@@ -1,14 +1,14 @@
-package com.walkbuddies.weatherservicec.service.weathermid;
+package com.walkbuddies.backend.service.weatherservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.walkbuddies.weatherservicec.domain.weathermid.WeatherMidEntity;
-import com.walkbuddies.weatherservicec.dto.weathermid.WeatherMidDto;
-import com.walkbuddies.weatherservicec.dto.weathermid.WeatherMidLandFcstDto;
-import com.walkbuddies.weatherservicec.dto.weathermid.WeatherMidResponse;
-import com.walkbuddies.weatherservicec.dto.weathermid.WeatherMidTaDto;
-import com.walkbuddies.weatherservicec.repository.weathermid.WeatherMidRepository;
+import com.walkbuddies.backend.domain.weatherservice.WeatherMidEntity;
+import com.walkbuddies.backend.repository.weatherservice.WeatherMidRepository;
+import com.walkbuddies.backend.dto.weatherservice.WeatherMidDto;
+import com.walkbuddies.backend.dto.weatherservice.WeatherMidLandFcstDto;
+import com.walkbuddies.backend.dto.weatherservice.WeatherMidResponse;
+import com.walkbuddies.backend.dto.weatherservice.WeatherMidTaDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -27,7 +27,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class WeatherMidServiceImpl implements WeatherMidService{
+public class WeatherMidServiceImpl implements WeatherMidService {
 
     private final ObjectMapper objectMapper;
     private final WeatherMidRepository weatherMidRepository;

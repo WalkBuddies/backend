@@ -1,9 +1,8 @@
 package com.walkbuddies.backend.controller.weatherservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.walkbuddies.weatherservicec.dto.weathermid.WeatherMidDto;
-import com.walkbuddies.weatherservicec.dto.weathermid.WeatherMidResponse;
-import com.walkbuddies.weatherservicec.service.weathermid.WeatherMidService;
+import com.walkbuddies.backend.dto.weatherservice.WeatherMidResponse;
+import com.walkbuddies.backend.service.weatherservice.WeatherMidService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

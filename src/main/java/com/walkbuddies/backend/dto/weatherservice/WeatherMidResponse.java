@@ -1,4 +1,4 @@
-package com.walkbuddies.weatherservicec.dto.weathermid;
+package com.walkbuddies.backend.dto.weatherservice;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

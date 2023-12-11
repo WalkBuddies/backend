@@ -1,9 +1,7 @@
-package com.walkbuddies.weatherservicec.service.weathermid;
+package com.walkbuddies.backend.service.weatherservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.walkbuddies.weatherservicec.domain.weathermid.WeatherMidEntity;
-import com.walkbuddies.weatherservicec.dto.weathermid.WeatherMidDto;
-import com.walkbuddies.weatherservicec.dto.weathermid.WeatherMidResponse;
+import com.walkbuddies.backend.dto.weatherservice.WeatherMidResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

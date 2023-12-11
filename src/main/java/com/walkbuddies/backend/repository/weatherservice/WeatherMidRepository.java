@@ -1,6 +1,6 @@
-package com.walkbuddies.weatherservicec.repository.weathermid;
+package com.walkbuddies.backend.repository.weatherservice;
 
-import com.walkbuddies.weatherservicec.domain.weathermid.WeatherMidEntity;
+import com.walkbuddies.backend.domain.weatherservice.WeatherMidEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

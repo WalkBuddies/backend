@@ -1,6 +1,6 @@
-package com.walkbuddies.weatherservicec.dto.weathermid;
+package com.walkbuddies.backend.dto.weatherservice;
 
-import com.walkbuddies.weatherservicec.domain.weathermid.WeatherMidEntity;
+import com.walkbuddies.backend.domain.weatherservice.WeatherMidEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

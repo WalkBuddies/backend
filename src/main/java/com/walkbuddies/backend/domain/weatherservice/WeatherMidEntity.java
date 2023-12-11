@@ -1,4 +1,4 @@
-package com.walkbuddies.weatherservicec.domain.weathermid;
+package com.walkbuddies.backend.domain.weatherservice;
 
 import jakarta.persistence.*;
 import lombok.*;
