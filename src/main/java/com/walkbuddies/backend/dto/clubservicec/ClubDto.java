@@ -1,11 +1,9 @@
 package com.walkbuddies.backend.dto.clubservicec;
 
 import com.walkbuddies.backend.domain.clubservice.ClubEntity;
-import com.walkbuddies.backend.type.ClubRole;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter
@@ -17,7 +15,7 @@ public class ClubDto {
     private Long clubId;
     private String clubName;
     private Long townId;
-    private Long memberId;
+    private Long ownerId;
     private Integer members;
     private Integer membersLimit;
     private Integer accessLimit;
@@ -30,8 +28,8 @@ public class ClubDto {
         ClubDto clubData = ClubDto.builder()
                 .clubId(clubEntity.getClubId())
                 .clubName(clubEntity.getClubName())
-                .townId(clubEntity.getTownId())
-                .memberId(clubEntity.getMemberId())
+                .townId(clubEntity.getTownId().getTownId())
+                .ownerId(clubEntity.getOwnerId().getMemberId())
                 .members(clubEntity.getMembers())
                 .membersLimit(clubEntity.getMembersLimit())
                 .accessLimit(clubEntity.getAccessLimit())

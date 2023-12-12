@@ -4,6 +4,7 @@ import com.walkbuddies.backend.dto.clubservicec.ClubDto;
 import com.walkbuddies.backend.dto.clubservicec.ClubResponse;
 import com.walkbuddies.backend.service.clubservice.ClubService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;

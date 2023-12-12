@@ -1,6 +1,6 @@
 package com.walkbuddies.backend.domain.clubservice;
 
-import com.walkbuddies.backend.type.ClubRole;
+import com.walkbuddies.backend.domain.memberservice.MemberEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "club", uniqueConstraints = @UniqueConstraint(columnNames = {"regId"}))
+@Table(name = "club")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,9 +20,17 @@ public class ClubEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long clubId;
+
     private String clubName;
-    private Long townId;
-    private Long memberId;
+
+    @ManyToOne
+    @JoinColumn(name = "townId")
+    private MemberEntity townId;
+
+    @ManyToOne
+    @JoinColumn(name = "memberId")
+    private MemberEntity ownerId;
+
     private Integer members;
     private Integer membersLimit;
     private Integer accessLimit;
