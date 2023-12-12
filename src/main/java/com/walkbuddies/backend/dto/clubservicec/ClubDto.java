@@ -18,7 +18,6 @@ public class ClubDto {
     private String clubName;
     private Long townId;
     private Long memberId;
-    private ClubRole clubRole;
     private Integer members;
     private Integer membersLimit;
     private Integer accessLimit;
@@ -33,7 +32,6 @@ public class ClubDto {
                 .clubName(clubEntity.getClubName())
                 .townId(clubEntity.getTownId())
                 .memberId(clubEntity.getMemberId())
-                .clubRole(clubEntity.getClubRole())
                 .members(clubEntity.getMembers())
                 .membersLimit(clubEntity.getMembersLimit())
                 .accessLimit(clubEntity.getAccessLimit())

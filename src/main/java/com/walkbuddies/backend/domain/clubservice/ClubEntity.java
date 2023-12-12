@@ -23,7 +23,6 @@ public class ClubEntity {
     private String clubName;
     private Long townId;
     private Long memberId;
-    private ClubRole clubRole;
     private Integer members;
     private Integer membersLimit;
     private Integer accessLimit;

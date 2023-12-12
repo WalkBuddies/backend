@@ -33,7 +33,6 @@ public class ClubServiceImpl implements ClubService {
                 .clubName(clubDto.getClubName())
                 .townId(clubDto.getTownId())
                 .memberId(clubDto.getMemberId())
-                .clubRole(ClubRole.OWNER)
                 .members(1)
                 .membersLimit(clubDto.getMembersLimit())
                 .accessLimit(clubDto.getAccessLimit())
