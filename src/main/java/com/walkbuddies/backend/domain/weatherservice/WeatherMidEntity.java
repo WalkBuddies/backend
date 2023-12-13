@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "weather_mid_term")
+@Table(name = "weather_mid_term", uniqueConstraints = @UniqueConstraint(columnNames = {"regId"}))
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,4 +1,4 @@
-package com.walkbuddies.airservice.service.airService;
+package com.walkbuddies.backend.service.airservice;
 
 import com.walkbuddies.backend.domain.airservice.AirServiceEntity;
 import com.walkbuddies.backend.dto.airservice.MsrstnDto;

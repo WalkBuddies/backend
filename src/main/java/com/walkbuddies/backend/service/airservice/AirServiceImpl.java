@@ -1,4 +1,4 @@
-package com.walkbuddies.airservice.service.airService;
+package com.walkbuddies.backend.service.airservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -6,13 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.walkbuddies.backend.domain.airservice.AirServiceEntity;
 import com.walkbuddies.backend.dto.airservice.MsrstnDto;
-import com.walkbuddies.airservice.repository.airService.AirServiceRepository;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+
+import com.walkbuddies.backend.repository.airservice.AirServiceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

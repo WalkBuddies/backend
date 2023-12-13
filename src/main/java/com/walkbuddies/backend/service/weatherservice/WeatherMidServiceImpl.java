@@ -10,7 +10,6 @@ import com.walkbuddies.backend.dto.weatherservice.WeatherMidLandFcstDto;
 import com.walkbuddies.backend.dto.weatherservice.WeatherMidResponse;
 import com.walkbuddies.backend.dto.weatherservice.WeatherMidTaDto;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -28,7 +27,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class WeatherMidServiceImpl implements WeatherMidService {
 
     private final ObjectMapper objectMapper;
@@ -54,7 +52,7 @@ public class WeatherMidServiceImpl implements WeatherMidService {
         return firstItem;
     }
 
-    @Value("${myapp.openapi.api-key}")
+    @Value("${spring.keys.api-key}")
     private String key;
 
     /**
@@ -137,108 +135,105 @@ public class WeatherMidServiceImpl implements WeatherMidService {
     @Transactional
     @Override
     public String updateWeatherMidData(String tmFc) throws JsonProcessingException {
-        try {
-            List<WeatherMidDto> parseCSV = parseCSV();
-            for (WeatherMidDto weatherMidDto : parseCSV) {
 
-                WeatherMidTaDto weatherMidTa = (WeatherMidTaDto) getWeatherMidTa(weatherMidDto.getRegId(), tmFc);
-                WeatherMidLandFcstDto weatherMidLandFcst = (WeatherMidLandFcstDto) getWeatherMidLandFcst(weatherMidDto.getRegId(), tmFc);
+        List<WeatherMidDto> parseCSV = parseCSV();
+        for (WeatherMidDto weatherMidDto : parseCSV) {
 
-                if (weatherMidTa == null || weatherMidLandFcst == null) {
-                    // null 값이 오면 해당 도시의 업데이트를 무시하고 다음 도시로 진행
-                    continue;
-                }
+            WeatherMidTaDto weatherMidTa = (WeatherMidTaDto) getWeatherMidTa(weatherMidDto.getRegId(), tmFc);
+            WeatherMidLandFcstDto weatherMidLandFcst = (WeatherMidLandFcstDto) getWeatherMidLandFcst(weatherMidDto.getRegId(), tmFc);
 
-
-                Optional<WeatherMidEntity> optionalWeatherMidEntity = weatherMidRepository.findByRegId(weatherMidDto.getRegId());
-
-                if (optionalWeatherMidEntity.isPresent()) {
-                    WeatherMidEntity existingEntity = optionalWeatherMidEntity.get();
-                    WeatherMidEntity updatedEntity = new WeatherMidEntity(
-                            existingEntity.getMidTermId(),
-                            existingEntity.getRegId(),
-                            existingEntity.getCityName(),
-                            tmFc,
-                            weatherMidTa.getTaMin3(),
-                            weatherMidTa.getTaMax3(),
-                            weatherMidTa.getTaMin4(),
-                            weatherMidTa.getTaMax4(),
-                            weatherMidTa.getTaMin5(),
-                            weatherMidTa.getTaMax5(),
-                            weatherMidTa.getTaMin6(),
-                            weatherMidTa.getTaMax6(),
-                            weatherMidTa.getTaMin7(),
-                            weatherMidTa.getTaMax7(),
-                            weatherMidLandFcst.getRnSt3Am(),
-                            weatherMidLandFcst.getRnSt3Pm(),
-                            weatherMidLandFcst.getRnSt4Am(),
-                            weatherMidLandFcst.getRnSt4Pm(),
-                            weatherMidLandFcst.getRnSt5Am(),
-                            weatherMidLandFcst.getRnSt5Pm(),
-                            weatherMidLandFcst.getRnSt6Am(),
-                            weatherMidLandFcst.getRnSt6Pm(),
-                            weatherMidLandFcst.getRnSt7Am(),
-                            weatherMidLandFcst.getRnSt7Pm(),
-                            weatherMidLandFcst.getWf3Am(),
-                            weatherMidLandFcst.getWf3Pm(),
-                            weatherMidLandFcst.getWf4Am(),
-                            weatherMidLandFcst.getWf4Pm(),
-                            weatherMidLandFcst.getWf5Am(),
-                            weatherMidLandFcst.getWf5Pm(),
-                            weatherMidLandFcst.getWf6Am(),
-                            weatherMidLandFcst.getWf6Pm(),
-                            weatherMidLandFcst.getWf7Am(),
-                            weatherMidLandFcst.getWf7Pm(),
-                            existingEntity.getRegDate(),
-                            LocalDate.now()
-                    );
-
-                    weatherMidRepository.save(updatedEntity);
-
-                } else {
-                    WeatherMidEntity weatherMidEntity = WeatherMidEntity.builder()
-                            .regId(weatherMidDto.getRegId())
-                            .cityName(weatherMidDto.getCityName())
-                            .tmFc(tmFc)
-                            .taMin3(weatherMidTa.getTaMin3())
-                            .taMax3(weatherMidTa.getTaMax3())
-                            .taMin4(weatherMidTa.getTaMin4())
-                            .taMax4(weatherMidTa.getTaMax4())
-                            .taMin5(weatherMidTa.getTaMin5())
-                            .taMax5(weatherMidTa.getTaMax5())
-                            .taMin6(weatherMidTa.getTaMin6())
-                            .taMax6(weatherMidTa.getTaMax6())
-                            .taMin7(weatherMidTa.getTaMin7())
-                            .taMax7(weatherMidTa.getTaMax7())
-                            .rnSt3Am(weatherMidLandFcst.getRnSt3Am())
-                            .rnSt3Pm(weatherMidLandFcst.getRnSt3Pm())
-                            .rnSt4Am(weatherMidLandFcst.getRnSt4Am())
-                            .rnSt4Pm(weatherMidLandFcst.getRnSt4Pm())
-                            .rnSt5Am(weatherMidLandFcst.getRnSt5Am())
-                            .rnSt5Pm(weatherMidLandFcst.getRnSt5Pm())
-                            .rnSt6Am(weatherMidLandFcst.getRnSt6Am())
-                            .rnSt6Pm(weatherMidLandFcst.getRnSt6Pm())
-                            .rnSt7Am(weatherMidLandFcst.getRnSt7Am())
-                            .rnSt7Pm(weatherMidLandFcst.getRnSt7Pm())
-                            .wf3Am(weatherMidLandFcst.getWf3Am())
-                            .wf3Pm(weatherMidLandFcst.getWf3Pm())
-                            .wf4Am(weatherMidLandFcst.getWf4Am())
-                            .wf4Pm(weatherMidLandFcst.getWf4Pm())
-                            .wf5Am(weatherMidLandFcst.getWf5Am())
-                            .wf5Pm(weatherMidLandFcst.getWf5Pm())
-                            .wf6Am(weatherMidLandFcst.getWf6Am())
-                            .wf6Pm(weatherMidLandFcst.getWf6Pm())
-                            .wf7Am(weatherMidLandFcst.getWf7Am())
-                            .wf7Pm(weatherMidLandFcst.getWf7Pm())
-                            .regDate(LocalDate.now())
-                            .modDate(LocalDate.now())
-                            .build();
-
-                    weatherMidRepository.save(weatherMidEntity);
-                }
+            if (weatherMidTa == null || weatherMidLandFcst == null) {
+                // null 값이 오면 해당 도시의 업데이트를 무시하고 다음 도시로 진행
+                continue;
             }
-        } catch (Exception e) {
-            log.error("Error updating weather data", e);
+
+
+            Optional<WeatherMidEntity> optionalWeatherMidEntity = weatherMidRepository.findByRegId(weatherMidDto.getRegId());
+
+            if (optionalWeatherMidEntity.isPresent()) {
+                WeatherMidEntity existingEntity = optionalWeatherMidEntity.get();
+                WeatherMidEntity updatedEntity = new WeatherMidEntity(
+                        existingEntity.getMidTermId(),
+                        existingEntity.getRegId(),
+                        existingEntity.getCityName(),
+                        tmFc,
+                        weatherMidTa.getTaMin3(),
+                        weatherMidTa.getTaMax3(),
+                        weatherMidTa.getTaMin4(),
+                        weatherMidTa.getTaMax4(),
+                        weatherMidTa.getTaMin5(),
+                        weatherMidTa.getTaMax5(),
+                        weatherMidTa.getTaMin6(),
+                        weatherMidTa.getTaMax6(),
+                        weatherMidTa.getTaMin7(),
+                        weatherMidTa.getTaMax7(),
+                        weatherMidLandFcst.getRnSt3Am(),
+                        weatherMidLandFcst.getRnSt3Pm(),
+                        weatherMidLandFcst.getRnSt4Am(),
+                        weatherMidLandFcst.getRnSt4Pm(),
+                        weatherMidLandFcst.getRnSt5Am(),
+                        weatherMidLandFcst.getRnSt5Pm(),
+                        weatherMidLandFcst.getRnSt6Am(),
+                        weatherMidLandFcst.getRnSt6Pm(),
+                        weatherMidLandFcst.getRnSt7Am(),
+                        weatherMidLandFcst.getRnSt7Pm(),
+                        weatherMidLandFcst.getWf3Am(),
+                        weatherMidLandFcst.getWf3Pm(),
+                        weatherMidLandFcst.getWf4Am(),
+                        weatherMidLandFcst.getWf4Pm(),
+                        weatherMidLandFcst.getWf5Am(),
+                        weatherMidLandFcst.getWf5Pm(),
+                        weatherMidLandFcst.getWf6Am(),
+                        weatherMidLandFcst.getWf6Pm(),
+                        weatherMidLandFcst.getWf7Am(),
+                        weatherMidLandFcst.getWf7Pm(),
+                        existingEntity.getRegDate(),
+                        LocalDate.now()
+                );
+
+                weatherMidRepository.save(updatedEntity);
+
+            } else {
+                WeatherMidEntity weatherMidEntity = WeatherMidEntity.builder()
+                        .regId(weatherMidDto.getRegId())
+                        .cityName(weatherMidDto.getCityName())
+                        .tmFc(tmFc)
+                        .taMin3(weatherMidTa.getTaMin3())
+                        .taMax3(weatherMidTa.getTaMax3())
+                        .taMin4(weatherMidTa.getTaMin4())
+                        .taMax4(weatherMidTa.getTaMax4())
+                        .taMin5(weatherMidTa.getTaMin5())
+                        .taMax5(weatherMidTa.getTaMax5())
+                        .taMin6(weatherMidTa.getTaMin6())
+                        .taMax6(weatherMidTa.getTaMax6())
+                        .taMin7(weatherMidTa.getTaMin7())
+                        .taMax7(weatherMidTa.getTaMax7())
+                        .rnSt3Am(weatherMidLandFcst.getRnSt3Am())
+                        .rnSt3Pm(weatherMidLandFcst.getRnSt3Pm())
+                        .rnSt4Am(weatherMidLandFcst.getRnSt4Am())
+                        .rnSt4Pm(weatherMidLandFcst.getRnSt4Pm())
+                        .rnSt5Am(weatherMidLandFcst.getRnSt5Am())
+                        .rnSt5Pm(weatherMidLandFcst.getRnSt5Pm())
+                        .rnSt6Am(weatherMidLandFcst.getRnSt6Am())
+                        .rnSt6Pm(weatherMidLandFcst.getRnSt6Pm())
+                        .rnSt7Am(weatherMidLandFcst.getRnSt7Am())
+                        .rnSt7Pm(weatherMidLandFcst.getRnSt7Pm())
+                        .wf3Am(weatherMidLandFcst.getWf3Am())
+                        .wf3Pm(weatherMidLandFcst.getWf3Pm())
+                        .wf4Am(weatherMidLandFcst.getWf4Am())
+                        .wf4Pm(weatherMidLandFcst.getWf4Pm())
+                        .wf5Am(weatherMidLandFcst.getWf5Am())
+                        .wf5Pm(weatherMidLandFcst.getWf5Pm())
+                        .wf6Am(weatherMidLandFcst.getWf6Am())
+                        .wf6Pm(weatherMidLandFcst.getWf6Pm())
+                        .wf7Am(weatherMidLandFcst.getWf7Am())
+                        .wf7Pm(weatherMidLandFcst.getWf7Pm())
+                        .regDate(LocalDate.now())
+                        .modDate(LocalDate.now())
+                        .build();
+
+                weatherMidRepository.save(weatherMidEntity);
+            }
         }
 
         return "업데이트 완료!";
