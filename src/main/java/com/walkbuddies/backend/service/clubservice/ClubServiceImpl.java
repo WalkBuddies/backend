@@ -76,6 +76,7 @@ public class ClubServiceImpl implements ClubService {
         }
 
         return clubEntities.stream()
+                .filter(clubEntity -> clubEntity.getAccessLimit() != 2)
                 .map(ClubEntity::getClubName)
                 .collect(Collectors.toList());
     }
