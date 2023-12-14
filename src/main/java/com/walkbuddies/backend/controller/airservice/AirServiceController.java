@@ -1,8 +1,8 @@
-package com.walkbuddies.airservice.controller.airService;
+package com.walkbuddies.backend.controller.airservice;
 
 import com.walkbuddies.backend.domain.airservice.AirServiceEntity;
-import com.walkbuddies.airservice.service.airService.AirService;
 
+import com.walkbuddies.backend.service.airservice.AirService;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import lombok.AllArgsConstructor;
@@ -27,5 +27,11 @@ public class AirServiceController {
     return ResponseEntity.ok(result);
   }
 
+  @GetMapping("/bookmark-data")
+  public ResponseEntity<?> getBookmarkAirInfo(@RequestParam double x, @RequestParam double y)
+      throws URISyntaxException, IOException {
+    AirServiceEntity result = this.airService.getBookmarkAirInfo(x, y);
+    return ResponseEntity.ok(result);
+  }
 
 }

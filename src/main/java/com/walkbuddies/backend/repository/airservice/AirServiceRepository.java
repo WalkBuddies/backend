@@ -1,4 +1,4 @@
-package com.walkbuddies.airservice.repository.airService;
+package com.walkbuddies.backend.repository.airservice;
 
 import com.walkbuddies.backend.domain.airservice.AirServiceEntity;
 import java.util.Optional;

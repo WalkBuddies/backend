@@ -1,4 +1,4 @@
-package com.walkbuddies.airservice.service.airService;
+package com.walkbuddies.backend.service.airservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.walkbuddies.backend.domain.airservice.AirServiceEntity;
 import com.walkbuddies.backend.dto.airservice.MsrstnDto;
-import com.walkbuddies.airservice.repository.airService.AirServiceRepository;
+import com.walkbuddies.backend.repository.airservice.AirServiceRepository;
+import com.walkbuddies.backend.service.commonservice.CommonService;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,6 +32,7 @@ public class AirServiceImpl implements AirService {
   private String API_KEY;
   private final ObjectMapper objectMapper;
   final AirServiceRepository airServiceRepository;
+  private final CommonService commonService;
 
   /**
    * api dataTime 항목을 datetimeformat으로 변환하는 메소드
@@ -41,8 +43,7 @@ public class AirServiceImpl implements AirService {
     time = time.substring(1, time.length() - 1);
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     LocalDateTime dateTime = LocalDateTime.parse(time,formatter);
-    String result = dateTime.toString();
-    return result;
+    return dateTime.toString();
   }
 
   /**
@@ -55,9 +56,8 @@ public class AirServiceImpl implements AirService {
 
     RestTemplate restTemplate = new RestTemplate();
     URI uri = new URI(apiUrl);
-    String result = restTemplate.getForObject(uri,String.class);
 
-    return result;
+    return restTemplate.getForObject(uri,String.class);
   }
 
   /**
@@ -68,12 +68,11 @@ public class AirServiceImpl implements AirService {
    */
   private JsonNode jsonParser(String jsonString) throws JsonProcessingException {
     JsonNode jsonNode = objectMapper.readTree(jsonString);
-    JsonNode itemsArray = jsonNode
+
+    return jsonNode
         .path("response")
         .path("body")
         .path("items");
-
-    return itemsArray;
   }
 
   /**
@@ -122,9 +121,7 @@ public class AirServiceImpl implements AirService {
     String result = getApiInfo(apiUrl);
     JsonNode items = jsonParser(result);
 
-    MsrstnDto msrtnDto = objectMapper.treeToValue(items.get(0), MsrstnDto.class);
-
-    return msrtnDto;
+    return objectMapper.treeToValue(items.get(0), MsrstnDto.class);
   }
 
   /**
@@ -161,6 +158,22 @@ public class AirServiceImpl implements AirService {
     }
 
     return airServiceEntity;
+  }
+
+  /**
+   * 즐겨찾기 미세먼지 조회
+   * @param x 경도
+   * @param y 위도
+   * @return
+   * @throws URISyntaxException
+   * @throws IOException
+   */
+  @Override
+  public AirServiceEntity getBookmarkAirInfo(double x, double y)
+      throws URISyntaxException, IOException {
+    double[] tmArr = commonService.GeoToTm(x, y);
+
+    return getAirInfo(tmArr[0], tmArr[1]);
   }
 
 
