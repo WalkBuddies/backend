@@ -16,7 +16,6 @@ import lombok.Setter;
 public class AirServiceDto {
 
   private String stationName;
-  private String sidoName;
   private LocalDateTime dataTime;
   private Float so2Value;
   private Float coValue;
