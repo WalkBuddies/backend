@@ -1,6 +1,7 @@
 package com.walkbuddies.backend.controller.clubservice;
 
 import com.walkbuddies.backend.dto.clubservice.ClubDto;
+import com.walkbuddies.backend.dto.clubservice.ClubJoinInform;
 import com.walkbuddies.backend.dto.clubservice.ClubResponse;
 import com.walkbuddies.backend.service.clubservice.ClubService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,13 @@ public class ClubController {
     }
 
     @GetMapping("/club/search")
-    public List<String> searchClub(@RequestParam String clubName) {
-        return clubService.searchClub(clubName);
+    public List<String> searchClub(@RequestParam Long townId, @RequestParam String clubName) {
+        return clubService.searchClub(townId, clubName);
+    }
+
+    @PostMapping("/club/join/request")
+    public String joinClubRequest(@RequestBody ClubJoinInform clubJoinInform) {
+
+        return clubService.joinClubRequest(clubJoinInform);
     }
 }
