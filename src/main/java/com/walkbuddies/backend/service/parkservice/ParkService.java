@@ -81,4 +81,22 @@ public interface ParkService {
      * @param parkId
      */
     void deletePark(int parkId);
+
+    /**
+     * 멤버가 즐겨찾기한 공원 목록 조회
+     * @param memberId
+     * @return
+     */
+    List<ParkDto> getFavoritePark(Long memberId);
+
+    /**
+     * 공원 즐겨찾기 추가
+     * @param memberId
+     * @param parkId
+     */
+    void addFavoritePark(Long memberId, Long parkId);
+
+    void deleteFavoritePark(Long memberId, Long parkId);
+
+    boolean isFavoritePark(Long memberId, Long parkId);
 }

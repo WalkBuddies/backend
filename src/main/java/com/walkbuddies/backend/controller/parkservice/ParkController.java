@@ -48,7 +48,7 @@ public class ParkController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ParkDto>> getParkList(@RequestParam float longitude, @RequestParam float latitude) {
+    public ResponseEntity<List<ParkDto>> getParkList(@RequestParam(name = "longitude") float longitude, @RequestParam(name = "latitude") float latitude) {
         try {
             List<ParkDto> parkDtoList = parkService.getParkList(longitude, latitude);
             return ResponseEntity.ok(parkDtoList);
@@ -104,6 +104,28 @@ public class ParkController {
         } catch (Exception e) {
             log.error("Error while deleting park", e);
             return ResponseEntity.status(500).body("Failed to delete park.");
+        }
+    }
+
+    @GetMapping("/favorites/{memberId}")
+    public ResponseEntity<List<ParkDto>> getFavoriteParks(@PathVariable Long memberId) {
+        try {
+            List<ParkDto> favoriteParkList = parkService.getFavoritePark(memberId);
+            return ResponseEntity.ok(favoriteParkList);
+        } catch (Exception e) {
+            log.error("Error while retrieving favorite park list", e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @PostMapping("/favorites/{memberId}/{parkId}")
+    public ResponseEntity<String> addFavoritePark(@PathVariable Long memberId, @PathVariable Long parkId) {
+        try {
+            parkService.addFavoritePark(memberId, parkId);
+            return ResponseEntity.ok("Favorite Park added successfully.");
+        } catch (Exception e) {
+            log.error("Error while adding favorite park", e);
+            return ResponseEntity.status(500).body("Failed to add favorite park.");
         }
     }
 }

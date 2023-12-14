@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface ParkRepository extends JpaRepository<ParkEntity, Long> {
     Optional<ParkEntity> findByAddress(String address);
 
-    @Query(value = "SELECT park_name, address, longitude, latitude," +
+    @Query(value = "SELECT park_id, park_name, address, longitude, latitude," +
                     "ST_Distance_Sphere(Point(:longitude, :latitude), Point(longitude, latitude)) AS distance " +
                     "FROM park " +
                     "WHERE ST_Distance_Sphere(Point(:longitude, :latitude), Point(longitude, latitude)) < :distance",
