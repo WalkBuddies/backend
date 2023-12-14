@@ -4,8 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.walkbuddies.backend.domain.memberservice.MemberEntity;
+import com.walkbuddies.backend.domain.parkservice.FavoriteParkEntity;
 import com.walkbuddies.backend.domain.parkservice.ParkEntity;
 import com.walkbuddies.backend.dto.parkservice.ParkDto;
+import com.walkbuddies.backend.repository.memberservice.MemberRepository;
+import com.walkbuddies.backend.repository.parkservice.FavoriteParkRepository;
 import com.walkbuddies.backend.repository.parkservice.ParkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,12 +20,15 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ParkServiceImpl implements ParkService {
 
     private final ParkRepository parkRepository;
+    private final FavoriteParkRepository favoriteParkRepository;
+    private final MemberRepository memberRepository;
 
     @Value("${park-service-key}")
     private String serviceKey;
@@ -130,11 +137,12 @@ public class ParkServiceImpl implements ParkService {
         List<Object[]> parkList = parkRepository.findNearbyParks(longitude, latitude, 1000);
         for (Object[] parkData : parkList) {
             ParkDto parkDto = new ParkDto();
-            parkDto.setParkName((String) parkData[0]);
-            parkDto.setAddress((String) parkData[1]);
-            parkDto.setLongitude(String.valueOf(parkData[2]));
-            parkDto.setLatitude(String.valueOf(parkData[3]));
-            parkDto.setDistance(((Number) parkData[4]).floatValue());
+            parkDto.setParkId((Long) parkData[0]);
+            parkDto.setParkName((String) parkData[1]);
+            parkDto.setAddress((String) parkData[2]);
+            parkDto.setLongitude(String.valueOf(parkData[3]));
+            parkDto.setLatitude(String.valueOf(parkData[4]));
+            parkDto.setDistance(((Number) parkData[5]).floatValue());
 
             result.add(parkDto);
         }
@@ -186,6 +194,49 @@ public class ParkServiceImpl implements ParkService {
     @Transactional
     public void deletePark(int parkId) {
         parkRepository.deleteById((long) parkId);
+    }
+
+    @Override
+    public List<ParkDto> getFavoritePark(Long memberId) {
+        List<FavoriteParkEntity> favoriteParks = favoriteParkRepository.findByMemberMemberId(memberId);
+
+        return favoriteParks.stream()
+                .map(favoriteParkEntity -> ParkDto.convertToDto(favoriteParkEntity.getPark()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void addFavoritePark(Long memberId, Long parkId) {
+        Optional<MemberEntity> optionalMember = memberRepository.findById(memberId);
+        Optional<ParkEntity> optionalPark = parkRepository.findById(parkId);
+
+        if (optionalMember.isPresent() && optionalPark.isPresent()) {
+            MemberEntity member = optionalMember.get();
+            ParkEntity park = optionalPark.get();
+
+            FavoriteParkEntity favoritePark = new FavoriteParkEntity(member, park);
+
+            favoriteParkRepository.save(favoritePark);
+        } else {
+            throw new RuntimeException("Member or Park not found.");
+        }
+    }
+
+    @Override
+    public void deleteFavoritePark(Long memberId, Long parkId) {
+        Optional<FavoriteParkEntity> optionalFavoritePark = favoriteParkRepository.findByMemberMemberIdAndParkParkId(memberId, parkId);
+
+        if (optionalFavoritePark.isPresent()) {
+            favoriteParkRepository.delete(optionalFavoritePark.get());
+        } else {
+            throw new RuntimeException("Favorite Park not found.");
+        }
+    }
+
+    @Override
+    public boolean isFavoritePark(Long memberId, Long parkId) {
+        return favoriteParkRepository.existsByMemberMemberIdAndParkParkId(memberId, parkId);
     }
 
     private void updateExistingPark(ParkEntity existingPark, ParkDto parkDto) {
