@@ -1,10 +1,8 @@
-package com.walkbuddies.backend.dto.clubservicec;
+package com.walkbuddies.backend.dto.clubservice;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter

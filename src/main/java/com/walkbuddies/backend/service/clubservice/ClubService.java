@@ -1,8 +1,10 @@
 package com.walkbuddies.backend.service.clubservice;
 
-import com.walkbuddies.backend.dto.clubservicec.ClubDto;
-import com.walkbuddies.backend.dto.clubservicec.ClubResponse;
+import com.walkbuddies.backend.dto.clubservice.ClubDto;
+import com.walkbuddies.backend.dto.clubservice.ClubResponse;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface ClubService {
@@ -13,4 +15,10 @@ public interface ClubService {
      */
     ClubResponse createClub(ClubDto clubDto);
 
+    /**
+     * 소모임 검색 기능 메서드.
+     * @param clubName
+     * @return
+     */
+    List<String> searchClub(String clubName);
 }
