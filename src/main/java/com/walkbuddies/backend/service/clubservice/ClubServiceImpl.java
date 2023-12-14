@@ -126,7 +126,7 @@ public class ClubServiceImpl implements ClubService {
 
         if (!myClubEntities.isEmpty()) {
             for (MyClubEntity myClubEntity : myClubEntities) {
-                if (myClubEntity.getMyClubId().equals(clubJoinInform.getClubId())) {
+                if (myClubEntity.getClubId().getClubId().equals(clubJoinInform.getClubId())) {
                     return "이미 가입한 소모임에는 가입할 수 없습니다.";
                 }
             }
