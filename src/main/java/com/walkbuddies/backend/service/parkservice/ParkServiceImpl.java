@@ -85,19 +85,24 @@ public class ParkServiceImpl implements ParkService {
 
             parkDto.setParkName(parkNode.path("parkNm").asText());
 
-            JsonNode latitudeNode = parkNode.path("latitude");
-            if (latitudeNode.isMissingNode() || latitudeNode.isNull() || latitudeNode.asText().isEmpty()) {
-                continue;
+            if (parkNode.has("latitude")) {
+                parkDto.setLatitude(parkNode.path("latitude").asText());
             }
-            parkDto.setLatitude(parkNode.path("latitude").asText());
 
-            JsonNode longitudeNode = parkNode.path("longitude");
-            if (longitudeNode.isMissingNode() || longitudeNode.isNull() || longitudeNode.asText().isEmpty()) {
-                continue;
+            if (parkNode.has("longitude")) {
+                parkDto.setLongitude(parkNode.path("longitude").asText());
             }
-            parkDto.setLongitude(parkNode.path("longitude").asText());
 
             parkDto.setAddress(parkNode.path("lnmadr").asText());
+
+            if (parkNode.has("mvmFclty")) {
+                parkDto.setSportFacility(parkNode.path("mvmFclty").asText());
+            }
+
+            if (parkNode.has("cnvnncFclty")) {
+                parkDto.setConvenienceFacility(parkNode.path("cnvnncFclty").asText());
+            }
+
             parkDtoList.add(parkDto);
         }
         return parkDtoList;
@@ -112,7 +117,8 @@ public class ParkServiceImpl implements ParkService {
             if (existingPark.isPresent()) {
                 updateExistingPark(existingPark.get(), parkDto);
             } else {
-                parkRepository.save(convertToEntity(parkDto));
+                ParkEntity newPark = ParkEntity.convertToEntity(parkDto);
+                parkRepository.save(newPark);
             }
         }
     }
@@ -143,7 +149,7 @@ public class ParkServiceImpl implements ParkService {
         Optional<ParkEntity> parkEntity = parkRepository.findById((long) parkId);
 
         if (parkEntity.isPresent()) {
-            return Optional.of(convertToDto(parkEntity.get()));
+            return Optional.of(ParkDto.convertToDto(parkEntity.get()));
         } else {
             return Optional.empty();
         }
@@ -152,7 +158,7 @@ public class ParkServiceImpl implements ParkService {
     @Override
     @Transactional
     public void addPark(ParkDto parkDto) {
-        ParkEntity parkEntity = convertToEntity(parkDto);
+        ParkEntity parkEntity = ParkEntity.convertToEntity(parkDto);
         parkRepository.save(parkEntity);
     }
 
@@ -167,6 +173,8 @@ public class ParkServiceImpl implements ParkService {
             park.setLatitude(Float.parseFloat(newDto.getLatitude()));
             park.setLongitude(Float.parseFloat(newDto.getLongitude()));
             park.setAddress(newDto.getAddress());
+            park.setSportFacility(newDto.getSportFacility());
+            park.setConvenienceFacility(newDto.getConvenienceFacility());
 
             parkRepository.save(park);
         } else {
@@ -180,29 +188,22 @@ public class ParkServiceImpl implements ParkService {
         parkRepository.deleteById((long) parkId);
     }
 
-    private ParkDto convertToDto(ParkEntity parkEntity) {
-        return ParkDto.builder()
-                .parkName(parkEntity.getParkName())
-                .latitude(String.valueOf(parkEntity.getLatitude()))
-                .longitude(String.valueOf(parkEntity.getLongitude()))
-                .address(parkEntity.getAddress())
-                .build();
-    }
-
     private void updateExistingPark(ParkEntity existingPark, ParkDto parkDto) {
         existingPark.setParkName(parkDto.getParkName());
-        existingPark.setLongitude(Float.parseFloat(parkDto.getLongitude()));
-        existingPark.setLatitude(Float.parseFloat(parkDto.getLatitude()));
+
+        if (parkDto.getLongitude() != null && !parkDto.getLongitude().isEmpty()) {
+            existingPark.setLongitude(Float.parseFloat(parkDto.getLongitude()));
+        }
+        if (parkDto.getLatitude() != null && !parkDto.getLatitude().isEmpty()) {
+            existingPark.setLatitude(Float.parseFloat(parkDto.getLatitude()));
+        }
+        if (parkDto.getSportFacility() != null && !parkDto.getSportFacility().isEmpty()) {
+            existingPark.setSportFacility(parkDto.getSportFacility());
+        }
+        if (parkDto.getConvenienceFacility() != null && !parkDto.getConvenienceFacility().isEmpty()) {
+            existingPark.setConvenienceFacility(parkDto.getConvenienceFacility());
+        }
 
         parkRepository.save(existingPark);
-    }
-
-    private ParkEntity convertToEntity(ParkDto parkDto) {
-        return ParkEntity.builder()
-                .parkName(parkDto.getParkName())
-                .longitude(Float.parseFloat(parkDto.getLongitude()))
-                .latitude(Float.parseFloat(parkDto.getLatitude()))
-                .address(parkDto.getAddress())
-                .build();
     }
 }
