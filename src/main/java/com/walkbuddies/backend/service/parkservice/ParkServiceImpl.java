@@ -12,6 +12,7 @@ import com.walkbuddies.backend.repository.memberservice.MemberRepository;
 import com.walkbuddies.backend.repository.parkservice.FavoriteParkRepository;
 import com.walkbuddies.backend.repository.parkservice.ParkRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ParkServiceImpl implements ParkService {
@@ -34,27 +36,58 @@ public class ParkServiceImpl implements ParkService {
     private String serviceKey;
 
     @Override
+    @Transactional
+    public void updateParkData() {
+        int pageNo = 1;
+        int numOfRows = 300;
+
+        while (true) {
+            String apiUrl = buildParkAPIUrl(pageNo, numOfRows);
+            String response = fetchDataFromApi(apiUrl);
+
+            if (!hasMoreData(response)) {
+                log.info("No more data received.");
+                break;
+            }
+
+            List<ParkDto> parkDtoList = parseApiResponse(response);
+            saveAllParks(parkDtoList);
+
+            log.info("pageNo: " + pageNo);
+            pageNo++;
+        }
+
+    }
+
+    @Override
     public String buildParkAPIUrl(int pageNo, int numOfRows) {
-        String url = "http://api.data.go.kr/openapi/tn_pubr_public_cty_park_info_api" +
+        return "http://api.data.go.kr/openapi/tn_pubr_public_cty_park_info_api" +
                 "?serviceKey=" + serviceKey + "&type=json" +
                 "&pageNo=" + pageNo + "&numOfRows=" + numOfRows;
-
-        return url;
     }
 
     @Override
-    public String fetchDataFromApi(String apiUrl) throws URISyntaxException {
+    public String fetchDataFromApi(String apiUrl) {
         RestTemplate restTemplate = new RestTemplate();
-        URI uri = new URI(apiUrl);
-        String response = restTemplate.getForObject(uri, String.class);
+        URI uri;
+        try {
+            uri = new URI(apiUrl);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
 
-        return response;
+        return restTemplate.getForObject(uri, String.class);
     }
 
     @Override
-    public boolean hasMoreData(String response) throws JsonProcessingException {
+    public boolean hasMoreData(String response) {
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(response);
+        JsonNode rootNode;
+        try {
+            rootNode = objectMapper.readTree(response);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         JsonNode responseNode = rootNode.path("response");
         if (responseNode.isMissingNode()) {
@@ -73,9 +106,14 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public List<ParkDto> parseApiResponse(String response) throws JsonProcessingException {
+    public List<ParkDto> parseApiResponse(String response) {
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(response);
+        JsonNode rootNode;
+        try {
+            rootNode = objectMapper.readTree(response);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         JsonNode responseNode = rootNode.path("response");
         JsonNode bodyNode = responseNode.path("body");
@@ -153,18 +191,17 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public Optional<ParkDto> getParkInfo(int parkId) {
+    public ParkDto getParkInfo(int parkId) {
         Optional<ParkEntity> parkEntity = parkRepository.findById((long) parkId);
 
         if (parkEntity.isPresent()) {
-            return Optional.of(ParkDto.convertToDto(parkEntity.get()));
+            return ParkDto.convertToDto(parkEntity.get());
         } else {
-            return Optional.empty();
+            throw new RuntimeException("Park not found.");
         }
     }
 
     @Override
-    @Transactional
     public void addPark(ParkDto parkDto) {
         ParkEntity parkEntity = ParkEntity.convertToEntity(parkDto);
         parkRepository.save(parkEntity);
@@ -191,7 +228,6 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    @Transactional
     public void deletePark(int parkId) {
         parkRepository.deleteById((long) parkId);
     }
