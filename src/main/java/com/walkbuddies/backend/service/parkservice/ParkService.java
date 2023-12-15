@@ -1,9 +1,8 @@
 package com.walkbuddies.backend.service.parkservice;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.walkbuddies.backend.dto.parkservice.ParkDto;
 import org.springframework.stereotype.Service;
-import java.net.URISyntaxException;
+
 import java.util.List;
 
 @Service
@@ -26,7 +25,6 @@ public interface ParkService {
      * open api에서 데이터를 가져오는 메서드
      * @param apiUrl
      * @return
-     * @throws URISyntaxException
      */
     String fetchDataFromApi(String apiUrl);
 
@@ -34,7 +32,6 @@ public interface ParkService {
      * 가져올 데이터가 더 존재하는지 확인
      * @param response
      * @return
-     * @throws JsonProcessingException
      */
     boolean hasMoreData(String response);
 
@@ -42,7 +39,6 @@ public interface ParkService {
      * 가져온 데이터 파싱하여 ParkDto 리스트로 변환
      * @param response
      * @return
-     * @throws JsonProcessingException
      */
     List<ParkDto> parseApiResponse(String response);
 
@@ -58,7 +54,7 @@ public interface ParkService {
      * @param latitude
      * @return
      */
-    List<ParkDto> getParkList(float longitude, float latitude);
+    List<ParkDto> getParkList(Double longitude, Double latitude);
 
     /**
      * parkId로 공원 정보를 반환
@@ -66,7 +62,7 @@ public interface ParkService {
      * @param parkId
      * @return
      */
-    ParkDto getParkInfo(int parkId);
+    ParkDto getParkInfo(Long parkId);
 
     /**
      * 공원 정보 추가
@@ -79,13 +75,13 @@ public interface ParkService {
      * @param parkId
      * @param newDto
      */
-    void updatePark(int parkId, ParkDto newDto);
+    void updatePark(Long parkId, ParkDto newDto);
 
     /**
      * 공원 정보 삭제
      * @param parkId
      */
-    void deletePark(int parkId);
+    void deletePark(Long parkId);
 
     /**
      * 멤버가 즐겨찾기한 공원 목록 조회
@@ -107,12 +103,4 @@ public interface ParkService {
      * @param parkId
      */
     void deleteFavoritePark(Long memberId, Long parkId);
-
-    /**
-     * 공원 즐겨찾기 여부 조회
-     * @param memberId
-     * @param parkId
-     * @return
-     */
-    boolean isFavoritePark(Long memberId, Long parkId);
 }

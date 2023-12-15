@@ -169,18 +169,18 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public List<ParkDto> getParkList(float longitude, float latitude) {
+    public List<ParkDto> getParkList(Double longitude, Double latitude) {
         List<ParkDto> result = new ArrayList<>();
 
         List<Object[]> parkList = parkRepository.findNearbyParks(longitude, latitude, 1000);
-        for (Object[] parkData : parkList) {
+        for (Object[] park : parkList) {
             ParkDto parkDto = new ParkDto();
-            parkDto.setParkId((Long) parkData[0]);
-            parkDto.setParkName((String) parkData[1]);
-            parkDto.setAddress((String) parkData[2]);
-            parkDto.setLongitude(String.valueOf(parkData[3]));
-            parkDto.setLatitude(String.valueOf(parkData[4]));
-            parkDto.setDistance(((Number) parkData[5]).floatValue());
+            Optional<ParkEntity> optionalPark = parkRepository.findById((Long) park[0]);
+            if (optionalPark.isPresent()) {
+                ParkEntity parkEntity = optionalPark.get();
+                parkDto = ParkDto.convertToDto(parkEntity);
+                parkDto.setDistance((Double) park[1]);
+            }
 
             result.add(parkDto);
         }
@@ -191,8 +191,8 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public ParkDto getParkInfo(int parkId) {
-        Optional<ParkEntity> parkEntity = parkRepository.findById((long) parkId);
+    public ParkDto getParkInfo(Long parkId) {
+        Optional<ParkEntity> parkEntity = parkRepository.findById(parkId);
 
         if (parkEntity.isPresent()) {
             return ParkDto.convertToDto(parkEntity.get());
@@ -209,17 +209,12 @@ public class ParkServiceImpl implements ParkService {
 
     @Override
     @Transactional
-    public void updatePark(int parkId, ParkDto newDto) {
-        Optional<ParkEntity> optionalPark = parkRepository.findById((long) parkId);
+    public void updatePark(Long parkId, ParkDto newDto) {
+        Optional<ParkEntity> optionalPark = parkRepository.findById(parkId);
 
         if (optionalPark.isPresent()) {
             ParkEntity park = optionalPark.get();
-            park.setParkName(newDto.getParkName());
-            park.setLatitude(Float.parseFloat(newDto.getLatitude()));
-            park.setLongitude(Float.parseFloat(newDto.getLongitude()));
-            park.setAddress(newDto.getAddress());
-            park.setSportFacility(newDto.getSportFacility());
-            park.setConvenienceFacility(newDto.getConvenienceFacility());
+            updateExistingPark(park, newDto);
 
             parkRepository.save(park);
         } else {
@@ -228,8 +223,8 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public void deletePark(int parkId) {
-        parkRepository.deleteById((long) parkId);
+    public void deletePark(Long parkId) {
+        parkRepository.deleteById(parkId);
     }
 
     @Override
@@ -242,7 +237,6 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    @Transactional
     public void addFavoritePark(Long memberId, Long parkId) {
         Optional<MemberEntity> optionalMember = memberRepository.findById(memberId);
         Optional<ParkEntity> optionalPark = parkRepository.findById(parkId);
@@ -270,24 +264,39 @@ public class ParkServiceImpl implements ParkService {
         }
     }
 
-    @Override
-    public boolean isFavoritePark(Long memberId, Long parkId) {
-        return favoriteParkRepository.existsByMemberMemberIdAndParkParkId(memberId, parkId);
-    }
-
     private void updateExistingPark(ParkEntity existingPark, ParkDto parkDto) {
-        existingPark.setParkName(parkDto.getParkName());
+        if (!parkDto.getParkName().equals(existingPark.getParkName())) {
+            existingPark.setParkName(parkDto.getParkName());
+        }
 
-        if (parkDto.getLongitude() != null && !parkDto.getLongitude().isEmpty()) {
-            existingPark.setLongitude(Float.parseFloat(parkDto.getLongitude()));
+        if (existingPark.getLongitude() != null) {
+            if (!parkDto.getLongitude().equals(String.valueOf(existingPark.getLongitude()))) {
+                existingPark.setLongitude(Double.valueOf(parkDto.getLongitude()));
+            }
         }
-        if (parkDto.getLatitude() != null && !parkDto.getLatitude().isEmpty()) {
-            existingPark.setLatitude(Float.parseFloat(parkDto.getLatitude()));
+
+        if (existingPark.getLatitude() != null) {
+            if (!parkDto.getLatitude().equals(String.valueOf(existingPark.getLatitude()))) {
+                existingPark.setLatitude(Double.valueOf(parkDto.getLatitude()));
+            }
         }
-        if (parkDto.getSportFacility() != null && !parkDto.getSportFacility().isEmpty()) {
-            existingPark.setSportFacility(parkDto.getSportFacility());
+
+        if (parkDto.getAddress() != null && !parkDto.getAddress().isEmpty()) {
+            if (!parkDto.getAddress().equals(existingPark.getAddress())) {
+                existingPark.setAddress(parkDto.getAddress());
+            }
         }
-        if (parkDto.getConvenienceFacility() != null && !parkDto.getConvenienceFacility().isEmpty()) {
+
+        if (parkDto.getSportFacility() == null) {
+            existingPark.setSportFacility("");
+        } else if (!parkDto.getSportFacility().equals(existingPark.getSportFacility())) {
+                existingPark.setSportFacility(parkDto.getSportFacility());
+        }
+
+
+        if (parkDto.getConvenienceFacility() == null) {
+            existingPark.setConvenienceFacility("");
+        } else if (!parkDto.getConvenienceFacility().equals(existingPark.getConvenienceFacility())) {
             existingPark.setConvenienceFacility(parkDto.getConvenienceFacility());
         }
 

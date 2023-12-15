@@ -24,13 +24,13 @@ public class ParkController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ParkDto>> getParkList(@RequestParam(name = "longitude") float longitude, @RequestParam(name = "latitude") float latitude) {
+    public ResponseEntity<List<ParkDto>> getParkList(@RequestParam(name = "longitude") Double longitude, @RequestParam(name = "latitude") Double latitude) {
         List<ParkDto> parkDtoList = parkService.getParkList(longitude, latitude);
         return ResponseEntity.ok(parkDtoList);
     }
 
     @GetMapping("/{parkId}")
-    public ResponseEntity<ParkDto> getParkInfo(@PathVariable int parkId) {
+    public ResponseEntity<ParkDto> getParkInfo(@PathVariable Long parkId) {
         ParkDto parkDto = parkService.getParkInfo(parkId);
         return ResponseEntity.ok(parkDto);
     }
@@ -42,13 +42,13 @@ public class ParkController {
     }
 
     @PutMapping("/{parkId}")
-    public ResponseEntity<String> updatePark(@PathVariable int parkId, @RequestBody ParkDto newDto) {
+    public ResponseEntity<String> updatePark(@PathVariable Long parkId, @RequestBody ParkDto newDto) {
         parkService.updatePark(parkId, newDto);
         return ResponseEntity.ok("Park information updated successfully.");
     }
 
     @DeleteMapping("/{parkId}")
-    public ResponseEntity<String> deletePark(@PathVariable int parkId) {
+    public ResponseEntity<String> deletePark(@PathVariable Long parkId) {
         parkService.deletePark(parkId);
         return ResponseEntity.ok("Park deleted successfully.");
     }

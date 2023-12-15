@@ -8,7 +8,6 @@ import lombok.*;
 @Table(name = "park")
 @Builder
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ParkEntity {
@@ -16,14 +15,14 @@ public class ParkEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "park_id")
-    private long parkId;
+    private Long parkId;
 
     @Column(name = "park_name")
     private String parkName;
     @Column(name = "longitude")
-    private float longitude;
+    private Double longitude;
     @Column(name = "latitude")
-    private float latitude;
+    private Double latitude;
     @Column(name = "address")
     private String address;
     @Column(name = "sport_facility")
@@ -34,11 +33,35 @@ public class ParkEntity {
     public static ParkEntity convertToEntity(ParkDto parkDto) {
         return ParkEntity.builder()
                 .parkName(parkDto.getParkName())
-                .longitude(Float.parseFloat(parkDto.getLongitude()))
-                .latitude(Float.parseFloat(parkDto.getLatitude()))
+                .longitude(Double.valueOf(parkDto.getLongitude()))
+                .latitude(Double.valueOf(parkDto.getLatitude()))
                 .address(parkDto.getAddress())
                 .sportFacility(parkDto.getSportFacility())
                 .convenienceFacility(parkDto.getConvenienceFacility())
                 .build();
+    }
+
+    public void setParkName(String parkName) {
+        this.parkName = parkName;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setSportFacility(String sportFacility) {
+        this.sportFacility = sportFacility;
+    }
+
+    public void setConvenienceFacility(String convenienceFacility) {
+        this.convenienceFacility = convenienceFacility;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
