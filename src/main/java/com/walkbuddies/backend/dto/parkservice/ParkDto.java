@@ -17,7 +17,7 @@ public class ParkDto {
     private String sportFacility;
     private String convenienceFacility;
 
-    private float distance;
+    private Double distance;
 
     public static ParkDto convertToDto(ParkEntity parkEntity) {
         return ParkDto.builder()

@@ -12,6 +12,7 @@ import com.walkbuddies.backend.repository.memberservice.MemberRepository;
 import com.walkbuddies.backend.repository.parkservice.FavoriteParkRepository;
 import com.walkbuddies.backend.repository.parkservice.ParkRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ParkServiceImpl implements ParkService {
@@ -34,27 +36,58 @@ public class ParkServiceImpl implements ParkService {
     private String serviceKey;
 
     @Override
+    @Transactional
+    public void updateParkData() {
+        int pageNo = 1;
+        int numOfRows = 300;
+
+        while (true) {
+            String apiUrl = buildParkAPIUrl(pageNo, numOfRows);
+            String response = fetchDataFromApi(apiUrl);
+
+            if (!hasMoreData(response)) {
+                log.info("No more data received.");
+                break;
+            }
+
+            List<ParkDto> parkDtoList = parseApiResponse(response);
+            saveAllParks(parkDtoList);
+
+            log.info("pageNo: " + pageNo);
+            pageNo++;
+        }
+
+    }
+
+    @Override
     public String buildParkAPIUrl(int pageNo, int numOfRows) {
-        String url = "http://api.data.go.kr/openapi/tn_pubr_public_cty_park_info_api" +
+        return "http://api.data.go.kr/openapi/tn_pubr_public_cty_park_info_api" +
                 "?serviceKey=" + serviceKey + "&type=json" +
                 "&pageNo=" + pageNo + "&numOfRows=" + numOfRows;
-
-        return url;
     }
 
     @Override
-    public String fetchDataFromApi(String apiUrl) throws URISyntaxException {
+    public String fetchDataFromApi(String apiUrl) {
         RestTemplate restTemplate = new RestTemplate();
-        URI uri = new URI(apiUrl);
-        String response = restTemplate.getForObject(uri, String.class);
+        URI uri;
+        try {
+            uri = new URI(apiUrl);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
 
-        return response;
+        return restTemplate.getForObject(uri, String.class);
     }
 
     @Override
-    public boolean hasMoreData(String response) throws JsonProcessingException {
+    public boolean hasMoreData(String response) {
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(response);
+        JsonNode rootNode;
+        try {
+            rootNode = objectMapper.readTree(response);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         JsonNode responseNode = rootNode.path("response");
         if (responseNode.isMissingNode()) {
@@ -73,9 +106,14 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public List<ParkDto> parseApiResponse(String response) throws JsonProcessingException {
+    public List<ParkDto> parseApiResponse(String response) {
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(response);
+        JsonNode rootNode;
+        try {
+            rootNode = objectMapper.readTree(response);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         JsonNode responseNode = rootNode.path("response");
         JsonNode bodyNode = responseNode.path("body");
@@ -131,18 +169,18 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public List<ParkDto> getParkList(float longitude, float latitude) {
+    public List<ParkDto> getParkList(Double longitude, Double latitude) {
         List<ParkDto> result = new ArrayList<>();
 
         List<Object[]> parkList = parkRepository.findNearbyParks(longitude, latitude, 1000);
-        for (Object[] parkData : parkList) {
+        for (Object[] park : parkList) {
             ParkDto parkDto = new ParkDto();
-            parkDto.setParkId((Long) parkData[0]);
-            parkDto.setParkName((String) parkData[1]);
-            parkDto.setAddress((String) parkData[2]);
-            parkDto.setLongitude(String.valueOf(parkData[3]));
-            parkDto.setLatitude(String.valueOf(parkData[4]));
-            parkDto.setDistance(((Number) parkData[5]).floatValue());
+            Optional<ParkEntity> optionalPark = parkRepository.findById((Long) park[0]);
+            if (optionalPark.isPresent()) {
+                ParkEntity parkEntity = optionalPark.get();
+                parkDto = ParkDto.convertToDto(parkEntity);
+                parkDto.setDistance((Double) park[1]);
+            }
 
             result.add(parkDto);
         }
@@ -153,18 +191,17 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public Optional<ParkDto> getParkInfo(int parkId) {
-        Optional<ParkEntity> parkEntity = parkRepository.findById((long) parkId);
+    public ParkDto getParkInfo(Long parkId) {
+        Optional<ParkEntity> parkEntity = parkRepository.findById(parkId);
 
         if (parkEntity.isPresent()) {
-            return Optional.of(ParkDto.convertToDto(parkEntity.get()));
+            return ParkDto.convertToDto(parkEntity.get());
         } else {
-            return Optional.empty();
+            throw new RuntimeException("Park not found.");
         }
     }
 
     @Override
-    @Transactional
     public void addPark(ParkDto parkDto) {
         ParkEntity parkEntity = ParkEntity.convertToEntity(parkDto);
         parkRepository.save(parkEntity);
@@ -172,17 +209,12 @@ public class ParkServiceImpl implements ParkService {
 
     @Override
     @Transactional
-    public void updatePark(int parkId, ParkDto newDto) {
-        Optional<ParkEntity> optionalPark = parkRepository.findById((long) parkId);
+    public void updatePark(Long parkId, ParkDto newDto) {
+        Optional<ParkEntity> optionalPark = parkRepository.findById(parkId);
 
         if (optionalPark.isPresent()) {
             ParkEntity park = optionalPark.get();
-            park.setParkName(newDto.getParkName());
-            park.setLatitude(Float.parseFloat(newDto.getLatitude()));
-            park.setLongitude(Float.parseFloat(newDto.getLongitude()));
-            park.setAddress(newDto.getAddress());
-            park.setSportFacility(newDto.getSportFacility());
-            park.setConvenienceFacility(newDto.getConvenienceFacility());
+            updateExistingPark(park, newDto);
 
             parkRepository.save(park);
         } else {
@@ -191,9 +223,8 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    @Transactional
-    public void deletePark(int parkId) {
-        parkRepository.deleteById((long) parkId);
+    public void deletePark(Long parkId) {
+        parkRepository.deleteById(parkId);
     }
 
     @Override
@@ -206,7 +237,6 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    @Transactional
     public void addFavoritePark(Long memberId, Long parkId) {
         Optional<MemberEntity> optionalMember = memberRepository.findById(memberId);
         Optional<ParkEntity> optionalPark = parkRepository.findById(parkId);
@@ -234,24 +264,39 @@ public class ParkServiceImpl implements ParkService {
         }
     }
 
-    @Override
-    public boolean isFavoritePark(Long memberId, Long parkId) {
-        return favoriteParkRepository.existsByMemberMemberIdAndParkParkId(memberId, parkId);
-    }
-
     private void updateExistingPark(ParkEntity existingPark, ParkDto parkDto) {
-        existingPark.setParkName(parkDto.getParkName());
+        if (!parkDto.getParkName().equals(existingPark.getParkName())) {
+            existingPark.setParkName(parkDto.getParkName());
+        }
 
-        if (parkDto.getLongitude() != null && !parkDto.getLongitude().isEmpty()) {
-            existingPark.setLongitude(Float.parseFloat(parkDto.getLongitude()));
+        if (existingPark.getLongitude() != null) {
+            if (!parkDto.getLongitude().equals(String.valueOf(existingPark.getLongitude()))) {
+                existingPark.setLongitude(Double.valueOf(parkDto.getLongitude()));
+            }
         }
-        if (parkDto.getLatitude() != null && !parkDto.getLatitude().isEmpty()) {
-            existingPark.setLatitude(Float.parseFloat(parkDto.getLatitude()));
+
+        if (existingPark.getLatitude() != null) {
+            if (!parkDto.getLatitude().equals(String.valueOf(existingPark.getLatitude()))) {
+                existingPark.setLatitude(Double.valueOf(parkDto.getLatitude()));
+            }
         }
-        if (parkDto.getSportFacility() != null && !parkDto.getSportFacility().isEmpty()) {
-            existingPark.setSportFacility(parkDto.getSportFacility());
+
+        if (parkDto.getAddress() != null && !parkDto.getAddress().isEmpty()) {
+            if (!parkDto.getAddress().equals(existingPark.getAddress())) {
+                existingPark.setAddress(parkDto.getAddress());
+            }
         }
-        if (parkDto.getConvenienceFacility() != null && !parkDto.getConvenienceFacility().isEmpty()) {
+
+        if (parkDto.getSportFacility() == null) {
+            existingPark.setSportFacility("");
+        } else if (!parkDto.getSportFacility().equals(existingPark.getSportFacility())) {
+                existingPark.setSportFacility(parkDto.getSportFacility());
+        }
+
+
+        if (parkDto.getConvenienceFacility() == null) {
+            existingPark.setConvenienceFacility("");
+        } else if (!parkDto.getConvenienceFacility().equals(existingPark.getConvenienceFacility())) {
             existingPark.setConvenienceFacility(parkDto.getConvenienceFacility());
         }
 
