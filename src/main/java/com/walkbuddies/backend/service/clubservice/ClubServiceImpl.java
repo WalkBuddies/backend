@@ -80,6 +80,7 @@ public class ClubServiceImpl implements ClubService {
 
     /**
      * 소모임 검색 기능 메서드.
+     * 검색어가 포함되고 검색이 되도록 한 소모임에 한에서 모두 검색이 됨.
      * @param clubName
      * @return
      */
@@ -186,6 +187,80 @@ public class ClubServiceImpl implements ClubService {
         return "가입 완료!";
     }
 
+    /**
+     * 소모임 Id를 기반으로 소모임의 가입 신청자를 볼 수 있는 메서드.
+     * 신청자의 memberId와 가입시 작성했던 message를 함께 볼 수 있음.
+     * @param clubId
+     * @return
+     */
+    @Override
+    public List<String> getClubWaitingData(Long clubId) {
+        Optional<ClubEntity> optionalClub = clubRepository.findByClubId(clubId);
+        List<ClubWaitingEntity> clubWaitingEntities = clubWaitingRepository.findByClubId(optionalClub);
+        if (clubWaitingEntities.isEmpty()) {
+            return Collections.singletonList("가입 신청자가 없습니다.");
+        }
 
+        return clubWaitingEntities.stream()
+                .map(clubWaitingEntity -> String.format("memberId: %s, message: %s",
+                        clubWaitingEntity.getMemberId().getMemberId(),
+                        clubWaitingEntity.getMessage()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 소모임 신청자 가입 승인, 거절 메서드.
+     * 승인에 대한 Boolean 타입과 정보를 받아서 승인할지 거절할지 정함.
+     * @param allowJoin
+     * @param clubJoinInform
+     * @return
+     */
+    @Transactional
+    @Override
+    public String joinClubResponse(Boolean allowJoin, ClubJoinInform clubJoinInform) {
+
+        Optional<ClubEntity> optionalClub = clubRepository.findByClubId(clubJoinInform.getClubId());
+        Optional<MemberEntity> optionalMember = memberRepository.findByMemberId(clubJoinInform.getMemberId());
+        Optional<MyClubEntity> optionalMyClub = myClubRepository.findByClubIdAndMemberId(optionalClub.get(), optionalMember.get());
+        Optional<ClubWaitingEntity> optionalClubWaiting = clubWaitingRepository.findByClubIdAndMemberId(optionalClub.get(), optionalMember.get());
+
+        if (!allowJoin) {
+            myClubRepository.delete(optionalMyClub.get());
+            clubWaitingRepository.delete(optionalClubWaiting.get());
+
+            return clubJoinInform.getMemberId() + "유저 소모임 가입 승인 거절.";
+        }
+
+        if (optionalClub.get().getMembersLimit() < optionalClub.get().getMembers() + 1) {
+            return "인원수 제한으로 더 이상 소모임 가입을 시킬 수 없습니다.";
+        }
+
+        MyClubEntity myClubEntity = MyClubEntity.builder()
+                .myClubId(optionalMyClub.get().getMyClubId())
+                .memberId(optionalMyClub.get().getMemberId())
+                .clubId(optionalMyClub.get().getClubId())
+                .authority(2)
+                .regAt(LocalDate.now())
+                .build();
+
+        ClubEntity clubEntity = ClubEntity.builder()
+                .clubId(optionalClub.get().getClubId())
+                .clubName(optionalClub.get().getClubName())
+                .townId(optionalClub.get().getTownId())
+                .ownerId(optionalClub.get().getOwnerId())
+                .members(optionalClub.get().getMembers() + 1)
+                .membersLimit(optionalClub.get().getMembersLimit())
+                .accessLimit(optionalClub.get().getAccessLimit())
+                .needGrant(optionalClub.get().getNeedGrant())
+                .regDate(optionalClub.get().getRegDate())
+                .modDate(LocalDate.now())
+                .build();
+
+        myClubRepository.save(myClubEntity);
+        clubRepository.save(clubEntity);
+        clubWaitingRepository.delete(optionalClubWaiting.get());
+
+        return clubJoinInform.getMemberId() + "유저 소모임 가입 승인.";
+    }
 
 }

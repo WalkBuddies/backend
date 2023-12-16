@@ -30,4 +30,15 @@ public class ClubController {
 
         return clubService.joinClubRequest(clubJoinInform);
     }
+
+    @GetMapping("/club/waiting/get")
+    public List<String> getClubWaitingData(@RequestParam Long clubId) {
+        return clubService.getClubWaitingData(clubId);
+    }
+
+    @PostMapping("/club/join/response")
+    public String joinClubResponse(@RequestParam boolean allowJoin,
+                                   @RequestBody ClubJoinInform clubJoinInform) {
+        return clubService.joinClubResponse(allowJoin, clubJoinInform);
+    }
 }

@@ -18,6 +18,7 @@ public interface ClubService {
 
     /**
      * 소모임 검색 기능 메서드.
+     * 검색어가 포함되고 검색이 되도록 한 소모임에 한에서 모두 검색이 됨.
      * @param clubName
      * @return
      */
@@ -30,4 +31,21 @@ public interface ClubService {
      * @return
      */
     String joinClubRequest(ClubJoinInform clubJoinInform);
+
+    /**
+     * 소모임 Id를 기반으로 소모임의 가입 신청자를 볼 수 있는 메서드.
+     * 신청자의 memberId와 가입시 작성했던 message를 함께 볼 수 있음.
+     * @param clubId
+     * @return
+     */
+    List<String> getClubWaitingData(Long clubId);
+
+    /**
+     * 소모임 신청자 가입 승인, 거절 메서드.
+     * 승인에 대한 Boolean 타입과 정보를 받아서 승인할지 거절할지 정함.
+     * @param allowJoin
+     * @param clubJoinInform
+     * @return
+     */
+    String joinClubResponse(Boolean allowJoin, ClubJoinInform clubJoinInform);
 }
