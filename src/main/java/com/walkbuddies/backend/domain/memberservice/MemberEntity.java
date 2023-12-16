@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.domain.memberservice;
 
+import com.walkbuddies.backend.domain.clubservice.TownEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,8 @@ public class MemberEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberId;
 
-    private Long townId;
+    @ManyToOne
+    @JoinColumn(name = "townId")
+    private TownEntity townId;
 
 }

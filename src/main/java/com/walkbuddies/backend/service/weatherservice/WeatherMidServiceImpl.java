@@ -136,8 +136,8 @@ public class WeatherMidServiceImpl implements WeatherMidService {
     @Override
     public String updateWeatherMidData(String tmFc) throws JsonProcessingException {
 
-        List<WeatherMidDto> parseCSV = parseCSV();
-        for (WeatherMidDto weatherMidDto : parseCSV) {
+        List<WeatherMidDto> dataFromDB = getDataFromDB();
+        for (WeatherMidDto weatherMidDto : dataFromDB) {
 
             WeatherMidTaDto weatherMidTa = (WeatherMidTaDto) getWeatherMidTa(weatherMidDto.getRegId(), tmFc);
             WeatherMidLandFcstDto weatherMidLandFcst = (WeatherMidLandFcstDto) getWeatherMidLandFcst(weatherMidDto.getRegId(), tmFc);
@@ -256,46 +256,22 @@ public class WeatherMidServiceImpl implements WeatherMidService {
     }
 
     /**
-     * 도시이름, 지역코드, 지역이름이 있는 CSV 파일을 List<WeatherMidDto>에 담아 리턴하는 메서드
+     * DB에서 도시이름, 지역코드를 가져와서 List<WeatherMidDto>에 담아 리턴하는 메서드
      * @return
      */
-    public List<WeatherMidDto> parseCSV() {
-        ClassPathResource resource = new ClassPathResource("weatherMidRegionCode.csv");
-        List<WeatherMidDto> regionCodes = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
+    public List<WeatherMidDto> getDataFromDB() {
+        List<WeatherMidEntity> weatherMidEntities = weatherMidRepository.findAll();
+        List<WeatherMidDto> weatherMidDtos = new ArrayList<>();
 
-            boolean flag = false;
+        for (WeatherMidEntity entity : weatherMidEntities) {
+            WeatherMidDto weatherMidDto = WeatherMidDto.builder()
+                    .cityName(entity.getCityName())
+                    .regId(entity.getRegId())
+                    .build();
 
-            while (true) {
-                String line = br.readLine();
-                if (line == null) {
-                    break;
-                }
-
-                // 첫 줄을 읽지 않음
-                if (flag == false) {
-                    flag = true;
-                    continue;
-                }
-
-                String[] ar = line.split(",");
-
-                WeatherMidDto weatherMidDto = WeatherMidDto.builder()
-                        .cityName(ar[0])
-                        .regId(ar[1])
-                        .build();
-
-
-
-                regionCodes.add(weatherMidDto);
-            }
-
-
-        } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
-            e.printStackTrace();
+            weatherMidDtos.add(weatherMidDto);
         }
 
-        return regionCodes;
+        return weatherMidDtos;
     }
 }

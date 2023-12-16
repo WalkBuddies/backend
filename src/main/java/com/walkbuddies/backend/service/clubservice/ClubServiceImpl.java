@@ -1,12 +1,15 @@
 package com.walkbuddies.backend.service.clubservice;
 
 import com.walkbuddies.backend.domain.clubservice.ClubEntity;
+import com.walkbuddies.backend.domain.clubservice.ClubWaitingEntity;
 import com.walkbuddies.backend.domain.clubservice.MyClubEntity;
+import com.walkbuddies.backend.domain.clubservice.TownEntity;
 import com.walkbuddies.backend.domain.memberservice.MemberEntity;
 import com.walkbuddies.backend.dto.clubservice.ClubDto;
 import com.walkbuddies.backend.dto.clubservice.ClubJoinInform;
 import com.walkbuddies.backend.dto.clubservice.ClubResponse;
 import com.walkbuddies.backend.repository.clubservice.ClubRepository;
+import com.walkbuddies.backend.repository.clubservice.ClubWaitingRepository;
 import com.walkbuddies.backend.repository.clubservice.MyClubRepository;
 import com.walkbuddies.backend.repository.memberservice.MemberRepository;
 import jakarta.persistence.EntityExistsException;
@@ -27,6 +30,7 @@ public class ClubServiceImpl implements ClubService {
     private final ClubRepository clubRepository;
     private final MyClubRepository myClubRepository;
     private final MemberRepository memberRepository;
+    private final ClubWaitingRepository clubWaitingRepository;
 
     /**
      * 소모임을 생성하는 메서드.
@@ -45,13 +49,13 @@ public class ClubServiceImpl implements ClubService {
         MemberEntity member = memberRepository.findById(clubDto.getOwnerId())
                 .orElseThrow(() -> new EntityNotFoundException("해당 회원을 찾을 수 없습니다: " + clubDto.getOwnerId()));
 
-       if (!clubDto.getTownId().equals(member.getTownId())) {
+       if (!clubDto.getTownId().equals(member.getTownId().getTownId())) {
            throw new RuntimeException("내 동네가 아닙니다.");
        }
 
         ClubEntity clubEntity = ClubEntity.builder()
                 .clubName(clubDto.getClubName())
-                .townId(member)
+                .townId(member.getTownId())
                 .ownerId(member)
                 .members(1)
                 .membersLimit(clubDto.getMembersLimit())
@@ -103,9 +107,13 @@ public class ClubServiceImpl implements ClubService {
     @Override
     public String joinClubRequest(ClubJoinInform clubJoinInform) {
 
+        TownEntity townEntity = TownEntity.builder()
+                .TownId(clubJoinInform.getTownId())
+                .build();
+
         MemberEntity memberEntity = MemberEntity.builder()
                 .memberId(clubJoinInform.getMemberId())
-                .townId(clubJoinInform.getTownId())
+                .townId(townEntity)
                 .build();
 
         MemberEntity member = memberRepository.findById(clubJoinInform.getMemberId())
@@ -133,7 +141,22 @@ public class ClubServiceImpl implements ClubService {
         }
 
         if (optionalClub.get().getNeedGrant() == 1) {
-            // 가입 승인 대기 관련
+            // 가입 승인 대기
+            ClubWaitingEntity clubWaitingEntity = ClubWaitingEntity.builder()
+                    .clubId(optionalClub.get())
+                    .memberId(member)
+                    .message(clubJoinInform.getMessage())
+                    .build();
+            clubWaitingRepository.save(clubWaitingEntity);
+
+            MyClubEntity myClubEntity = MyClubEntity.builder()
+                    .memberId(member)
+                    .clubId(optionalClub.get())
+                    .authority(3)
+                    .regAt(LocalDate.now())
+                    .build();
+            myClubRepository.save(myClubEntity);
+
             return "가입 승인 대기!";
         }
 
