@@ -12,10 +12,10 @@ import java.util.Optional;
 public interface ParkRepository extends JpaRepository<ParkEntity, Long> {
     Optional<ParkEntity> findByAddress(String address);
 
-    @Query(value = "SELECT park_name, address, longitude, latitude," +
+    @Query(value = "SELECT park_id, " +
                     "ST_Distance_Sphere(Point(:longitude, :latitude), Point(longitude, latitude)) AS distance " +
                     "FROM park " +
                     "WHERE ST_Distance_Sphere(Point(:longitude, :latitude), Point(longitude, latitude)) < :distance",
             nativeQuery = true)
-    List<Object[]> findNearbyParks(float longitude, float latitude, float distance);
+    List<Object[]> findNearbyParks(Double longitude, Double latitude, float distance);
 }

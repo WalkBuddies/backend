@@ -7,35 +7,27 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Entity
-@Table(name = "club")
+@Table(name = "club_wating")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClubEntity {
+public class ClubWaitingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long clubId;
-
-    private String clubName;
+    private Long waitingId;
 
     @ManyToOne
-    @JoinColumn(name = "townId")
-    private TownEntity townId;
+    @JoinColumn(name = "clubId")
+    private ClubEntity clubId;
 
     @ManyToOne
     @JoinColumn(name = "memberId")
-    private MemberEntity ownerId;
+    private MemberEntity memberId;
 
-    private Integer members;
-    private Integer membersLimit;
-    private Integer accessLimit;
-    private Integer needGrant;
-    private LocalDate regDate;
-    private LocalDate modDate;
+    private String message;
+
 
 }

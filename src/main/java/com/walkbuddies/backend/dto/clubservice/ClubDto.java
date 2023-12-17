@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.dto.clubservicec;
+package com.walkbuddies.backend.dto.clubservice;
 
 import com.walkbuddies.backend.domain.clubservice.ClubEntity;
 import lombok.*;

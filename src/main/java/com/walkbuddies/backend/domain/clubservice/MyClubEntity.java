@@ -10,32 +10,25 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "club")
+@Table(name = "my_club")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClubEntity {
+public class MyClubEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long clubId;
-
-    private String clubName;
-
-    @ManyToOne
-    @JoinColumn(name = "townId")
-    private TownEntity townId;
+    private Long myClubId;
 
     @ManyToOne
     @JoinColumn(name = "memberId")
-    private MemberEntity ownerId;
+    private MemberEntity memberId;
 
-    private Integer members;
-    private Integer membersLimit;
-    private Integer accessLimit;
-    private Integer needGrant;
-    private LocalDate regDate;
-    private LocalDate modDate;
+    @ManyToOne
+    @JoinColumn(name = "clubId")
+    private ClubEntity clubId;
 
+    private Integer authority;
+    private LocalDate regAt;
 }
