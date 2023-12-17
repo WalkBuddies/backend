@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.club.domain;
 
+import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -37,5 +38,21 @@ public class ClubEntity {
     private Integer needGrant;
     private LocalDate regDate;
     private LocalDate modDate;
+
+    public static ClubDto entityToDto(ClubEntity clubEntity) {
+
+        return ClubDto.builder()
+                .clubId(clubEntity.getClubId())
+                .clubName(clubEntity.getClubName())
+                .townId(clubEntity.getTownId().getTownId())
+                .ownerId(clubEntity.getOwnerId().getMemberId())
+                .members(clubEntity.getMembers())
+                .membersLimit(clubEntity.getMembersLimit())
+                .accessLimit(clubEntity.getAccessLimit())
+                .needGrant(clubEntity.getNeedGrant())
+                .regDate(clubEntity.getRegDate())
+                .modDate(clubEntity.getModDate())
+                .build();
+    }
 
 }

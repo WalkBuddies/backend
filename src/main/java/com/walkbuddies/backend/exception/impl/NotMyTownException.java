@@ -13,6 +13,6 @@ public class NotMyTownException extends AbstractException {
 
     @Override
     public String getMessage() {
-        return "내 동네가 아닙니다.";
+        return "동네 인증을 먼저 해주세요.";
     }
 }
