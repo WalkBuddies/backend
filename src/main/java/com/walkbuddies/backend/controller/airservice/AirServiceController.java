@@ -1,12 +1,10 @@
 package com.walkbuddies.backend.controller.airservice;
 
 import com.walkbuddies.backend.domain.airservice.AirServiceEntity;
-
 import com.walkbuddies.backend.service.airservice.AirService;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import com.walkbuddies.backend.service.airservice.AirService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

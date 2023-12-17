@@ -12,4 +12,7 @@ public interface ClubRepository extends JpaRepository<ClubEntity, Long> {
     Optional<ClubEntity> findByClubName(String clubName);
 
     List<ClubEntity> findByClubNameContaining(String clubName);
+
+    Optional<ClubEntity> findByClubId(Long clubId);
+
 }

@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.domain.memberservice;
 
+import com.walkbuddies.backend.domain.clubservice.TownEntity;
 import com.walkbuddies.backend.dto.memberservice.SignUpDto;
 import com.walkbuddies.backend.util.SHA256;
 import jakarta.persistence.*;
@@ -22,7 +23,9 @@ public class MemberEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberId;
 
-    private Long townId;
+    @ManyToOne
+    @JoinColumn(name = "townId")
+    private TownEntity townId;
 
     @Column(nullable = false, unique = true)
     private String email;
