@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.walkbuddies.backend.domain.airservice.AirServiceEntity;
+import com.walkbuddies.backend.dto.airservice.AirServiceDto;
 import com.walkbuddies.backend.dto.airservice.MsrstnDto;
 import com.walkbuddies.backend.repository.airservice.AirServiceRepository;
 import com.walkbuddies.backend.service.commonservice.CommonService;
@@ -35,7 +36,7 @@ public class AirServiceImpl implements AirService {
   private final CommonService commonService;
 
   /**
-   * api dataTime 항목을 datetimeformat으로 변환하는 메소드
+   * api dataTime 항목을 dateTimeFormat으로 변환하는 메소드
    * @param time 문자열 dateTime
    * @return dateTime
    */
@@ -60,6 +61,7 @@ public class AirServiceImpl implements AirService {
     return restTemplate.getForObject(uri,String.class);
   }
 
+
   /**
    * jsonString을 파싱하는 메소드
    * @param jsonString
@@ -75,7 +77,8 @@ public class AirServiceImpl implements AirService {
         .path("items");
   }
 
-  /**
+
+  /**(수정진행중)
    * 요청좌표의 미세먼지정보를 찾는 메소드
    * 최근접측정소를 찾은 후 측정소 코드를 통해 db에 저장된 정보가 없다면 미세먼지 api에서 정보를 받음
    * db에 저장된 정보가 조회시간보다 1시간 이내면 db의 정보를 반환, 아니면 api에서 정보를 받음
@@ -84,22 +87,35 @@ public class AirServiceImpl implements AirService {
    * @return
    * @throws IOException
    */
-  public AirServiceEntity getAirInfo(double tmX, double tmY) throws IOException, URISyntaxException {
+  public AirServiceDto getAirInfo(double tmX, double tmY) throws IOException, URISyntaxException {
     MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tmX, tmY);
-    AirServiceEntity result;
+    AirServiceDto result = new AirServiceDto();
     LocalDateTime now = LocalDateTime.now();
     Optional<AirServiceEntity> checkDb = airServiceRepository.findByStationCode(msrstnDto.getStationCode());
 
-    if (checkDb.isPresent()) {
-      AirServiceEntity airServiceEntity = checkDb.get();
-      if (airServiceEntity.getDataTime().isBefore(now.minusHours(1))) {
-        result = getAirInfoFromApi(msrstnDto);
-      } else {
-        result = airServiceEntity;
-      }
+//    if (checkDb.isPresent()) {
+//      AirServiceEntity airServiceEntity = checkDb.get();
+//      if (airServiceEntity.getDataTime().isBefore(now.minusHours(1))) {
+//        AirServiceEntity data = getAirInfoFromApi(msrstnDto);
+//        saveApiData(data);
+//        result = AirServiceEntity.entityToDto(data);
+//      } else {
+//        result = AirServiceEntity.entityToDto(airServiceEntity);
+//      }
+//    } else {
+//      AirServiceEntity data = getAirInfoFromApi(msrstnDto);
+//      saveApiData(data);
+//      result = AirServiceEntity.entityToDto(data));
+//    }
+
+    if (checkDb.isPresent() && checkDb.get().getDataTime().isAfter(now.minusHours(1))) {
+      result = AirServiceEntity.entityToDto(checkDb.get());
     } else {
-      result = getAirInfoFromApi(msrstnDto);
+      AirServiceEntity data = getAirInfoFromApi(msrstnDto);
+      saveApiData(data);
+      result = AirServiceEntity.entityToDto(data);
     }
+
     return result;
   }
 
@@ -152,12 +168,20 @@ public class AirServiceImpl implements AirService {
        }
        ((ObjectNode)item).put("dataTime", changeTimeFormat(String.valueOf(item.get("dataTime"))));
        airServiceEntity = objectMapper.treeToValue(item, AirServiceEntity.class);
-       airServiceRepository.save(airServiceEntity);
        log.info(airServiceEntity.getStationName() + "저장 완료");
        break;
     }
 
     return airServiceEntity;
+  }
+
+  /**
+   * api 데이터 저장
+   * @param airServiceEntity
+   */
+  private void saveApiData(AirServiceEntity airServiceEntity) {
+
+    airServiceRepository.save(airServiceEntity);
   }
 
   /**
@@ -169,7 +193,7 @@ public class AirServiceImpl implements AirService {
    * @throws IOException
    */
   @Override
-  public AirServiceEntity getBookmarkAirInfo(double x, double y)
+  public AirServiceDto getBookmarkAirInfo(double x, double y)
       throws URISyntaxException, IOException {
     double[] tmArr = commonService.GeoToTm(x, y);
 

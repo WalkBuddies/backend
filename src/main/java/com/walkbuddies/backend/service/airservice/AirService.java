@@ -1,6 +1,7 @@
 package com.walkbuddies.backend.service.airservice;
 
 import com.walkbuddies.backend.domain.airservice.AirServiceEntity;
+import com.walkbuddies.backend.dto.airservice.AirServiceDto;
 import com.walkbuddies.backend.dto.airservice.MsrstnDto;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -18,7 +19,7 @@ public interface AirService {
    * @return
    * @throws IOException
    */
-  AirServiceEntity getAirInfo(double tmX, double tmY) throws IOException, URISyntaxException;
+  AirServiceDto getAirInfo(double tmX, double tmY) throws IOException, URISyntaxException;
   /**
    * 요청받은 좌표로부터 최근접측정소를 찾는 api 호출
    * @param tmX 입력받은 tmx 좌표
@@ -44,5 +45,5 @@ public interface AirService {
    * @throws URISyntaxException
    * @throws IOException
    */
-  AirServiceEntity getBookmarkAirInfo(double x, double y) throws URISyntaxException, IOException;
+  AirServiceDto getBookmarkAirInfo(double x, double y) throws URISyntaxException, IOException;
 }

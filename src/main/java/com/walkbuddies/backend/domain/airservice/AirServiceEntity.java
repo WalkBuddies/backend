@@ -62,4 +62,26 @@ public class AirServiceEntity {
         .build();
   }
 
+  public static AirServiceDto entityToDto(AirServiceEntity entity) {
+
+    return AirServiceDto.builder()
+        .stationCode(entity.getStationCode())
+        .stationName(entity.getStationName())
+        .dataTime(entity.getDataTime())
+        .so2Value(entity.getSo2Value())
+        .so2Grade(entity.getSo2Grade())
+        .coValue(entity.getCoValue())
+        .coGrade(entity.getCoGrade())
+        .o3Value(entity.getO3Value())
+        .o3Grade(entity.getO3Grade())
+        .no2Value(entity.getNo2Value())
+        .pm10Value(entity.getPm10Value())
+        .pm10Grade(entity.getPm10Grade())
+        .pm25Value(entity.getPm25Value())
+        .pm25Grade(entity.getPm25Grade())
+        .khaiValue(entity.getKhaiValue())
+        .khaiGrade(entity.getKhaiGrade())
+        .build();
+  }
+
 }

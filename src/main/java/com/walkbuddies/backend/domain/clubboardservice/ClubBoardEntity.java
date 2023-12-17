@@ -36,11 +36,11 @@ public class ClubBoardEntity {
   private long clubBoardId;
 
   @ManyToOne
-  @JoinColumn(name = "clubId")
+//  @JoinColumn(name = "clubId")
   private ClubEntity clubId;
 
   @ManyToOne
-  @JoinColumn(name = "memeberId")
+//  @JoinColumn(name = "memeberId")
   private MemberEntity memberId;
 
   private String nickname;
@@ -52,7 +52,7 @@ public class ClubBoardEntity {
   private int deleteYn;
   private int fileYn;
 
-  public ClubBoardEntity dtoToEntity(ClubBoardDto dto) {
+  public static ClubBoardEntity dtoToEntity(ClubBoardDto dto) {
 
     return ClubBoardEntity.builder()
         .clubBoardId(dto.getClubBoardId())
@@ -64,6 +64,21 @@ public class ClubBoardEntity {
         .noticeYn(dto.getNoticeYn())
         .deleteYn(dto.getDeleteYn())
         .fileYn(dto.getFileYn())
+        .build();
+  }
+
+  public static ClubBoardDto entityToDto(ClubBoardEntity entity) {
+
+    return ClubBoardDto.builder()
+        .clubBoardId(entity.getClubBoardId())
+        .nickname(entity.getNickname())
+        .title(entity.getTitle())
+        .content(entity.getContent())
+        .createAt(entity.getCreateAt())
+        .updateAt(entity.getUpdateAt())
+        .noticeYn(entity.getNoticeYn())
+        .deleteYn(entity.getDeleteYn())
+        .fileYn(entity.getFileYn())
         .build();
   }
 

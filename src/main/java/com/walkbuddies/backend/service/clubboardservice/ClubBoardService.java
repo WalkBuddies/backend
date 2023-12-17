@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ClubBoardService {
 
-  ClubBoardEntity createBoard(ClubBoardDto clubBoardDto);
-  ClubBoardEntity getBoard(Long boardIdx);
-  List<ClubBoardEntity> getList();
+  void createBoard(ClubBoardDto clubBoardDto);
+  ClubBoardDto getBoard(Long boardIdx);
+  List<ClubBoardDto> getList();
+  void updateBoard(ClubBoardDto clubBoardDto);
+  void deleteBoard(ClubBoardDto clubBoardDto);
 }

@@ -2,6 +2,7 @@ package com.walkbuddies.backend.controller.airservice;
 
 import com.walkbuddies.backend.domain.airservice.AirServiceEntity;
 
+import com.walkbuddies.backend.dto.airservice.AirServiceDto;
 import com.walkbuddies.backend.service.airservice.AirService;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -23,14 +24,14 @@ public class AirServiceController {
   @GetMapping("/data")
   public ResponseEntity<?> getAirInfo(@RequestParam double tmX, @RequestParam double tmY)
       throws IOException, URISyntaxException {
-    AirServiceEntity result = this.airService.getAirInfo(tmX, tmY);
+    AirServiceDto result = this.airService.getAirInfo(tmX, tmY);
     return ResponseEntity.ok(result);
   }
 
   @GetMapping("/bookmark-data")
   public ResponseEntity<?> getBookmarkAirInfo(@RequestParam double x, @RequestParam double y)
       throws URISyntaxException, IOException {
-    AirServiceEntity result = this.airService.getBookmarkAirInfo(x, y);
+    AirServiceDto result = this.airService.getBookmarkAirInfo(x, y);
     return ResponseEntity.ok(result);
   }
 

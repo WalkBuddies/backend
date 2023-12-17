@@ -1,6 +1,5 @@
 package com.walkbuddies.backend.controller.clubboardservice;
 
-import com.walkbuddies.backend.domain.clubboardservice.ClubBoardEntity;
 import com.walkbuddies.backend.dto.clubboardservice.ClubBoardDto;
 import com.walkbuddies.backend.service.clubboardservice.ClubBoardService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,7 @@ public class ClubBoardController {
   //read
   @GetMapping("/board-details/{boardIdx}")
   public ResponseEntity<?> getBoard(@PathVariable Long boardIdx) {
-    clubBoardService.getBoard(boardIdx);
+    ClubBoardDto result = clubBoardService.getBoard(boardIdx);
 
     return null;
   }
@@ -39,8 +38,19 @@ public class ClubBoardController {
   }
   //update
 
+  @PostMapping("/update")
+  public ResponseEntity<?> updateBoard(ClubBoardDto clubBoardDto) {
+    clubBoardService.updateBoard(clubBoardDto);
 
+    return null;
+  }
 
   //delete
 
+  @PostMapping("/delete")
+  public ResponseEntity<?> deleteBoard(ClubBoardDto clubBoardDto) {
+    clubBoardService.deleteBoard(clubBoardDto);
+
+    return null;
+  }
 }
