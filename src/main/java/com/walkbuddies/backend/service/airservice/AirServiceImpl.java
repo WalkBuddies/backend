@@ -93,23 +93,15 @@ public class AirServiceImpl implements AirService {
     LocalDateTime now = LocalDateTime.now();
     Optional<AirServiceEntity> checkDb = airServiceRepository.findByStationCode(msrstnDto.getStationCode());
 
-//    if (checkDb.isPresent()) {
-//      AirServiceEntity airServiceEntity = checkDb.get();
-//      if (airServiceEntity.getDataTime().isBefore(now.minusHours(1))) {
-//        AirServiceEntity data = getAirInfoFromApi(msrstnDto);
-//        saveApiData(data);
-//        result = AirServiceEntity.entityToDto(data);
-//      } else {
-//        result = AirServiceEntity.entityToDto(airServiceEntity);
-//      }
-//    } else {
-//      AirServiceEntity data = getAirInfoFromApi(msrstnDto);
-//      saveApiData(data);
-//      result = AirServiceEntity.entityToDto(data));
-//    }
-
-    if (checkDb.isPresent() && checkDb.get().getDataTime().isAfter(now.minusHours(1))) {
-      result = AirServiceEntity.entityToDto(checkDb.get());
+    if (checkDb.isPresent()) {
+      AirServiceEntity airServiceEntity = checkDb.get();
+      if (airServiceEntity.getDataTime().isBefore(now.minusHours(1))) {
+        AirServiceEntity data = getAirInfoFromApi(msrstnDto);
+        saveApiData(data);
+        result = AirServiceEntity.entityToDto(data);
+      } else {
+        result = AirServiceEntity.entityToDto(airServiceEntity);
+      }
     } else {
       AirServiceEntity data = getAirInfoFromApi(msrstnDto);
       saveApiData(data);
