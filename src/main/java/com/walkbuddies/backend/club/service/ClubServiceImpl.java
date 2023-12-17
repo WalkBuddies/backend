@@ -10,6 +10,9 @@ import com.walkbuddies.backend.club.dto.ClubResponse;
 import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.club.repository.ClubWaitingRepository;
 import com.walkbuddies.backend.club.repository.MyClubRepository;
+import com.walkbuddies.backend.exception.impl.ExistsClubException;
+import com.walkbuddies.backend.exception.impl.ExistsMemberException;
+import com.walkbuddies.backend.exception.impl.NotMyTownException;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import jakarta.persistence.EntityExistsException;
@@ -46,14 +49,14 @@ public class ClubServiceImpl implements ClubService {
 
         Optional<ClubEntity> existingClub = clubRepository.findByClubName(clubDto.getClubName());
         if (existingClub.isPresent()) {
-            throw new EntityExistsException("이미 존재하는 소모임 이름 입니다: " + clubDto.getClubName());
+            throw new ExistsClubException();
         }
 
         MemberEntity member = memberRepository.findById(clubDto.getOwnerId())
-                .orElseThrow(() -> new EntityNotFoundException("해당 회원을 찾을 수 없습니다: " + clubDto.getOwnerId()));
+                .orElseThrow(() -> new ExistsMemberException());
 
         if (!clubDto.getTownId().equals(member.getTownId().getTownId())) {
-            throw new RuntimeException("내 동네가 아닙니다.");
+            throw new NotMyTownException();
         }
 
         ClubEntity clubEntity = ClubEntity.builder()
