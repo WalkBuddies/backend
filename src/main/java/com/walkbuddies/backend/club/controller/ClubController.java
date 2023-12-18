@@ -66,4 +66,19 @@ public class ClubController {
         ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), clubService.joinClubResponse(allowJoin, clubJoinInform), null);
         return ResponseEntity.ok(clubResponse);
     }
+
+    @PostMapping("club/leave")
+    public ResponseEntity<ClubResponse> leaveClub(@RequestParam(name = "clubId") Long clubId,
+                                                  @RequestParam(name = "memberId") Long memberId) {
+
+        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), clubService.leaveClub(clubId, memberId), null);
+        return ResponseEntity.ok(clubResponse);
+    }
+
+    @PostMapping("/club/update")
+    public ResponseEntity<ClubResponse> updateClubData(@RequestBody  ClubDto clubDto) {
+
+        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), "소모임 정보를 수정했습니다.", clubService.updateClubData(clubDto));
+        return ResponseEntity.ok(clubResponse);
+    }
 }
