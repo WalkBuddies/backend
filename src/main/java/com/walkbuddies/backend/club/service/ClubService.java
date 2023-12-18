@@ -15,7 +15,7 @@ public interface ClubService {
      * @param clubDto
      * @return
      */
-    ClubResponse createClub(ClubDto clubDto);
+    ClubDto createClub(ClubDto clubDto);
 
     /**
      * 소모임 검색 기능 메서드.

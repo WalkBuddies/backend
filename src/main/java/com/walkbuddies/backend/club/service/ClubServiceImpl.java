@@ -6,16 +6,12 @@ import com.walkbuddies.backend.club.domain.MyClubEntity;
 import com.walkbuddies.backend.club.domain.TownEntity;
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
-import com.walkbuddies.backend.club.dto.ClubResponse;
 import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.club.repository.ClubWaitingRepository;
 import com.walkbuddies.backend.club.repository.MyClubRepository;
-import com.walkbuddies.backend.exception.impl.ExistsClubException;
-import com.walkbuddies.backend.exception.impl.ExistsMemberException;
-import com.walkbuddies.backend.exception.impl.NotMyTownException;
+import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -45,7 +41,7 @@ public class ClubServiceImpl implements ClubService {
      */
     @Transactional
     @Override
-    public ClubResponse createClub(ClubDto clubDto) {
+    public ClubDto createClub(ClubDto clubDto) {
 
         Optional<ClubEntity> existingClub = clubRepository.findByClubName(clubDto.getClubName());
         if (existingClub.isPresent()) {
@@ -53,7 +49,7 @@ public class ClubServiceImpl implements ClubService {
         }
 
         MemberEntity member = memberRepository.findById(clubDto.getOwnerId())
-                .orElseThrow(() -> new ExistsMemberException());
+                .orElseThrow(() -> new NotFoundMemberException());
 
         if (!clubDto.getTownId().equals(member.getTownId().getTownId())) {
             throw new NotMyTownException();
@@ -81,7 +77,7 @@ public class ClubServiceImpl implements ClubService {
 
         myClubRepository.save(myClubEntity);
 
-        return ClubDto.of(HttpStatus.OK.value(), "소모임 생성을 완료했습니다.", clubEntity);
+        return ClubEntity.entityToDto(clubEntity);
     }
 
     /**
@@ -96,7 +92,7 @@ public class ClubServiceImpl implements ClubService {
 
         List<ClubEntity> clubEntities = clubRepository.findByClubNameContaining(clubName);
         if (clubEntities.isEmpty()) {
-            throw new EntityExistsException("검색어에 해당하는 소모임이 없습니다.");
+            throw new NotFoundClubException();
         }
 
         return clubEntities.stream()
@@ -126,25 +122,25 @@ public class ClubServiceImpl implements ClubService {
                 .build();
 
         MemberEntity member = memberRepository.findById(clubJoinInform.getMemberId())
-                .orElseThrow(() -> new EntityNotFoundException("해당 회원을 찾을 수 없습니다: " + clubJoinInform.getMemberId()));
+                .orElseThrow(() -> new NotFoundMemberException());
         Optional<ClubEntity> optionalClub = clubRepository.findByClubId(clubJoinInform.getClubId());
         List<MyClubEntity> myClubEntities = myClubRepository.findByMemberId(memberEntity);
 
         if (optionalClub.isPresent()) {
             if (optionalClub.get().getMembersLimit() < optionalClub.get().getMembers() + 1) {
-                return "인원수 제한으로 더 이상 가입이 불가능한 소모임 입니다.";
+                throw new MemberLimitException();
             }
             if (!optionalClub.get().getTownId().getTownId().equals(clubJoinInform.getTownId())) {
-                return "동네 인증을 먼저 해주세요.";
+                throw new NotMyTownException();
             }
         } else {
-            return "존재하지 않는 소모임 입니다.";
+            throw new NotFoundClubException();
         }
 
         if (!myClubEntities.isEmpty()) {
             for (MyClubEntity myClubEntity : myClubEntities) {
                 if (myClubEntity.getClubId().getClubId().equals(clubJoinInform.getClubId())) {
-                    return "이미 가입한 소모임에는 가입할 수 없습니다.";
+                    throw new AlreadyMemberException();
                 }
             }
         }
@@ -230,9 +226,24 @@ public class ClubServiceImpl implements ClubService {
     public String joinClubResponse(Boolean allowJoin, ClubJoinInform clubJoinInform) {
 
         Optional<ClubEntity> optionalClub = clubRepository.findByClubId(clubJoinInform.getClubId());
+        if (optionalClub.isEmpty()) {
+            throw new NotFoundClubException();
+        }
+
         Optional<MemberEntity> optionalMember = memberRepository.findByMemberId(clubJoinInform.getMemberId());
+        if (optionalMember.isEmpty()) {
+            throw new NotFoundMemberException();
+        }
+
         Optional<MyClubEntity> optionalMyClub = myClubRepository.findByClubIdAndMemberId(optionalClub.get(), optionalMember.get());
+        if (optionalMyClub.isEmpty()) {
+            throw new NotFoundMyClubException();
+        }
+
         Optional<ClubWaitingEntity> optionalClubWaiting = clubWaitingRepository.findByClubIdAndMemberId(optionalClub.get(), optionalMember.get());
+        if (optionalClubWaiting.isEmpty()) {
+            throw new ClubJoinException();
+        }
 
         if (!allowJoin) {
             myClubRepository.delete(optionalMyClub.get());
@@ -242,7 +253,7 @@ public class ClubServiceImpl implements ClubService {
         }
 
         if (optionalClub.get().getMembersLimit() < optionalClub.get().getMembers() + 1) {
-            return "인원수 제한으로 더 이상 소모임 가입을 시킬 수 없습니다.";
+            throw new MemberLimitException();
         }
 
         MyClubEntity myClubEntity = MyClubEntity.builder()

@@ -3,16 +3,14 @@ package com.walkbuddies.backend.exception.impl;
 import com.walkbuddies.backend.exception.AbstractException;
 import org.springframework.http.HttpStatus;
 
-public class NotMyTownException extends AbstractException {
-
-
+public class NotFoundClubException extends AbstractException {
     @Override
     public int getStatusCode() {
-        return HttpStatus.BAD_REQUEST.value();
+        return HttpStatus.NOT_FOUND.value();
     }
 
     @Override
     public String getMessage() {
-        return "동네 인증을 먼저 해주세요.";
+        return "소모임을 찾을 수 없습니다.";
     }
 }

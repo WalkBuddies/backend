@@ -238,7 +238,7 @@ public class WeatherMidServiceImpl implements WeatherMidService {
             }
         }
 
-        return "업데이트 완료!";
+        return "중기예보 정보를 업데이트 완료 했습니다.";
     }
 
     /**
@@ -248,14 +248,15 @@ public class WeatherMidServiceImpl implements WeatherMidService {
      * @return
      */
     @Override
-    public WeatherMidResponse getWeatherMidData(String cityName) {
+    public List<WeatherMidDto> getWeatherMidData(String cityName) {
 
-        List<WeatherMidEntity> weatherMidDtoList = new ArrayList<>();
         WeatherMidEntity result = weatherMidRepository.findByCityName(cityName)
                 .orElseThrow(() -> new NoSuchElementException("도시 이름이 없습니다: " + cityName));
-        weatherMidDtoList.add(result);
 
-        return WeatherMidDto.of(HttpStatus.OK.value(), "중기예보 정보를 조회하는데 성공하였습니다.", weatherMidDtoList);
+        List<WeatherMidDto> weatherMidDtoList = new ArrayList<>();
+        weatherMidDtoList.add(WeatherMidEntity.dtoToEntity(result));
+
+        return weatherMidDtoList;
     }
 
     /**

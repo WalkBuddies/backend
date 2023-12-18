@@ -3,9 +3,7 @@ package com.walkbuddies.backend.exception.impl;
 import com.walkbuddies.backend.exception.AbstractException;
 import org.springframework.http.HttpStatus;
 
-public class NotMyTownException extends AbstractException {
-
-
+public class MemberLimitException extends AbstractException {
     @Override
     public int getStatusCode() {
         return HttpStatus.BAD_REQUEST.value();
@@ -13,6 +11,6 @@ public class NotMyTownException extends AbstractException {
 
     @Override
     public String getMessage() {
-        return "동네 인증을 먼저 해주세요.";
+        return "더 이상 멤버를 받을 수 없습니다. 인원수 제한을 초과했습니다.";
     }
 }

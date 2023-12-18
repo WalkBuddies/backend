@@ -28,6 +28,4 @@ public class ClubWaitingEntity {
     private MemberEntity memberId;
 
     private String message;
-
-
 }

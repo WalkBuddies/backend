@@ -3,9 +3,7 @@ package com.walkbuddies.backend.exception.impl;
 import com.walkbuddies.backend.exception.AbstractException;
 import org.springframework.http.HttpStatus;
 
-public class NotMyTownException extends AbstractException {
-
-
+public class AlreadyMemberException extends AbstractException {
     @Override
     public int getStatusCode() {
         return HttpStatus.BAD_REQUEST.value();
@@ -13,6 +11,6 @@ public class NotMyTownException extends AbstractException {
 
     @Override
     public String getMessage() {
-        return "동네 인증을 먼저 해주세요.";
+        return "이미 가입한 소모임에는 가입 할 수 없습니다.";
     }
 }
