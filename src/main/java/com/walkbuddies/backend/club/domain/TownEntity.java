@@ -16,7 +16,7 @@ public class TownEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long TownId;
+    private Long townId;
 
     private String townName;
 }
