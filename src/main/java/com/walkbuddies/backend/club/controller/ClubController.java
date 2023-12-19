@@ -2,6 +2,7 @@ package com.walkbuddies.backend.club.controller;
 
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
+import com.walkbuddies.backend.club.dto.ClubListResponse;
 import com.walkbuddies.backend.club.dto.ClubResponse;
 import com.walkbuddies.backend.club.service.ClubService;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +22,25 @@ public class ClubController {
     public ResponseEntity<ClubResponse> createClub(@RequestBody ClubDto clubDto) {
 
         ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(),
-                clubDto.getClubName() + " 소모임을 생성 완료 했습니다.",
+                clubDto.getClubName() + " 소모임을 생성 완료했습니다.",
                 clubService.createClub(clubDto));
 
         return ResponseEntity.ok(clubResponse);
     }
 
+    @PostMapping("/club/delete")
+    public ResponseEntity<ClubResponse> deleteClub(@RequestParam(name = "ownerId") Long ownerId,
+                                                   @RequestParam(name = "clubId") Long clubId) {
+
+        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), "소모임 폐쇄를 완료했습니다.",
+                clubService.deleteClub(ownerId, clubId));
+
+        return ResponseEntity.ok(clubResponse);
+    }
+
     @GetMapping("/club/search")
-    public ResponseEntity<ClubResponse> searchClub(@RequestParam(name = "townId") Long townId, @RequestParam(name = "clubName") String clubName) {
+    public ResponseEntity<ClubResponse> searchClub(@RequestParam(name = "townId") Long townId,
+                                                   @RequestParam(name = "clubName") String clubName) {
 
         List<String> foundClubs = clubService.searchClub(townId, clubName);
         ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(),
@@ -45,7 +57,7 @@ public class ClubController {
         return ResponseEntity.ok(clubResponse);
     }
 
-    @GetMapping("/club/waiting/get")
+    @GetMapping("/club/join/waiting")
     public ResponseEntity<ClubResponse> getClubWaitingData(@RequestParam(name = "clubId") Long clubId) {
 
         List<String> foundMembers = clubService.getClubWaitingData(clubId);
@@ -61,7 +73,7 @@ public class ClubController {
 
     @PostMapping("/club/join/response")
     public ResponseEntity<ClubResponse> joinClubResponse(@RequestParam(name = "allowJoin") boolean allowJoin,
-                                   @RequestBody ClubJoinInform clubJoinInform) {
+                                                         @RequestBody ClubJoinInform clubJoinInform) {
 
         ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), clubService.joinClubResponse(allowJoin, clubJoinInform), null);
         return ResponseEntity.ok(clubResponse);
@@ -80,5 +92,22 @@ public class ClubController {
 
         ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), "소모임 정보를 수정했습니다.", clubService.updateClubData(clubDto));
         return ResponseEntity.ok(clubResponse);
+    }
+
+    @PostMapping("/club/member/role")
+    public ResponseEntity<ClubResponse> setMemberRole(@RequestParam(name = "clubId") Long clubId,
+                                                      @RequestParam(name = "memberId") Long memberId,
+                                                      @RequestParam(name = "authority") Integer authority) {
+
+        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), clubService.setMemberRole(clubId, memberId, authority), null);
+        return ResponseEntity.ok(clubResponse);
+    }
+
+    @GetMapping("/club/myclub")
+    public ResponseEntity<ClubListResponse> getMyClub(@RequestParam(name = "memberId") Long memberId) {
+
+       ClubListResponse clubListResponse = new ClubListResponse(HttpStatus.OK.value(),
+               "가입한 소모임 목록을 불러왔습니다.", clubService.getMyClub(memberId));
+       return ResponseEntity.ok(clubListResponse);
     }
 }

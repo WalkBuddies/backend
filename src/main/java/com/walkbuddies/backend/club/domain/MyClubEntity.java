@@ -30,5 +30,5 @@ public class MyClubEntity {
     private ClubEntity clubId;
 
     private Integer authority;
-    private LocalDate regAt;
+    private LocalDate regDate;
 }

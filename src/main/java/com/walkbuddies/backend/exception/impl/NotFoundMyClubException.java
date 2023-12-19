@@ -11,6 +11,6 @@ public class NotFoundMyClubException extends AbstractException {
 
     @Override
     public String getMessage() {
-        return "가입한 적 없는 소모임 입니다.";
+        return "해당 유저는 소모임의 멤버가 아닙니다.";
     }
 }
