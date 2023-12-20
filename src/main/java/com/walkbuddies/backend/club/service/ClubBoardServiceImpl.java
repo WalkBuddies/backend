@@ -5,7 +5,6 @@ import com.walkbuddies.backend.club.dto.ClubBoardDto;
 import com.walkbuddies.backend.club.repository.ClubBoardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,8 +17,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ClubBoardServiceImpl implements ClubBoardService {
     private final ClubBoardRepository clubBoardRepository;
-    private final ModelMapper modelMapper;
-    private final ClubBoardEntity clubBoardEntity;
+
 
     /**
      * 게시글 작성
@@ -29,9 +27,9 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     @Override
     public void createBoard(ClubBoardDto clubBoardDto) {
 
-        ClubBoardEntity requestEntity = modelMapper.map(clubBoardDto, ClubBoardEntity.class);
 
-        clubBoardRepository.save(requestEntity);
+
+        clubBoardRepository.save(ClubBoardEntity.dtoToEntity(clubBoardDto));
 
     }
 
