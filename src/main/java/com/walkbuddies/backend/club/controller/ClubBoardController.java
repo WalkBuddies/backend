@@ -1,8 +1,15 @@
 package com.walkbuddies.backend.club.controller;
 
 import com.walkbuddies.backend.club.dto.ClubBoardDto;
+import com.walkbuddies.backend.club.dto.ClubBoardResponse;
+import com.walkbuddies.backend.club.dto.ClubBoardSearch;
 import com.walkbuddies.backend.club.service.ClubBoardService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,45 +18,71 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ClubBoardController {
     private final ClubBoardService clubBoardService;
-
     //create
-    @PostMapping("/create")
-    public ResponseEntity<?> createBoard(ClubBoardDto clubBoardDto) {
-        clubBoardService.createBoard(clubBoardDto);
+    @PostMapping("/write")
+    public ResponseEntity<ClubBoardResponse> createBoard(@RequestBody ClubBoardDto clubBoardDto) {
+        System.out.println(clubBoardDto.toString());
+        ClubBoardDto response = clubBoardService.createPost(clubBoardDto);
+        ClubBoardResponse result = new ClubBoardResponse(HttpStatus.OK.value(), "작성완료",
+            response.toString());
 
-        return null;
+        return ResponseEntity.ok(result);
     }
 
     //read
     @GetMapping("/board-details/{boardIdx}")
-    public ResponseEntity<?> getBoard(@PathVariable Long boardIdx) {
-        ClubBoardDto result = clubBoardService.getBoard(boardIdx);
+    public ResponseEntity<ClubBoardResponse> readBoard(@PathVariable Long boardIdx) {
 
-        return null;
+        ClubBoardResponse result = new ClubBoardResponse(HttpStatus.OK.value(), "조회 완료",
+                                     clubBoardService.getPost(boardIdx).toString());
+
+        return ResponseEntity.ok(result);
     }
 
     //list : 검색기능 포함
     @GetMapping("/list")
-    public ResponseEntity<?> getList() {
-        clubBoardService.getList();
+    public ResponseEntity<ClubBoardResponse> boardList(@PageableDefault(page = 0, size = 20, sort = "clubBoardId", direction = Sort.Direction.DESC)
+                                                        Pageable pageable,
+                                                        @RequestParam(value = "keyword", required = false) String keyword,
+                                                        @RequestParam(value = "type", required = false) String type) {
+        List<ClubBoardDto> data;
+        if (keyword == null) {
+            data = clubBoardService.postList(pageable).getContent();
+        } else {
+            ClubBoardSearch search = ClubBoardSearch.builder()
+                .keyword(keyword)
+                .type(type)
+                .build();
+            data = clubBoardService.postSearchList(pageable, search).getContent();
+        }
 
-        return null;
+        ClubBoardResponse result = new ClubBoardResponse(HttpStatus.OK.value(), "검색 완료",
+            data.toString());
+
+        return ResponseEntity.ok(result);
     }
     //update
 
     @PostMapping("/update")
-    public ResponseEntity<?> updateBoard(ClubBoardDto clubBoardDto) {
-        clubBoardService.updateBoard(clubBoardDto);
+    public ResponseEntity<ClubBoardResponse> updateBoard(@RequestBody ClubBoardDto clubBoardDto) {
 
-        return null;
+        ClubBoardDto data = clubBoardService.updatePost(clubBoardDto);
+
+        ClubBoardResponse result = new ClubBoardResponse(HttpStatus.OK.value(), "수정 완료",
+            data.toString());
+
+        return ResponseEntity.ok(result);
     }
 
     //delete
 
-    @PostMapping("/delete")
-    public ResponseEntity<?> deleteBoard(ClubBoardDto clubBoardDto) {
-        clubBoardService.deleteBoard(clubBoardDto);
+    @GetMapping("/delete/{boardIdx}")
+    public ResponseEntity<ClubBoardResponse> deleteBoard(@PathVariable long boardIdx) {
+        clubBoardService.deletePost(boardIdx);
 
-        return null;
+        ClubBoardResponse result = new ClubBoardResponse(HttpStatus.OK.value(), "삭제 완료",
+            null);
+
+        return ResponseEntity.ok(result);
     }
 }

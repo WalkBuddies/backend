@@ -20,31 +20,32 @@ public class ClubBoardEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long clubBoardId;
 
-    @ManyToOne
+//    @ManyToOne
 //  @JoinColumn(name = "clubId")
-    private ClubEntity clubId;
+    private long clubId;
 
-    @ManyToOne
+//    @ManyToOne
 //  @JoinColumn(name = "memeberId")
-    private MemberEntity memberId;
+    private long memberId;
 
     private String nickname;
     private String title;
     private String content;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
+    private LocalDateTime deleteAt;
     private int noticeYn;
     private int deleteYn;
     private int fileYn;
 
     public static ClubBoardEntity dtoToEntity(ClubBoardDto dto) {
 
-        return ClubBoardEntity.builder().clubBoardId(dto.getClubBoardId()).nickname(dto.getNickname()).title(dto.getTitle()).content(dto.getContent()).createAt(dto.getCreateAt()).updateAt(dto.getUpdateAt()).noticeYn(dto.getNoticeYn()).deleteYn(dto.getDeleteYn()).fileYn(dto.getFileYn()).build();
+        return ClubBoardEntity.builder().clubBoardId(dto.getClubBoardId()).nickname(dto.getNickname()).title(dto.getTitle()).content(dto.getContent()).createAt(dto.getCreateAt()).updateAt(dto.getUpdateAt()).deleteAt(dto.getDeleteAt()).noticeYn(dto.getNoticeYn()).deleteYn(dto.getDeleteYn()).fileYn(dto.getFileYn()).build();
     }
 
     public static ClubBoardDto entityToDto(ClubBoardEntity entity) {
 
-        return ClubBoardDto.builder().clubBoardId(entity.getClubBoardId()).nickname(entity.getNickname()).title(entity.getTitle()).content(entity.getContent()).createAt(entity.getCreateAt()).updateAt(entity.getUpdateAt()).noticeYn(entity.getNoticeYn()).deleteYn(entity.getDeleteYn()).fileYn(entity.getFileYn()).build();
+        return ClubBoardDto.builder().clubBoardId(entity.getClubBoardId()).nickname(entity.getNickname()).title(entity.getTitle()).content(entity.getContent()).createAt(entity.getCreateAt()).updateAt(entity.getUpdateAt()).deleteAt(entity.getDeleteAt()).noticeYn(entity.getNoticeYn()).deleteYn(entity.getDeleteYn()).fileYn(entity.getFileYn()).build();
     }
 
 
