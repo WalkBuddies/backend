@@ -15,7 +15,7 @@ public interface ClubService {
      * @param clubDto
      * @return
      */
-    ClubResponse createClub(ClubDto clubDto);
+    ClubDto createClub(ClubDto clubDto);
 
     /**
      * 소모임 검색 기능 메서드.
@@ -53,4 +53,19 @@ public interface ClubService {
      * @return
      */
     String joinClubResponse(Boolean allowJoin, ClubJoinInform clubJoinInform);
+
+    /**
+     * 소모임 탈퇴 메서드.
+     * @param clubId
+     * @param memberId
+     * @return
+     */
+    String leaveClub(Long clubId, Long memberId);
+
+    /**
+     * 소모임 정보를 수정하는 메서드
+     * @param clubDto
+     * @return
+     */
+    ClubDto updateClubData(ClubDto clubDto);
 }

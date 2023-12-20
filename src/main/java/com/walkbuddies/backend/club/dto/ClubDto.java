@@ -4,6 +4,7 @@ import com.walkbuddies.backend.club.domain.ClubEntity;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,22 +23,5 @@ public class ClubDto {
     private Integer needGrant;
     private LocalDate regDate;
     private LocalDate modDate;
-
-    public static ClubResponse of(int statusCode, String message, ClubEntity clubEntity) {
-
-        ClubDto clubData = ClubDto.builder()
-                .clubId(clubEntity.getClubId())
-                .clubName(clubEntity.getClubName())
-                .townId(clubEntity.getTownId().getTownId())
-                .ownerId(clubEntity.getOwnerId().getMemberId())
-                .members(clubEntity.getMembers())
-                .membersLimit(clubEntity.getMembersLimit())
-                .accessLimit(clubEntity.getAccessLimit())
-                .needGrant(clubEntity.getNeedGrant())
-                .regDate(clubEntity.getRegDate())
-                .modDate(clubEntity.getModDate())
-                .build();
-
-        return new ClubResponse(statusCode, message, clubData);
-    }
+    private List<String> waitingMembers;
 }

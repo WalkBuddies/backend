@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.weather.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
