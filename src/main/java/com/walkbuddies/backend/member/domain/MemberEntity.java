@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "member")
@@ -41,37 +41,55 @@ public class MemberEntity {
 
     private Integer gender;
 
-    @Column
-    @Temporal(TemporalType.DATE)
-    private Date createAt;
+    private LocalDateTime createAt;
 
-    @Column
-    @Temporal(TemporalType.DATE)
-    private Date updateAt;
+    private LocalDateTime updateAt;
+
+    private String salt;
+
+    private LocalDateTime passwordUpdate;
+
+    private boolean verify;
+
+    private String verificationCode;
+
+    private LocalDateTime verifyExpiredAt;
 
     private Integer loginType;
-    private String imageUrl;
-    private String introduction;
-    private String salt;
-    private Date passwordUpdate;
-    private Integer socialCode;
-    private String oauthExternalId;
-    private String accessToken;
-    private boolean verify;
-    private String verificationCode;
-    private Date verifyExpiredAt;
-    private Date townVerificationDate;
 
-    public MemberEntity(SignUpDto dto) {
-        String salt = SHA256.createSalt();
-        this.email = dto.getEmail();
-        this.password = SHA256.getEncrypt(dto.getPassword(), salt);
-        this.name = dto.getName();
-        this.nickname = dto.getNickname();
-        this.gender = dto.getGender();
-        this.createAt = new Date();
-        this.updateAt = new Date();
-        this.salt = salt;
-        this.passwordUpdate = new Date();
+    private String imageUrl;
+
+    private String introduction;
+
+    private Integer socialCode;
+
+    private String oauthExternalId;
+
+    private String accessToken;
+
+    private LocalDateTime townVerificationDate;
+
+    public MemberEntity(SignUpDto signUpDto) {
+        this.email = signUpDto.getEmail();
+        this.salt = SHA256.createSalt();
+        this.password = SHA256.getEncrypt(signUpDto.getPassword(), salt);
+        this.name = signUpDto.getName();
+        this.nickname = signUpDto.getNickname();
+        this.gender = signUpDto.getGender();
+        this.createAt = LocalDateTime.now();
+        this.updateAt = LocalDateTime.now();
+        this.passwordUpdate = LocalDateTime.now();
+    }
+
+    public void createVerificationRequest(String code) {
+        this.verify = false;
+        this.verificationCode = code;
+        this.verifyExpiredAt = LocalDateTime.now().plusDays(1);
+    }
+
+    public void verify() {
+        this.verify = true;
+        this.verificationCode = null;
+        this.verifyExpiredAt = null;
     }
 }

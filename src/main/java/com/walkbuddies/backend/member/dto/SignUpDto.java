@@ -10,6 +10,7 @@ import lombok.*;
 public class SignUpDto {
     private String email;
     private String password;
+    private String checkPassword;
     private String name;
     private String nickname;
     private Integer gender;
