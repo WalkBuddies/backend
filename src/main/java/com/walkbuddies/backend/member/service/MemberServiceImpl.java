@@ -3,6 +3,7 @@ package com.walkbuddies.backend.member.service;
 import com.walkbuddies.backend.common.MailService;
 import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
+import com.walkbuddies.backend.member.dto.MemberDto;
 import com.walkbuddies.backend.member.dto.SignUpDto;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,18 +28,20 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void signUp(SignUpDto signUpDto) {
+    public MemberDto signUp(SignUpDto signUpDto) {
         validateSignUpRequest(signUpDto);
 
         MemberEntity member = new MemberEntity(signUpDto);
         member.createVerificationRequest(generateVerificationCode());
         memberRepository.save(member);
         sendVerificationEmail(member.getEmail(), member.getVerificationCode());
+
+        return MemberDto.convertToDto(member);
     }
 
     @Override
     @Transactional
-    public void verify(String email, String code) {
+    public MemberDto verify(String email, String code) {
         MemberEntity member = memberRepository.findByEmail(email)
                 .orElseThrow(NotFoundMemberException::new);
 
@@ -58,16 +61,27 @@ public class MemberServiceImpl implements MemberService {
         } else {
             throw new CodeMismatchException();
         }
+
+        return MemberDto.convertToDto(member);
     }
 
     private void sendVerificationEmail(String toEmail, String verificationCode) {
+        if (!isValidEmail(toEmail)) {
+            throw new InvalidEmailException();
+        }
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
         String title = "WalkBuddies 회원가입 인증";
-        String url = baseUrl + "/verify?email=" + toEmail + "&code=" + verificationCode;
+        String url = baseUrl + "/member/verify?email=" + toEmail + "&code=" + verificationCode;
         String message = "<h3>WalkBuddies 회원가입을 완료하려면 아래 링크를 클릭하세요.</h3>" +
                 "<a href='" + url + "' target='_blank'>인증 링크</a>";
 
         mailService.sendEmail(toEmail, title, message);
+    }
+
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        return pattern.matcher(email).matches();
     }
 
     private void checkDuplicatedEmail(String email) {

@@ -70,15 +70,16 @@ public class MemberEntity {
     private LocalDateTime townVerificationDate;
 
     public MemberEntity(SignUpDto signUpDto) {
+        LocalDateTime now = LocalDateTime.now();
         this.email = signUpDto.getEmail();
         this.salt = SHA256.createSalt();
         this.password = SHA256.getEncrypt(signUpDto.getPassword(), salt);
         this.name = signUpDto.getName();
         this.nickname = signUpDto.getNickname();
         this.gender = signUpDto.getGender();
-        this.createAt = LocalDateTime.now();
-        this.updateAt = LocalDateTime.now();
-        this.passwordUpdate = LocalDateTime.now();
+        this.createAt = now;
+        this.updateAt = now;
+        this.passwordUpdate = now;
     }
 
     public void createVerificationRequest(String code) {
