@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface ClubWaitingRepository extends JpaRepository<ClubWaitingEntity, Long> {
 
-    List<ClubWaitingEntity> findByClubId(Optional<ClubEntity> optionalClub);
-
     Optional<ClubWaitingEntity> findByClubIdAndMemberId(ClubEntity clubEntity, MemberEntity memberEntity);
+
+    List<ClubWaitingEntity> findByClubId(ClubEntity clubEntity);
 }

@@ -18,6 +18,14 @@ public interface ClubService {
     ClubDto createClub(ClubDto clubDto);
 
     /**
+     * 소모임 폐쇄 메서드
+     * @param ownerId
+     * @param clubId
+     * @return
+     */
+    ClubDto deleteClub(Long ownerId, Long clubId);
+
+    /**
      * 소모임 검색 기능 메서드.
      * 검색어가 포함되고 검색이 되도록 한 소모임에 한에서 모두 검색이 됨.
      *
@@ -68,4 +76,20 @@ public interface ClubService {
      * @return
      */
     ClubDto updateClubData(ClubDto clubDto);
+
+    /**
+     * 소모임 멤버의 역항을 변경하는 메서드
+     * @param clubId
+     * @param memberId
+     * @param authority
+     * @return
+     */
+    String setMemberRole(Long clubId, Long memberId, Integer authority);
+
+    /**
+     * 내 소모임 목록 보기 메서드
+     * @param memberId
+     * @return
+     */
+    List<ClubDto> getMyClub(Long memberId);
 }
