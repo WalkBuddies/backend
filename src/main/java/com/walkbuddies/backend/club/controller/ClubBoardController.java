@@ -12,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/club/board")
@@ -20,9 +21,10 @@ public class ClubBoardController {
     private final ClubBoardService clubBoardService;
     //create
     @PostMapping("/write")
-    public ResponseEntity<ClubBoardResponse> createBoard(@RequestBody ClubBoardDto clubBoardDto) {
+    public ResponseEntity<ClubBoardResponse> createBoard(@RequestPart(value = "files", required = false) List<MultipartFile> files
+                                                        ,@RequestPart(value = "board") ClubBoardDto clubBoardDto) {
         System.out.println(clubBoardDto.toString());
-        ClubBoardDto response = clubBoardService.createPost(clubBoardDto);
+        ClubBoardDto response = clubBoardService.createPost(files, clubBoardDto);
         ClubBoardResponse result = new ClubBoardResponse(HttpStatus.OK.value(), "작성완료",
             response.toString());
 

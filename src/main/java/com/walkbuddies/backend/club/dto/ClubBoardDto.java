@@ -1,6 +1,8 @@
 package com.walkbuddies.backend.club.dto;
 
 
+import com.walkbuddies.backend.common.dto.FileDto;
+import java.util.List;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,9 +15,10 @@ import java.time.LocalDateTime;
 @ToString
 public class ClubBoardDto {
 
-  private long clubBoardId;
+  private Long clubBoardId;
   private Long clubId;
   private Long memberId;
+  private List<FileDto> fileId;
 
   private String nickname;
   private String title;
@@ -23,9 +26,9 @@ public class ClubBoardDto {
   private LocalDateTime createAt;
   private LocalDateTime updateAt;
   private LocalDateTime deleteAt;
-  private int noticeYn;
-  private int deleteYn;
-  private int fileYn;
+  private Integer noticeYn;
+  private Integer deleteYn;
+  private Integer fileYn;
 
 }
 
