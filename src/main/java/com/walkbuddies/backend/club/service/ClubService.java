@@ -2,7 +2,6 @@ package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
-import com.walkbuddies.backend.club.dto.ClubResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -72,19 +71,11 @@ public interface ClubService {
 
     /**
      * 소모임 정보를 수정하는 메서드
+     * @param ownerId
      * @param clubDto
      * @return
      */
-    ClubDto updateClubData(ClubDto clubDto);
-
-    /**
-     * 소모임 멤버의 역항을 변경하는 메서드
-     * @param clubId
-     * @param memberId
-     * @param authority
-     * @return
-     */
-    String setMemberRole(Long clubId, Long memberId, Integer authority);
+    ClubDto updateClubData(Long ownerId, ClubDto clubDto);
 
     /**
      * 내 소모임 목록 보기 메서드
