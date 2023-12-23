@@ -88,18 +88,10 @@ public class ClubController {
     }
 
     @PostMapping("/club/update")
-    public ResponseEntity<ClubResponse> updateClubData(@RequestBody  ClubDto clubDto) {
+    public ResponseEntity<ClubResponse> updateClubData(@RequestParam(name = "ownerId") Long ownerId,
+                                                       @RequestBody  ClubDto clubDto) {
 
-        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), "소모임 정보를 수정했습니다.", clubService.updateClubData(clubDto));
-        return ResponseEntity.ok(clubResponse);
-    }
-
-    @PostMapping("/club/member/role")
-    public ResponseEntity<ClubResponse> setMemberRole(@RequestParam(name = "clubId") Long clubId,
-                                                      @RequestParam(name = "memberId") Long memberId,
-                                                      @RequestParam(name = "authority") Integer authority) {
-
-        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), clubService.setMemberRole(clubId, memberId, authority), null);
+        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), "소모임 정보를 수정했습니다.", clubService.updateClubData(ownerId, clubDto));
         return ResponseEntity.ok(clubResponse);
     }
 

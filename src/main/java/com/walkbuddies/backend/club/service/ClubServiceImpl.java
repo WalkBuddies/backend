@@ -13,12 +13,11 @@ import com.walkbuddies.backend.club.repository.TownRepository;
 import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Member;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -258,6 +257,7 @@ public class ClubServiceImpl implements ClubService {
                 .authority(2)
                 .regDate(LocalDate.now())
                 .build();
+        myClubRepository.save(updatedMyClubEntity);
 
         ClubEntity updatedClubEntity = ClubEntity.builder()
                 .clubId(clubEntity.getClubId())
@@ -271,9 +271,8 @@ public class ClubServiceImpl implements ClubService {
                 .regDate(clubEntity.getRegDate())
                 .modDate(LocalDate.now())
                 .build();
-
-        myClubRepository.save(updatedMyClubEntity);
         clubRepository.save(updatedClubEntity);
+
         clubWaitingRepository.delete(clubWaitingEntity);
 
         return "멤버 ID: " + clubJoinInform.getMemberId() + ", 닉네임: " + memberEntity.getNickname() + " 유저 소모임 가입 승인.";
@@ -292,6 +291,10 @@ public class ClubServiceImpl implements ClubService {
         ClubEntity clubEntity = getClubEntity(clubId);
         MemberEntity memberEntity = getMemberEntity(memberId);
         MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
+
+        if (clubEntity.getOwnerId().getMemberId() == memberId) {
+            throw new ChangeClubOwnerException();
+        }
 
         myClubRepository.delete(myClubEntity);
 
@@ -314,19 +317,36 @@ public class ClubServiceImpl implements ClubService {
 
     /**
      * 소모임 정보를 수정하는 메서드
+     * @param ownerId
      * @param clubDto
      * @return
      */
     @Transactional
     @Override
-    public ClubDto updateClubData(ClubDto clubDto) {
+    public ClubDto updateClubData(Long ownerId, ClubDto clubDto) {
+
         ClubEntity clubEntity = getClubEntity(clubDto.getClubId());
+        if (ownerId != clubEntity.getOwnerId().getMemberId()) {
+            throw new NotAdminException();
+        }
+
         MemberEntity memberEntity = getMemberEntity(clubDto.getOwnerId());
         MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
         TownEntity townEntity = townRepository.findByTownId(clubDto.getTownId());
 
-        if (myClubEntity.getAuthority() != 1) {
-            throw new NotAdminException();
+
+        if (clubEntity.getOwnerId().getMemberId() != clubDto.getOwnerId()) {
+            MemberEntity member = getMemberEntity(clubEntity.getOwnerId().getMemberId());
+            MyClubEntity myClub = getMyClubEntity(clubEntity, member);
+
+            MyClubEntity updatedMyClubEntity = MyClubEntity.builder()
+                    .myClubId(myClub.getMyClubId())
+                    .memberId(member)
+                    .clubId(clubEntity)
+                    .authority(2)
+                    .regDate(myClub.getRegDate())
+                    .build();
+            myClubRepository.save(updatedMyClubEntity);
         }
 
         ClubEntity updatedClubEntity = ClubEntity.builder()
@@ -343,41 +363,16 @@ public class ClubServiceImpl implements ClubService {
                 .build();
         clubRepository.save(updatedClubEntity);
 
-        return ClubEntity.entityToDto(updatedClubEntity);
-    }
-
-    /**
-     * 소모임 멤버의 역항을 변경하는 메서드
-     * @param clubId
-     * @param memberId
-     * @param authority
-     * @return
-     */
-    @Transactional
-    @Override
-    public String setMemberRole(Long clubId, Long memberId, Integer authority) {
-
-        ClubEntity clubEntity = getClubEntity(clubId);
-        MemberEntity memberEntity =getMemberEntity(memberId);
-        MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
-
         MyClubEntity updatedMyClubEntity = MyClubEntity.builder()
                 .myClubId(myClubEntity.getMyClubId())
                 .memberId(memberEntity)
                 .clubId(clubEntity)
-                .authority(authority)
+                .authority(1)
                 .regDate(myClubEntity.getRegDate())
                 .build();
         myClubRepository.save(updatedMyClubEntity);
 
-        String role = "";
-        if (authority == 1) {
-            role = "관리자";
-        } else {
-            role = "회원";
-        }
-
-        return "멤버 Id: " + memberId + ", 닉네임: " + memberEntity.getNickname() + "유저의 권한이 " + role + "로 변경되었습니다.";
+        return ClubEntity.entityToDto(updatedClubEntity);
     }
 
     /**
