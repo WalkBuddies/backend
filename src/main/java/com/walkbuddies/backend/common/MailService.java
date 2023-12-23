@@ -15,15 +15,16 @@ public class MailService {
 
     public void sendEmail(String toEmail, String title, String text) {
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper;
+
         try {
-            helper = new MimeMessageHelper(message, true, "UTF-8");
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(toEmail);
             helper.setSubject(title);
             helper.setText(text, true);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
+
         mailSender.send(message);
     }
 }

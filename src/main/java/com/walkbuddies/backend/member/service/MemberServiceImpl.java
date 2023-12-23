@@ -2,12 +2,17 @@ package com.walkbuddies.backend.member.service;
 
 import com.walkbuddies.backend.common.MailService;
 import com.walkbuddies.backend.exception.impl.*;
+import com.walkbuddies.backend.common.JwtTokenUtil;
 import com.walkbuddies.backend.member.domain.MemberEntity;
-import com.walkbuddies.backend.member.dto.MemberDto;
-import com.walkbuddies.backend.member.dto.SignUpDto;
+import com.walkbuddies.backend.member.dto.MemberResponse;
+import com.walkbuddies.backend.member.dto.SignUpRequest;
 import com.walkbuddies.backend.member.repository.MemberRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -25,23 +30,30 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final MailService mailService;
+    private final BCryptPasswordEncoder encoder;
+    private final HttpSession httpSession;
+
+    @Value("${jwt.secret.key}")
+    private String secretKey;
+    private final long EXPIRE_TIME_MS = 1000 * 60 * 60 * 24 * 7;
 
     @Override
     @Transactional
-    public MemberDto signUp(SignUpDto signUpDto) {
-        validateSignUpRequest(signUpDto);
+    public MemberResponse signUp(SignUpRequest signUpRequest) {
+        validateSignUpRequest(signUpRequest);
 
-        MemberEntity member = new MemberEntity(signUpDto);
+        String encodedPassword = encoder.encode(signUpRequest.getPassword());
+        MemberEntity member = signUpRequest.toEntity(encodedPassword);
         member.createVerificationRequest(generateVerificationCode());
-        memberRepository.save(member);
         sendVerificationEmail(member.getEmail(), member.getVerificationCode());
+        memberRepository.save(member);
 
-        return MemberDto.convertToDto(member);
+        return MemberResponse.fromEntity(member);
     }
 
     @Override
     @Transactional
-    public MemberDto verify(String email, String code) {
+    public MemberResponse verify(String email, String code) {
         MemberEntity member = memberRepository.findByEmail(email)
                 .orElseThrow(NotFoundMemberException::new);
 
@@ -62,7 +74,26 @@ public class MemberServiceImpl implements MemberService {
             throw new CodeMismatchException();
         }
 
-        return MemberDto.convertToDto(member);
+        return MemberResponse.fromEntity(member);
+    }
+
+    @Override
+    public String login(String email, String password) {
+        MemberEntity member = memberRepository.findByEmail(email)
+                .orElseThrow(NotFoundMemberException::new);
+
+        if (!encoder.matches(password, member.getPassword())) {
+            throw new PasswordMismatchException();
+        }
+
+        return JwtTokenUtil.createToken(email, EXPIRE_TIME_MS, secretKey);
+    }
+
+    @Override
+    public void logout() {
+        SecurityContextHolder.clearContext();
+
+        httpSession.invalidate();
     }
 
     private void sendVerificationEmail(String toEmail, String verificationCode) {
@@ -91,33 +122,33 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    private void validateSignUpRequest(SignUpDto signUpDto) {
+    private void validateSignUpRequest(SignUpRequest signUpRequest) {
         // 이메일 중복 확인
-        this.checkDuplicatedEmail(signUpDto.getEmail());
+        this.checkDuplicatedEmail(signUpRequest.getEmail());
 
         // 닉네임 중복 확인
-        if (memberRepository.existsByNickname(signUpDto.getNickname())) {
+        if (memberRepository.existsByNickname(signUpRequest.getNickname())) {
             throw new DuplicatedNicknameException();
         }
 
         // 패스워드 검증
-        this.checkValidPassword(signUpDto.getPassword());
+        this.checkValidPassword(signUpRequest.getPassword());
 
         // 필수 필드 확인
-        if (signUpDto.getName() == null || signUpDto.getName().isEmpty()
-                || signUpDto.getEmail() == null || signUpDto.getEmail().isEmpty()
-                || signUpDto.getPassword() == null || signUpDto.getPassword().isEmpty()
-                || signUpDto.getNickname() == null || signUpDto.getNickname().isEmpty()) {
+        if (signUpRequest.getName() == null || signUpRequest.getName().isEmpty()
+                || signUpRequest.getEmail() == null || signUpRequest.getEmail().isEmpty()
+                || signUpRequest.getPassword() == null || signUpRequest.getPassword().isEmpty()
+                || signUpRequest.getNickname() == null || signUpRequest.getNickname().isEmpty()) {
             throw new MissingFieldException();
         }
 
         // 닉네임 길이 확인
-        if (signUpDto.getNickname().length() < 3 || signUpDto.getNickname().length() > 20) {
+        if (signUpRequest.getNickname().length() < 3 || signUpRequest.getNickname().length() > 20) {
             throw new NicknameLengthException();
         }
 
         // 패스워드 확인
-        if (!signUpDto.getPassword().equals(signUpDto.getCheckPassword())) {
+        if (!signUpRequest.getPassword().equals(signUpRequest.getCheckPassword())) {
             throw new PasswordMismatchException();
         }
     }
@@ -130,13 +161,13 @@ public class MemberServiceImpl implements MemberService {
         final String SAMEPT = "(\\w)\\1\\1\\1";
 
         Matcher matcher;
-        
+
         // 패스워드 포맷(영문, 특수문자, 숫자 포함 길이 제한)
         matcher = Pattern.compile(REGEX).matcher(password);
         if (!matcher.find()) {
             throw new PasswordException();
         }
-        
+
         // 동일문자
         matcher = Pattern.compile(SAMEPT).matcher(password);
         if (matcher.find()) {
@@ -153,5 +184,4 @@ public class MemberServiceImpl implements MemberService {
         }
         return builder.toString();
     }
-
 }

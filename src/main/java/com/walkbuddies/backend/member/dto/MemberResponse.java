@@ -8,12 +8,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MemberDto {
+public class MemberResponse {
     private String email;
     private String name;
 
-    public static MemberDto convertToDto(MemberEntity member) {
-        return MemberDto.builder()
+    public static MemberResponse fromEntity(MemberEntity member) {
+        return MemberResponse.builder()
                 .email(member.getEmail())
                 .name(member.getName())
                 .build();
