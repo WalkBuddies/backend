@@ -66,4 +66,11 @@ public class MemberEntity {
         this.verificationCode = null;
         this.verifyExpiredAt = null;
     }
+
+    public void createPasswordRequest(String code, String tempPassword) {
+        this.verify = false;
+        this.verificationCode = code;
+        this.password = tempPassword;
+        this.verifyExpiredAt = LocalDateTime.now().plusDays(1);
+    }
 }

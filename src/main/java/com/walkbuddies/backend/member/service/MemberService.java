@@ -1,7 +1,9 @@
 package com.walkbuddies.backend.member.service;
 
 import com.walkbuddies.backend.member.domain.MemberEntity;
+import com.walkbuddies.backend.member.dto.LoginRequest;
 import com.walkbuddies.backend.member.dto.MemberResponse;
+import com.walkbuddies.backend.member.dto.ResetPasswordRequest;
 import com.walkbuddies.backend.member.dto.SignUpRequest;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +13,9 @@ public interface MemberService {
 
     MemberResponse verify(String email, String code);
 
-    String login(String email, String password);
+    String login(LoginRequest loginRequest);
 
     void logout();
+
+    MemberResponse resetPassword(ResetPasswordRequest request);
 }

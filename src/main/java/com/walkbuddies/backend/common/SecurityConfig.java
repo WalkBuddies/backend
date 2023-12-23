@@ -21,10 +21,11 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/member/*").permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                                .anyRequest().permitAll()
+                )
                 .logout(logout -> logout
-                        .logoutUrl("/member/logout")
-                        .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK))
+                        .logoutSuccessUrl("/")
                 );
 
         return http.build();

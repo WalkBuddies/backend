@@ -2,6 +2,8 @@ package com.walkbuddies.backend.member.controller;
 
 import com.walkbuddies.backend.common.response.SingleResponse;
 import com.walkbuddies.backend.member.dto.LoginRequest;
+import com.walkbuddies.backend.member.dto.MemberResponse;
+import com.walkbuddies.backend.member.dto.ResetPasswordRequest;
 import com.walkbuddies.backend.member.dto.SignUpRequest;
 import com.walkbuddies.backend.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +36,7 @@ public class MemberController {
 
     @PostMapping("/login")
     public ResponseEntity<SingleResponse> login(@RequestBody LoginRequest loginRequest){
-        String token = memberService.login(loginRequest.getEmail(), loginRequest.getPassword());
+        String token = memberService.login(loginRequest);
         SingleResponse response = new SingleResponse(HttpStatus.OK.value(), "로그인 성공", token);
         return ResponseEntity.ok(response);
     }
@@ -45,4 +47,14 @@ public class MemberController {
         SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(), "로그아웃 되었습니다.", null);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<SingleResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
+        SingleResponse response = new SingleResponse(HttpStatus.OK.value(),
+                "인증 메일이 발송되었습니다.",
+                memberService.resetPassword(request));
+
+        return ResponseEntity.ok(response);
+    }
+
 }
