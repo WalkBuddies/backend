@@ -1,8 +1,10 @@
 package com.walkbuddies.backend.club.domain;
 
 import com.walkbuddies.backend.club.dto.ClubBoardDto;
+import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.member.domain.MemberEntity;
+import com.walkbuddies.backend.member.repository.MemberRepository;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 public class ClubBoardEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long clubBoardId;
@@ -31,8 +32,7 @@ public class ClubBoardEntity {
     @JoinColumn(name = "memeberId")
     private MemberEntity memberId;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "fileId")
+    @OneToMany(mappedBy = "fileId", orphanRemoval = true)
     private List<FileEntity> fileId;
 
     private String nickname;
@@ -44,43 +44,5 @@ public class ClubBoardEntity {
     private Integer noticeYn;
     private Integer deleteYn;
     private Integer fileYn;
-
-    public ClubBoardEntity dtoToEntity(ClubBoardDto dto) {
-        final FileEntity fileEntity = new FileEntity();
-        return ClubBoardEntity.builder()
-            .clubBoardId(dto.getClubBoardId())
-            .nickname(dto.getNickname())
-            .fileId(fileEntity.dtoListToEntityList(dto.getFileId()))
-            .title(dto.getTitle())
-            .content(dto.getContent())
-            .createAt(dto.getCreateAt())
-            .updateAt(dto.getUpdateAt())
-            .deleteAt(dto.getDeleteAt())
-            .noticeYn(dto.getNoticeYn())
-            .deleteYn(dto.getDeleteYn())
-            .fileYn(dto.getFileYn())
-            .build();
-    }
-
-    public ClubBoardDto entityToDto(ClubBoardEntity entity) {
-        final FileEntity fileEntity = new FileEntity();
-        return ClubBoardDto.builder()
-            .clubBoardId(entity.getClubBoardId())
-            .fileId(fileEntity.entityListToDtoList(entity.getFileId()))
-            .clubId(entity.getClubId().getClubId())
-            .memberId(entity.getMemberId().getMemberId())
-            .nickname(entity.getNickname())
-            .title(entity.getTitle())
-            .content(entity.getContent())
-            .createAt(entity.getCreateAt())
-            .updateAt(entity.getUpdateAt())
-            .deleteAt(entity.getDeleteAt())
-            .noticeYn(entity.getNoticeYn())
-            .deleteYn(entity.getDeleteYn())
-            .fileYn(entity.getFileYn())
-            .build();
-    }
-
-
 
 }

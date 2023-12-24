@@ -29,36 +29,37 @@ public class FileEntity {
   private String saveName;
   private Long size;
   private LocalDateTime createAt;
-  private Integer delete_yn;
+  private Integer deleteYn;
   private LocalDateTime deleteAt;
 
 
-  public FileDto entityToDto(FileEntity entity) {
+  public static FileDto entityToDto(FileEntity entity) {
+
     return FileDto.builder()
         .fileId(entity.getFileId())
         .originalName(entity.getOriginalName())
         .savedName(entity.getSaveName())
         .createAt(entity.getCreateAt())
-        .delete_yn(entity.getDelete_yn())
+        .deleteYn(entity.getDeleteYn())
         .deleteAt(entity.getDeleteAt())
         .size(entity.getSize())
         .build();
   }
 
-  public FileEntity dtoToEntity(FileDto dto) {
+  public static FileEntity dtoToEntity(FileDto dto) {
     return FileEntity.builder()
         .fileId(dto.getFileId())
         .originalName(dto.getOriginalName())
         .saveName(dto.getSavedName())
         .createAt(dto.getCreateAt())
-        .delete_yn(dto.getDelete_yn())
+        .deleteYn(dto.getDeleteYn())
         .deleteAt(dto.getDeleteAt())
         .size(dto.getSize())
         .build();
   }
 
-  public List<FileDto> entityListToDtoList(List<FileEntity> files) {
-    if (files.isEmpty()) {
+  public static List<FileDto> entityListToDtoList(List<FileEntity> files) {
+    if (files==null) {
       return null;
     }
     List<FileDto> result = new ArrayList<>();
@@ -68,8 +69,8 @@ public class FileEntity {
     return result;
   }
 
-  public List<FileEntity> dtoListToEntityList(List<FileDto> files) {
-    if (files.isEmpty()) {
+  public static List<FileEntity> dtoListToEntityList(List<FileDto> files) {
+    if (files == null) {
       return null;
     }
     List <FileEntity> result = new ArrayList<>();

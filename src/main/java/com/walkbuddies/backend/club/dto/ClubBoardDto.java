@@ -1,7 +1,10 @@
 package com.walkbuddies.backend.club.dto;
 
 
+import com.walkbuddies.backend.club.domain.ClubBoardEntity;
+import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.common.dto.FileDto;
+import com.walkbuddies.backend.member.repository.MemberRepository;
 import java.util.List;
 import lombok.*;
 
@@ -13,8 +16,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ClubBoardDto {
 
+public class ClubBoardDto {
   private Long clubBoardId;
   private Long clubId;
   private Long memberId;
@@ -30,5 +33,5 @@ public class ClubBoardDto {
   private Integer deleteYn;
   private Integer fileYn;
 
-}
+  }
 

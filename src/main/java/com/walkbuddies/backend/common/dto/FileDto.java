@@ -23,7 +23,7 @@ public class FileDto {
   private String savedName;
   private Long size;
   private LocalDateTime createAt;
-  private Integer delete_yn;
+  private Integer deleteYn;
   private LocalDateTime deleteAt;
 
 
