@@ -2,7 +2,6 @@ package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
-import com.walkbuddies.backend.club.dto.ClubResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +15,14 @@ public interface ClubService {
      * @return
      */
     ClubDto createClub(ClubDto clubDto);
+
+    /**
+     * 소모임 폐쇄 메서드
+     * @param ownerId
+     * @param clubId
+     * @return
+     */
+    ClubDto deleteClub(Long ownerId, Long clubId);
 
     /**
      * 소모임 검색 기능 메서드.
@@ -64,8 +71,16 @@ public interface ClubService {
 
     /**
      * 소모임 정보를 수정하는 메서드
+     * @param ownerId
      * @param clubDto
      * @return
      */
-    ClubDto updateClubData(ClubDto clubDto);
+    ClubDto updateClubData(Long ownerId, ClubDto clubDto);
+
+    /**
+     * 내 소모임 목록 보기 메서드
+     * @param memberId
+     * @return
+     */
+    List<ClubDto> getMyClub(Long memberId);
 }
