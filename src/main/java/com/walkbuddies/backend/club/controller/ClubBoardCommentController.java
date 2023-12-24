@@ -4,9 +4,16 @@ import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.club.dto.ClubBoardCommentResponse;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.club.service.ClubBoardCommentService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +44,30 @@ public class ClubBoardCommentController {
   }
 
   //list
-  //read
+
+  @GetMapping("/{boardIdx}/reply-list")
+  public ResponseEntity<Page<ResponseDto>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
+       Pageable pageable
+      ,@PathVariable Long boardIdx) {
+    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardIdx);
+
+    return ResponseEntity.ok(result);
+  }
   //update
+  @PostMapping("/reply-update")
+  public ResponseEntity<ClubBoardCommentResponse> updateComment(@RequestBody RequestDto dto) {
+    ResponseDto result = clubBoardCommentService.updateComment(dto);
+    ClubBoardCommentResponse response = new ClubBoardCommentResponse(HttpStatus.OK.value(), "수정완료", result.toString());
+
+    return ResponseEntity.ok(response);
+  }
   //delete
+
+  @PostMapping("/{commentId}/reply-delete")
+  public ResponseEntity<ClubBoardCommentResponse> deleteComment(@PathVariable Long commentId) {
+    clubBoardCommentService.deleteComment(commentId);
+    ClubBoardCommentResponse response =  new ClubBoardCommentResponse(HttpStatus.OK.value(), "삭제완료", null);
+
+    return ResponseEntity.ok(response);
+  }
 }

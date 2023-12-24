@@ -1,22 +1,24 @@
 package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.domain.ClubBoardCommentEntity;
+import com.walkbuddies.backend.club.domain.ClubBoardEntity;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ConvertDtoEntity;
 import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.club.repository.ClubBoardCommentRepository;
 import com.walkbuddies.backend.club.repository.ClubBoardRepository;
-import com.walkbuddies.backend.member.repository.MemberRepository;
-import java.time.LocalDateTime;
+import com.walkbuddies.backend.exception.impl.NoResultException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
-  private final ClubBoardRepository clubBoardRepository;
-  private final MemberRepository memberRepository;
   private final ConvertDtoEntity convertDtoEntity;
+  private final ClubBoardRepository clubBoardRepository;
 
   private final ClubBoardCommentRepository clubBoardCommentRepository;
 
@@ -28,9 +30,53 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
         entity.updateParent(clubBoardCommentRepository.findById(requestDto.getParentId()).get());
       }
 
-      ResponseDto result = new ResponseDto();
       clubBoardCommentRepository.save(entity);
 
-      return result.toDto(entity);
+      return convertDtoEntity.toDto(entity);
   }
+
+  @Override
+  public Page<ResponseDto> getCommentList(Pageable pageable, Long boardIdx) {
+    System.out.println("페이지넘버: " + pageable.getPageNumber());
+    ClubBoardEntity boardEntity = clubBoardRepository.findByClubBoardId(boardIdx).orElseThrow(
+        NoResultException::new);
+
+     Page<ClubBoardCommentEntity> response = clubBoardCommentRepository.findAllByClubBoardIdAndDeleteYn(pageable, boardEntity, 0);
+
+     Page<ResponseDto> result = convertDtoEntity.toPageDto(response);
+
+    System.out.println(result);
+
+    return result;
+
+  }
+
+  @Override
+  public ResponseDto updateComment(RequestDto requestDto) {
+     Optional<ClubBoardCommentEntity> optional = clubBoardCommentRepository.findByClubBoardCommentId(
+         requestDto.getClubBoardCommentId());
+     if (optional.isEmpty()) {
+       throw new NoResultException();
+     }
+     ClubBoardCommentEntity entity = optional.get();
+     entity.updateContent(requestDto);
+     clubBoardCommentRepository.save(entity);
+
+    return convertDtoEntity.toDto(entity);
+  }
+
+  @Override
+  public void deleteComment(Long commentId) {
+     Optional<ClubBoardCommentEntity> optional = clubBoardCommentRepository.findByClubBoardCommentId(commentId);
+
+     if (optional.isEmpty()) {
+       throw new NoResultException();
+     }
+     ClubBoardCommentEntity entity = optional.get();
+     entity.delete();
+     clubBoardCommentRepository.save(entity);
+
+  }
+
+
 }

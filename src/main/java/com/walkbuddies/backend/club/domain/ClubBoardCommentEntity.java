@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.club.domain;
 
+import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -19,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Entity
@@ -38,7 +40,7 @@ public class ClubBoardCommentEntity {
 
   private String nickname;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "clubBoardId", nullable = false)
   private ClubBoardEntity clubBoardId;
 
@@ -52,6 +54,7 @@ public class ClubBoardCommentEntity {
   private String content;
   @CreationTimestamp
   private LocalDateTime createAt;
+  @UpdateTimestamp
   private LocalDateTime updateAt;
   @ColumnDefault("0")
   private Integer deleteYn;
@@ -59,5 +62,13 @@ public class ClubBoardCommentEntity {
 
   public void updateParent(ClubBoardCommentEntity parentId) {
     this.parentId = parentId;
+  }
+  public void updateContent(RequestDto dto) {
+    this.content = dto.getContent();
+  }
+
+  public void delete() {
+    this.deleteYn = 1;
+    this.deleteAt = LocalDateTime.now();
   }
 }

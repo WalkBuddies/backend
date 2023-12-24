@@ -29,34 +29,5 @@ public class ResponseDto {
   private Integer deleteYn;
   private LocalDateTime deleteAt;
 
-  public ResponseDto toDto(ClubBoardCommentEntity entity) {
-    if (entity.getParentId() != null) {
-      return ResponseDto.builder()
-          .clubBoardCommentId(entity.getClubBoardCommentId())
-          .memberId(entity.getMemberId().getMemberId())
-          .parentId(entity.getParentId().getClubBoardCommentId())
-          .nickname(entity.getNickname())
-          .clubBoardId(entity.getClubBoardId().getClubBoardId())
-          .content(entity.getContent())
-          .createAt(entity.getCreateAt())
-          .updateAt(entity.getUpdateAt())
-          .deleteYn(entity.getDeleteYn())
-          .deleteAt(entity.getDeleteAt())
-          .build();
-    } else {
-      return ResponseDto.builder()
-          .clubBoardCommentId(entity.getClubBoardCommentId())
-          .memberId(entity.getMemberId().getMemberId())
-          .nickname(entity.getNickname())
-          .clubBoardId(entity.getClubBoardId().getClubBoardId())
-          .content(entity.getContent())
-          .createAt(entity.getCreateAt())
-          .updateAt(entity.getUpdateAt())
-          .deleteYn(entity.getDeleteYn())
-          .deleteAt(entity.getDeleteAt())
-          .build();
-    }
 
   }
-
-}
