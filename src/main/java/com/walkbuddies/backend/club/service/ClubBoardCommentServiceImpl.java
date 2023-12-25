@@ -2,6 +2,7 @@ package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.domain.ClubBoardCommentEntity;
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
+
 import com.walkbuddies.backend.club.dto.clubboardcomment.ConvertDtoEntity;
 import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
   private final ConvertDtoEntity convertDtoEntity;
   private final ClubBoardRepository clubBoardRepository;
-
   private final ClubBoardCommentRepository clubBoardCommentRepository;
 
    @Override

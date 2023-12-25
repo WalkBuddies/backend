@@ -7,6 +7,9 @@ import com.walkbuddies.backend.club.repository.ClubBoardRepository;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import com.walkbuddies.backend.club.repository.ClubBoardRepository;
+import com.walkbuddies.backend.member.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -74,4 +77,5 @@ public class ConvertDtoEntity {
         .build());
     return  result;
   }
+
 }

@@ -18,4 +18,5 @@ public interface ClubBoardCommentService {
   ResponseDto updateComment(RequestDto requestDto);
   //delete
   void deleteComment(Long commentId);
+
 }

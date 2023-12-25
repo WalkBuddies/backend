@@ -4,16 +4,9 @@ import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.club.dto.ClubBoardCommentResponse;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.club.service.ClubBoardCommentService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,4 +63,5 @@ public class ClubBoardCommentController {
 
     return ResponseEntity.ok(response);
   }
+
 }
