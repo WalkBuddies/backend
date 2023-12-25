@@ -7,11 +7,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClubJoinInform {
+public class ClubParameter {
 
-    private Long memberId;
     private Long clubId;
+    private Long memberId;
+    private Long ownerId;
     private Long townId;
-    private String message;
-    private Boolean allowJoin;
+    private String clubName;
+
+
 }

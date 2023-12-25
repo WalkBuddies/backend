@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.member.domain;
 
+import com.walkbuddies.backend.admin.dto.MemberDetailDto;
 import com.walkbuddies.backend.club.domain.TownEntity;
 import com.walkbuddies.backend.common.SHA256;
 import com.walkbuddies.backend.member.dto.SignUpDto;
@@ -73,5 +74,32 @@ public class MemberEntity {
         this.updateAt = new Date();
         this.salt = salt;
         this.passwordUpdate = new Date();
+    }
+
+    public static MemberDetailDto entityToDetail(MemberEntity memberEntity) {
+
+        return MemberDetailDto.builder()
+                .memberId(memberEntity.getMemberId())
+                .townId(memberEntity.getTownId().getTownId())
+                .email(memberEntity.getEmail())
+                .password(memberEntity.getPassword())
+                .name(memberEntity.getName())
+                .nickName(memberEntity.getNickname())
+                .gender(memberEntity.getGender())
+                .createAt(memberEntity.getCreateAt())
+                .updateAt(memberEntity.getUpdateAt())
+                .loginType(memberEntity.getLoginType())
+                .imageUrl(memberEntity.getImageUrl())
+                .introduction(memberEntity.getIntroduction())
+                .salt(memberEntity.getSalt())
+                .passwordUpdate(memberEntity.getPasswordUpdate())
+                .socialCode(memberEntity.getSocialCode())
+                .oauthExternalId(memberEntity.getOauthExternalId())
+                .accessToken(memberEntity.getAccessToken())
+                .verify(memberEntity.isVerify())
+                .verificationCode(memberEntity.getVerificationCode())
+                .verifyExpiredAt(memberEntity.getVerifyExpiredAt())
+                .townVerificationDate(memberEntity.getTownVerificationDate())
+                .build();
     }
 }
