@@ -29,5 +29,5 @@ public class ResponseDto {
   private Integer deleteYn;
   private LocalDateTime deleteAt;
 
-
   }
+
