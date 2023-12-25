@@ -28,9 +28,8 @@ dependencies {
     // json 파싱 Jackson
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.16.0'
 
-    // model mapper
-    // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
-    implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.2.0'
+    // Websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

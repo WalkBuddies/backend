@@ -91,7 +91,7 @@ public class ClubController {
         return ResponseEntity.ok(singleResponse);
     }
 
-    @GetMapping("/club/myclub")
+    @GetMapping("/club/myClub")
     public ResponseEntity<ListResponse> getMyClub(@RequestBody ClubParameter clubParameter) {
 
         ListResponse listResponse = new ListResponse(HttpStatus.OK.value(),

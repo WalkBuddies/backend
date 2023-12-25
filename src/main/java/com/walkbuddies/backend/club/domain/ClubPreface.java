@@ -21,6 +21,6 @@ public class ClubPreface {
     private String preface;
 
     @ManyToOne
-    @JoinColumn(name = "clubId")
+    @JoinColumn(name = "club_id")
     private ClubEntity clubId;
 }
