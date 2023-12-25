@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
   private final ClubBoardCommentConvertDtoEntity clubBoardCommentConvertDtoEntity;
   private final ClubBoardRepository clubBoardRepository;
-
   private final ClubBoardCommentRepository clubBoardCommentRepository;
 
    @Override
