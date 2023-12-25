@@ -54,7 +54,6 @@ public class ClubBoardCommentEntity {
   private String content;
   @CreationTimestamp
   private LocalDateTime createAt;
-  @UpdateTimestamp
   private LocalDateTime updateAt;
   @ColumnDefault("0")
   private Integer deleteYn;

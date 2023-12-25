@@ -2,7 +2,7 @@ package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.domain.ClubBoardCommentEntity;
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
-import com.walkbuddies.backend.club.dto.clubboardcomment.ConvertDtoEntity;
+import com.walkbuddies.backend.club.dto.clubboardcomment.ClubBoardCommentConvertDtoEntity;
 import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.club.repository.ClubBoardCommentRepository;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
-  private final ConvertDtoEntity convertDtoEntity;
+  private final ClubBoardCommentConvertDtoEntity clubBoardCommentConvertDtoEntity;
   private final ClubBoardRepository clubBoardRepository;
 
   private final ClubBoardCommentRepository clubBoardCommentRepository;
@@ -25,14 +25,14 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
    @Override
   public ResponseDto createComment(Long boardIdx, RequestDto requestDto) {
       requestDto.setClubBoardId(boardIdx);
-      ClubBoardCommentEntity entity = convertDtoEntity.toEntity(requestDto);
+      ClubBoardCommentEntity entity = clubBoardCommentConvertDtoEntity.toEntity(requestDto);
       if (requestDto.getParentId() != null) {
         entity.updateParent(clubBoardCommentRepository.findById(requestDto.getParentId()).get());
       }
 
       clubBoardCommentRepository.save(entity);
 
-      return convertDtoEntity.toDto(entity);
+      return clubBoardCommentConvertDtoEntity.toDto(entity);
   }
 
   @Override
@@ -43,7 +43,7 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
 
      Page<ClubBoardCommentEntity> response = clubBoardCommentRepository.findAllByClubBoardIdAndDeleteYn(pageable, boardEntity, 0);
 
-     Page<ResponseDto> result = convertDtoEntity.toPageDto(response);
+     Page<ResponseDto> result = clubBoardCommentConvertDtoEntity.toPageDto(response);
 
     System.out.println(result);
 
@@ -62,7 +62,7 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
      entity.updateContent(requestDto);
      clubBoardCommentRepository.save(entity);
 
-    return convertDtoEntity.toDto(entity);
+    return clubBoardCommentConvertDtoEntity.toDto(entity);
   }
 
   @Override

@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.club.dto;
+package com.walkbuddies.backend.club.dto.clubboard;
 
 
 import com.walkbuddies.backend.common.dto.FileDto;
