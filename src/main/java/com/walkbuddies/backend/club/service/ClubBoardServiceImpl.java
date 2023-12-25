@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+
 public class ClubBoardServiceImpl implements ClubBoardService {
     private final ClubBoardRepository clubBoardRepository;
     private final ClubRepository clubRepository;
@@ -207,6 +207,11 @@ public class ClubBoardServiceImpl implements ClubBoardService {
         updateDto.setDeleteAt(LocalDateTime.now());
         ClubBoardEntity request = dtoToEntity(updateDto);
         clubBoardRepository.save(request);
+    }
+
+    @Override
+    public ClubBoardEntity getBoardEntity(Long boardIdx) {
+        return clubBoardRepository.findByClubBoardId(boardIdx).get();
     }
 
 

@@ -2,6 +2,8 @@ package com.walkbuddies.backend.club.controller;
 
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
+import com.walkbuddies.backend.club.dto.ClubListResponse;
+import com.walkbuddies.backend.club.dto.ClubResponse;
 import com.walkbuddies.backend.club.service.ClubService;
 import com.walkbuddies.backend.common.response.ListResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
@@ -38,7 +40,18 @@ public class ClubController {
         return ResponseEntity.ok(singleResponse);
     }
 
+    @PostMapping("/club/delete")
+    public ResponseEntity<ClubResponse> deleteClub(@RequestParam(name = "ownerId") Long ownerId,
+                                                   @RequestParam(name = "clubId") Long clubId) {
+
+        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), "소모임 폐쇄를 완료했습니다.",
+                clubService.deleteClub(ownerId, clubId));
+
+        return ResponseEntity.ok(clubResponse);
+    }
+
     @GetMapping("/club/search")
+
     public ResponseEntity<ListResponse> searchClub(@RequestParam(name = "townId") Long townId,
                                                    @RequestParam(name = "clubName") String clubName) {
 
@@ -59,6 +72,7 @@ public class ClubController {
     }
 
     @GetMapping("/club/join/waiting")
+
     public ResponseEntity<ListResponse> getClubWaitingData(@RequestParam(name = "clubId") Long clubId) {
 
         List<String> foundMembers = clubService.getClubWaitingData(clubId);
@@ -95,10 +109,10 @@ public class ClubController {
     }
 
     @GetMapping("/club/myclub")
-    public ResponseEntity<ListResponse> getMyClub(@RequestParam(name = "memberId") Long memberId) {
+    public ResponseEntity<ClubListResponse> getMyClub(@RequestParam(name = "memberId") Long memberId) {
 
-        ListResponse listResponse = new ListResponse(HttpStatus.OK.value(),
+       ClubListResponse clubListResponse = new ClubListResponse(HttpStatus.OK.value(),
                "가입한 소모임 목록을 불러왔습니다.", clubService.getMyClub(memberId));
-       return ResponseEntity.ok(listResponse);
+       return ResponseEntity.ok(clubListResponse);
     }
 }

@@ -11,6 +11,9 @@ import java.util.List;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import lombok.Builder.Default;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "club_board")
@@ -24,11 +27,11 @@ public class ClubBoardEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long clubBoardId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "clubId")
     private ClubEntity clubId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memeberId")
     private MemberEntity memberId;
 
@@ -38,11 +41,15 @@ public class ClubBoardEntity {
     private String nickname;
     private String title;
     private String content;
+    @CreationTimestamp
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
     private LocalDateTime deleteAt;
+    @ColumnDefault("0")
     private Integer noticeYn;
+    @ColumnDefault("0")
     private Integer deleteYn;
+    @ColumnDefault("0")
     private Integer fileYn;
 
 }

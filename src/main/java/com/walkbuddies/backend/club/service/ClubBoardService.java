@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.club.service;
 
+import com.walkbuddies.backend.club.domain.ClubBoardEntity;
 import com.walkbuddies.backend.club.dto.ClubBoardDto;
 import com.walkbuddies.backend.club.dto.ClubBoardSearch;
 import java.util.List;
@@ -51,4 +52,6 @@ public interface ClubBoardService {
    * @param boardIdx 원글 번호
    */
   void deletePost(Long boardIdx);
+
+  ClubBoardEntity getBoardEntity(Long boardIdx);
 }
