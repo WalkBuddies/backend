@@ -143,7 +143,6 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      */
     @Override
     public Page<ClubBoardDto> postList(Pageable pageable) {
-        System.out.println(pageable);
         return clubBoardRepository.findAllByDeleteYn(pageable, 0).map(ClubBoardServiceImpl::entityToDto);
     }
 

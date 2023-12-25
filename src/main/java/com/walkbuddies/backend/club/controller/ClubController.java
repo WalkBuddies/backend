@@ -74,7 +74,7 @@ public class ClubController {
     @GetMapping("/club/join/waiting")
 
     public ResponseEntity<ListResponse> getClubWaitingData(@RequestParam(name = "clubId") Long clubId) {
-
+      
         List<String> foundMembers = clubService.getClubWaitingData(clubId);
         ListResponse listResponse = new ListResponse(HttpStatus.OK.value(),
                 "소모임 ID: " + clubId + "에 가입 신청한 회원 목록입니다.", foundMembers);
@@ -113,6 +113,7 @@ public class ClubController {
 
        ClubListResponse clubListResponse = new ClubListResponse(HttpStatus.OK.value(),
                "가입한 소모임 목록을 불러왔습니다.", clubService.getMyClub(memberId));
-       return ResponseEntity.ok(clubListResponse);
-    }
+
+       return ResponseEntity.ok(listResponse);
+
 }

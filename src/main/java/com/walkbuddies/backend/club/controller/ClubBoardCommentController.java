@@ -37,7 +37,31 @@ public class ClubBoardCommentController {
   }
 
   //list
-  //read
+
+  @GetMapping("/{boardIdx}/reply-list")
+  public ResponseEntity<Page<ResponseDto>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
+       Pageable pageable
+      ,@PathVariable Long boardIdx) {
+    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardIdx);
+
+    return ResponseEntity.ok(result);
+  }
   //update
+  @PostMapping("/reply-update")
+  public ResponseEntity<ClubBoardCommentResponse> updateComment(@RequestBody RequestDto dto) {
+    ResponseDto result = clubBoardCommentService.updateComment(dto);
+    ClubBoardCommentResponse response = new ClubBoardCommentResponse(HttpStatus.OK.value(), "수정완료", result.toString());
+
+    return ResponseEntity.ok(response);
+  }
   //delete
+
+  @PostMapping("/{commentId}/reply-delete")
+  public ResponseEntity<ClubBoardCommentResponse> deleteComment(@PathVariable Long commentId) {
+    clubBoardCommentService.deleteComment(commentId);
+    ClubBoardCommentResponse response =  new ClubBoardCommentResponse(HttpStatus.OK.value(), "삭제완료", null);
+
+    return ResponseEntity.ok(response);
+  }
+
 }

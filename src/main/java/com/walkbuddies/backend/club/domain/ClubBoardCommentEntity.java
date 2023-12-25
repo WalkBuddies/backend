@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.club.domain;
 
+
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -38,6 +39,7 @@ public class ClubBoardCommentEntity {
 
   private String nickname;
 
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "clubBoardId", nullable = false)
   private ClubBoardEntity clubBoardId;
@@ -52,6 +54,7 @@ public class ClubBoardCommentEntity {
   private String content;
   @CreationTimestamp
   private LocalDateTime createAt;
+
   private LocalDateTime updateAt;
   @ColumnDefault("0")
   private Integer deleteYn;
@@ -60,4 +63,5 @@ public class ClubBoardCommentEntity {
   public void updateParent(ClubBoardCommentEntity parentId) {
     this.parentId = parentId;
   }
+
 }
