@@ -1,17 +1,13 @@
 package com.walkbuddies.backend.club.domain;
 
-import com.walkbuddies.backend.club.dto.ClubBoardDto;
-import com.walkbuddies.backend.club.repository.ClubRepository;
+import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.member.domain.MemberEntity;
-import com.walkbuddies.backend.member.repository.MemberRepository;
 import jakarta.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import lombok.Builder.Default;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -51,5 +47,11 @@ public class ClubBoardEntity {
     private Integer deleteYn;
     @ColumnDefault("0")
     private Integer fileYn;
+
+    public void update(ClubBoardDto dto) {
+        this.content = dto.getContent();
+        this.title = dto.getTitle();
+        this.updateAt = LocalDateTime.now();
+    }
 
 }

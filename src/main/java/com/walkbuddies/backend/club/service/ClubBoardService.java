@@ -1,7 +1,7 @@
 package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
-import com.walkbuddies.backend.club.dto.ClubBoardDto;
+import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.club.dto.ClubBoardSearch;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ public interface ClubBoardService {
   /**
    * 게시글 상세보기
    * to-be: 파일첨부 조회
-   * 삭제여부 체크후 0일 시 반환
+   * 삭제여부 체크후 값이 0일 시 반환
    * @param boardIdx 게시글번호
    * @return clubDto
    */
@@ -53,5 +53,10 @@ public interface ClubBoardService {
    */
   void deletePost(Long boardIdx);
 
+  /**
+   * 게시글정보
+   * @param boardIdx
+   * @return
+   */
   ClubBoardEntity getBoardEntity(Long boardIdx);
 }

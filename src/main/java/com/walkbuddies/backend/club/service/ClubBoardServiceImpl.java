@@ -1,8 +1,9 @@
 package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
-import com.walkbuddies.backend.club.dto.ClubBoardDto;
+import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.club.dto.ClubBoardSearch;
+import com.walkbuddies.backend.club.dto.clubboard.ClubBoardConvertDtoEntity;
 import com.walkbuddies.backend.club.repository.ClubBoardRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.common.domain.FileEntity;
@@ -31,54 +32,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class ClubBoardServiceImpl implements ClubBoardService {
     private final ClubBoardRepository clubBoardRepository;
     private final ClubRepository clubRepository;
+    private final ClubBoardConvertDtoEntity clubBoardConvertDtoEntity;
     private final MemberRepository memberRepository;
     private final FileServiceImpl fileService;
-
-    /**
-     * clubboard dto -> entity 변환
-     * @param dto
-     * @return entity
-     */
-    private ClubBoardEntity dtoToEntity(ClubBoardDto dto) {
-        return ClubBoardEntity.builder()
-            .clubBoardId(dto.getClubBoardId())
-            .clubId(clubRepository.findByClubId(dto.getClubId()).get())
-            .memberId(memberRepository.findByMemberId(dto.getMemberId()).get())
-            .nickname(dto.getNickname())
-            .fileId(FileEntity.dtoListToEntityList(dto.getFileId()))
-            .title(dto.getTitle())
-            .content(dto.getContent())
-            .createAt(dto.getCreateAt())
-            .updateAt(dto.getUpdateAt())
-            .deleteAt(dto.getDeleteAt())
-            .noticeYn(dto.getNoticeYn())
-            .deleteYn(dto.getDeleteYn())
-            .fileYn(dto.getFileYn())
-            .build();
-    }
-
-    /**
-     * clubboard entity -> dto 변환
-     * @param entity
-     * @return
-     */
-    public static ClubBoardDto entityToDto(ClubBoardEntity entity) {
-        return ClubBoardDto.builder()
-            .clubBoardId(entity.getClubBoardId())
-            .fileId(FileEntity.entityListToDtoList(entity.getFileId()))
-            .clubId(entity.getClubId().getClubId())
-            .memberId(entity.getMemberId().getMemberId())
-            .nickname(entity.getNickname())
-            .title(entity.getTitle())
-            .content(entity.getContent())
-            .createAt(entity.getCreateAt())
-            .updateAt(entity.getUpdateAt())
-            .deleteAt(entity.getDeleteAt())
-            .noticeYn(entity.getNoticeYn())
-            .deleteYn(entity.getDeleteYn())
-            .fileYn(entity.getFileYn())
-            .build();
-    }
 
     /**
      * 파일 있으면 파일업로드 후 dto 받아서 등록
@@ -103,9 +59,9 @@ public class ClubBoardServiceImpl implements ClubBoardService {
         clubBoardDto.setCreateAt(LocalDateTime.now());
 
 
-        ClubBoardEntity result = clubBoardRepository.save(dtoToEntity(clubBoardDto));
+        ClubBoardEntity result = clubBoardRepository.save(clubBoardConvertDtoEntity.dtoToEntity(clubBoardDto));
         System.out.println(result);
-        return entityToDto(result);
+        return clubBoardConvertDtoEntity.entityToDto(result);
 
     }
 
@@ -124,7 +80,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
 
         if (optionalEntity.isPresent()) {
             ClubBoardEntity entity = optionalEntity.get();
-            result = entityToDto(entity);
+            result = clubBoardConvertDtoEntity.entityToDto(entity);
 
             if (entity.getDeleteYn() == 1) {
                 throw new NoPostException();
@@ -143,7 +99,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      */
     @Override
     public Page<ClubBoardDto> postList(Pageable pageable) {
-        return clubBoardRepository.findAllByDeleteYn(pageable, 0).map(ClubBoardServiceImpl::entityToDto);
+        return clubBoardRepository.findAllByDeleteYn(pageable, 0).map(clubBoardConvertDtoEntity::entityToDto);
     }
 
     /**
@@ -156,12 +112,12 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     public Page<ClubBoardDto> postSearchList(Pageable pageable, ClubBoardSearch search) {
         Page<ClubBoardDto> result = switch (search.getType()) {
             case "제목" -> clubBoardRepository.findByTitleContainingAndDeleteYn(pageable, search.getKeyword(), 0)
-                .map(ClubBoardServiceImpl::entityToDto);
+                .map(clubBoardConvertDtoEntity::entityToDto);
 
             case "작성자" -> clubBoardRepository.findByNicknameContainingAndDeleteYn(pageable, search.getKeyword(), 0)
-                .map(ClubBoardServiceImpl::entityToDto);
+                .map(clubBoardConvertDtoEntity::entityToDto);
             case "내용" -> clubBoardRepository.findByContentContainingAndDeleteYn(pageable, search.getKeyword(), 0)
-                .map(ClubBoardServiceImpl::entityToDto);
+                .map(clubBoardConvertDtoEntity::entityToDto);
             default -> throw new NoResultException();
         };
 
@@ -175,17 +131,17 @@ public class ClubBoardServiceImpl implements ClubBoardService {
 
     /**
      * 게시글 수정
-     *
+     * to-be : 업로드 파일 수정
      * @param clubBoardDto 수정 dto
      * @return 수정된 dto
      */
     @Override
     public ClubBoardDto updatePost(ClubBoardDto clubBoardDto) {
-        clubBoardDto.setUpdateAt(LocalDateTime.now());
-        ClubBoardEntity request = dtoToEntity(clubBoardDto);
-        ClubBoardEntity updated =  clubBoardRepository.save(request);
+        ClubBoardEntity entity = getBoardEntity(clubBoardDto.getClubBoardId());
+        entity.update(clubBoardDto);
+        clubBoardRepository.save(entity);
 
-        return entityToDto(updated);
+        return clubBoardConvertDtoEntity.entityToDto(entity);
     }
 
     /**
@@ -200,18 +156,30 @@ public class ClubBoardServiceImpl implements ClubBoardService {
             throw new NoPostException();
         }
 
-        ClubBoardDto updateDto = entityToDto(result.get());
+        ClubBoardDto updateDto = clubBoardConvertDtoEntity.entityToDto(result.get());
 
         updateDto.setDeleteYn(1);
         updateDto.setDeleteAt(LocalDateTime.now());
-        ClubBoardEntity request = dtoToEntity(updateDto);
+        ClubBoardEntity request = clubBoardConvertDtoEntity.dtoToEntity(updateDto);
         clubBoardRepository.save(request);
     }
 
+    /**
+     * 게시글 불러오기
+     * @param boardIdx 원글번호
+     * @return clubBoardEntity
+     */
     @Override
     public ClubBoardEntity getBoardEntity(Long boardIdx) {
-        return clubBoardRepository.findByClubBoardId(boardIdx).get();
+        Optional<ClubBoardEntity> op = clubBoardRepository.findByClubBoardId(boardIdx);
+
+        if (op.isEmpty()) {
+            throw new NoPostException();
+        }
+
+        return op.get();
     }
+
 
 
 }

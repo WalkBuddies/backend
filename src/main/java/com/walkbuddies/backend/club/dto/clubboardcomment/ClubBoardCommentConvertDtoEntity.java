@@ -1,9 +1,7 @@
 package com.walkbuddies.backend.club.dto.clubboardcomment;
 
 import com.walkbuddies.backend.club.domain.ClubBoardCommentEntity;
-import com.walkbuddies.backend.club.dto.ClubBoardCommentResponse;
-import com.walkbuddies.backend.club.repository.ClubBoardCommentRepository;
-import com.walkbuddies.backend.club.repository.ClubBoardRepository;
+import com.walkbuddies.backend.club.service.ClubBoardServiceImpl;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,16 +12,18 @@ import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
-public class ConvertDtoEntity {
+public class ClubBoardCommentConvertDtoEntity {
 
-  private final ClubBoardRepository clubBoardRepository;
+  private final ClubBoardServiceImpl clubBoardService;
   private final MemberRepository memberRepository;
 
   public ClubBoardCommentEntity toEntity(RequestDto requestDto) {
-
+    /**
+     * to-be memberservice에 findbymemberid 서비스 추가하기
+     */
     return ClubBoardCommentEntity.builder()
         .clubBoardCommentId(requestDto.getClubBoardCommentId())
-        .clubBoardId(clubBoardRepository.findByClubBoardId(requestDto.getClubBoardId()).get())
+        .clubBoardId(clubBoardService.getBoardEntity(requestDto.getClubBoardId()))
         .memberId(memberRepository.findByMemberId(requestDto.getMemberId()).get())
         .nickname(requestDto.getNickname())
         .content(requestDto.getContent())
@@ -63,7 +63,7 @@ public class ConvertDtoEntity {
     }
   }
   public Page<ResponseDto> toPageDto(Page<ClubBoardCommentEntity> entities) {
-    Page<ResponseDto> result = entities.map(e -> ResponseDto.builder()
+    return entities.map(e -> ResponseDto.builder()
         .clubBoardCommentId(e.getClubBoardCommentId())
         .memberId(e.getMemberId().getMemberId())
         .parentId(e.getParentId() == null ? null : e.getParentId().getClubBoardCommentId())
@@ -75,7 +75,6 @@ public class ConvertDtoEntity {
         .deleteYn(e.getDeleteYn())
         .deleteAt(e.getDeleteAt())
         .build());
-    return  result;
   }
 
 }
