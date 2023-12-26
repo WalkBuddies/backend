@@ -25,17 +25,18 @@ public class ClubEntity {
     private String clubName;
 
     @ManyToOne
-    @JoinColumn(name = "townId")
+    @JoinColumn(name = "town_id")
     private TownEntity townId;
 
     @ManyToOne
-    @JoinColumn(name = "memberId")
+    @JoinColumn(name = "member_id")
     private MemberEntity ownerId;
 
     private Integer members;
     private Integer membersLimit;
     private Integer accessLimit;
     private Integer needGrant;
+    private boolean isSuspended;
     private LocalDate regDate;
     private LocalDate modDate;
 
@@ -50,6 +51,7 @@ public class ClubEntity {
                 .membersLimit(clubEntity.getMembersLimit())
                 .accessLimit(clubEntity.getAccessLimit())
                 .needGrant(clubEntity.getNeedGrant())
+                .isSuspended(clubEntity.isSuspended())
                 .regDate(clubEntity.getRegDate())
                 .modDate(clubEntity.getModDate())
                 .build();

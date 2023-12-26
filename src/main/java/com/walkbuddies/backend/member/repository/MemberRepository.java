@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,4 +19,8 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     Optional<MemberEntity> findByEmail(String email);
 
     Optional<MemberEntity> findByEmailAndName(String email, String name);
+  
+    Optional<List<MemberEntity>> findByName(String name);
+
+    Optional<MemberEntity> findByNickname(String nickName);
 }

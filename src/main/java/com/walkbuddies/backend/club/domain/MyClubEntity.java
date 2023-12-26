@@ -22,13 +22,13 @@ public class MyClubEntity {
     private Long myClubId;
 
     @ManyToOne
-    @JoinColumn(name = "memberId")
+    @JoinColumn(name = "member_id")
     private MemberEntity memberId;
 
     @ManyToOne
-    @JoinColumn(name = "clubId")
+    @JoinColumn(name = "club_id")
     private ClubEntity clubId;
 
     private Integer authority;
-    private LocalDate regAt;
+    private LocalDate regDate;
 }

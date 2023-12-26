@@ -2,8 +2,11 @@ package com.walkbuddies.backend.club.controller;
 
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
-import com.walkbuddies.backend.club.dto.ClubResponse;
+import com.walkbuddies.backend.club.dto.ClubParameter;
+import com.walkbuddies.backend.club.dto.ClubUpdateParameter;
 import com.walkbuddies.backend.club.service.ClubService;
+import com.walkbuddies.backend.common.response.ListResponse;
+import com.walkbuddies.backend.common.response.SingleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,52 +21,81 @@ public class ClubController {
     private final ClubService clubService;
 
     @PostMapping("/club/create")
-    public ResponseEntity<ClubResponse> createClub(@RequestBody ClubDto clubDto) {
+    public ResponseEntity<SingleResponse> createClub(@RequestBody ClubDto clubDto) {
 
-        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(),
-                clubDto.getClubName() + " 소모임을 생성 완료 했습니다.",
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
+                clubDto.getClubName() + " 소모임을 생성 완료했습니다.",
                 clubService.createClub(clubDto));
 
-        return ResponseEntity.ok(clubResponse);
+        return ResponseEntity.ok(singleResponse);
+    }
+
+    @PostMapping("/club/delete")
+    public ResponseEntity<SingleResponse> deleteClub(@RequestBody ClubParameter clubParameter) {
+
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "소모임 폐쇄를 완료했습니다.",
+                clubService.deleteClub(clubParameter));
+
+        return ResponseEntity.ok(singleResponse);
     }
 
     @GetMapping("/club/search")
-    public ResponseEntity<ClubResponse> searchClub(@RequestParam(name = "townId") Long townId, @RequestParam(name = "clubName") String clubName) {
+    public ResponseEntity<ListResponse> searchClub(@RequestBody ClubParameter clubParameter) {
 
-        List<String> foundClubs = clubService.searchClub(townId, clubName);
-        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(),
-                clubName + "이(가) 포함된 소모임이 검색되었습니다.",
-                ClubDto.builder().clubName(foundClubs.toString()).build());
+        List<String> foundClubs = clubService.searchClub(clubParameter);
+        ListResponse listResponse = new ListResponse(HttpStatus.OK.value(),
+                clubParameter.getClubName() + "이(가) 포함된 소모임이 검색되었습니다.", foundClubs);
 
-        return ResponseEntity.ok(clubResponse);
+        return ResponseEntity.ok(listResponse);
     }
 
     @PostMapping("/club/join/request")
-    public ResponseEntity<ClubResponse> joinClubRequest(@RequestBody ClubJoinInform clubJoinInform) {
+    public ResponseEntity<SingleResponse> joinClubRequest(@RequestBody ClubJoinInform clubJoinInform) {
 
-        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), clubService.joinClubRequest(clubJoinInform), null);
-        return ResponseEntity.ok(clubResponse);
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
+                "소모임 가입 신청이 완료 되었습니다.",
+                clubService.joinClubRequest(clubJoinInform));
+        return ResponseEntity.ok(singleResponse);
     }
 
-    @GetMapping("/club/waiting/get")
-    public ResponseEntity<ClubResponse> getClubWaitingData(@RequestParam(name = "clubId") Long clubId) {
+    @GetMapping("/club/join/waiting")
+    public ResponseEntity<ListResponse> getClubWaitingData(@RequestBody ClubParameter clubParameter) {
 
-        List<String> foundMembers = clubService.getClubWaitingData(clubId);
-        ClubDto clubDto = ClubDto.builder()
-                .clubId(clubId)
-                .waitingMembers(foundMembers)
-                .build();
-        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(),
-                "소모임 ID: " + clubId + "에 가입 신청한 회원 목록입니다.", clubDto);
+        List<String> foundMembers = clubService.getClubWaitingData(clubParameter);
+        ListResponse listResponse = new ListResponse(HttpStatus.OK.value(),
+                "소모임 ID: " + clubParameter.getClubId() + "에 가입 신청한 회원 목록입니다.", foundMembers);
 
-        return ResponseEntity.ok(clubResponse);
+        return ResponseEntity.ok(listResponse);
     }
 
     @PostMapping("/club/join/response")
-    public ResponseEntity<ClubResponse> joinClubResponse(@RequestParam(name = "allowJoin") boolean allowJoin,
-                                   @RequestBody ClubJoinInform clubJoinInform) {
+    public ResponseEntity<SingleResponse> joinClubResponse(@RequestBody ClubJoinInform clubJoinInform) {
 
-        ClubResponse clubResponse = new ClubResponse(HttpStatus.OK.value(), clubService.joinClubResponse(allowJoin, clubJoinInform), null);
-        return ResponseEntity.ok(clubResponse);
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "소모임 가입 신청에 대한 응답입니다.",
+                clubService.joinClubResponse(clubJoinInform));
+        return ResponseEntity.ok(singleResponse);
+    }
+
+    @PostMapping("club/leave")
+    public ResponseEntity<SingleResponse> leaveClub(@RequestBody ClubParameter clubParameter) {
+
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "소모임 탈퇴가 완료 되었습니다.",
+                clubService.leaveClub(clubParameter));
+        return ResponseEntity.ok(singleResponse);
+    }
+
+    @PostMapping("/club/update")
+    public ResponseEntity<SingleResponse> updateClubData(@RequestBody ClubUpdateParameter clubUpdateParameter) {
+
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "소모임 정보를 수정했습니다.", clubService.updateClubData(clubUpdateParameter));
+        return ResponseEntity.ok(singleResponse);
+    }
+
+    @GetMapping("/club/myClub")
+    public ResponseEntity<ListResponse> getMyClub(@RequestBody ClubParameter clubParameter) {
+
+        ListResponse listResponse = new ListResponse(HttpStatus.OK.value(),
+               "가입한 소모임 목록을 불러왔습니다.", clubService.getMyClub(clubParameter));
+       return ResponseEntity.ok(listResponse);
     }
 }

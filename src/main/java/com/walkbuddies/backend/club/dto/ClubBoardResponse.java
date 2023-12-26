@@ -7,8 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class ClubResponse {
-    private final int statusCode;
-    private final String message;
-    private final ClubDto data;
+public class ClubBoardResponse {
+  private final int statusCode;
+  private final String message;
+  private final String data;
+
 }

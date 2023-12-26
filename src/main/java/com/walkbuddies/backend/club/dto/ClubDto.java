@@ -1,6 +1,7 @@
 package com.walkbuddies.backend.club.dto;
 
 import com.walkbuddies.backend.club.domain.ClubEntity;
+import com.walkbuddies.backend.club.repository.ClubRepository;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -12,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ClubDto {
-
     private Long clubId;
     private String clubName;
     private Long townId;
@@ -21,7 +21,7 @@ public class ClubDto {
     private Integer membersLimit;
     private Integer accessLimit;
     private Integer needGrant;
+    private Boolean isSuspended;
     private LocalDate regDate;
     private LocalDate modDate;
-    private List<String> waitingMembers;
 }

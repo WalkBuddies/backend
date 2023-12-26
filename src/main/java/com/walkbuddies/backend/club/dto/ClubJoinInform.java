@@ -13,4 +13,5 @@ public class ClubJoinInform {
     private Long clubId;
     private Long townId;
     private String message;
+    private Boolean allowJoin;
 }

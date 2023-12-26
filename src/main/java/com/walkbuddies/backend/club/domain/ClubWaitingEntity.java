@@ -20,12 +20,16 @@ public class ClubWaitingEntity {
     private Long waitingId;
 
     @ManyToOne
-    @JoinColumn(name = "clubId")
+    @JoinColumn(name = "club_id")
     private ClubEntity clubId;
 
     @ManyToOne
-    @JoinColumn(name = "memberId")
+    @JoinColumn(name = "member_id")
     private MemberEntity memberId;
+
+    @ManyToOne
+    @JoinColumn(name = "nickname")
+    private MemberEntity nickName;
 
     private String message;
 }

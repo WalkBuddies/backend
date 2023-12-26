@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.member.domain;
 
+import com.walkbuddies.backend.admin.dto.MemberDetailDto;
 import com.walkbuddies.backend.club.domain.TownEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -77,5 +78,32 @@ public class MemberEntity implements Serializable {
         this.password = tempPassword;
         this.passwordUpdate = LocalDateTime.now();
         this.verifyExpiredAt = LocalDateTime.now().plusDays(1);
+    }
+
+    public static MemberDetailDto entityToDetail(MemberEntity memberEntity) {
+
+        return MemberDetailDto.builder()
+                .memberId(memberEntity.getMemberId())
+                .townId(memberEntity.getTownId().getTownId())
+                .email(memberEntity.getEmail())
+                .password(memberEntity.getPassword())
+                .name(memberEntity.getName())
+                .nickName(memberEntity.getNickname())
+                .gender(memberEntity.getGender())
+                .createAt(memberEntity.getCreateAt())
+                .updateAt(memberEntity.getUpdateAt())
+                .loginType(memberEntity.getLoginType())
+                .imageUrl(memberEntity.getImageUrl())
+                .introduction(memberEntity.getIntroduction())
+                .salt(memberEntity.getSalt())
+                .passwordUpdate(memberEntity.getPasswordUpdate())
+                .socialCode(memberEntity.getSocialCode())
+                .oauthExternalId(memberEntity.getOauthExternalId())
+                .accessToken(memberEntity.getAccessToken())
+                .verify(memberEntity.isVerify())
+                .verificationCode(memberEntity.getVerificationCode())
+                .verifyExpiredAt(memberEntity.getVerifyExpiredAt())
+                .townVerificationDate(memberEntity.getTownVerificationDate())
+                .build();
     }
 }
