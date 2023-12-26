@@ -6,8 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @AllArgsConstructor
 @Builder
 public class SignUpRequest {
@@ -18,10 +17,12 @@ public class SignUpRequest {
     private String nickname;
     private Integer gender;
 
-    public MemberEntity toEntity(String encodedPassword) {
+    public MemberEntity toEntity(String role, String encodedPassword) {
         LocalDateTime now = LocalDateTime.now();
         return MemberEntity.builder()
                 .email(this.email)
+                .role(role)
+                .blocked(false)
                 .password(encodedPassword)
                 .name(this.name)
                 .nickname(this.nickname)

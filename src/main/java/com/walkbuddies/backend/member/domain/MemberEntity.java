@@ -2,11 +2,9 @@ package com.walkbuddies.backend.member.domain;
 
 import com.walkbuddies.backend.club.domain.TownEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MemberEntity {
+public class MemberEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +25,12 @@ public class MemberEntity {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
+    private String role;    // USER, ADMIN
+
+    @Column(nullable = false)
+    private boolean blocked;
 
     @Column(nullable = false)
     private String password;
@@ -71,6 +75,7 @@ public class MemberEntity {
         this.verify = false;
         this.verificationCode = code;
         this.password = tempPassword;
+        this.passwordUpdate = LocalDateTime.now();
         this.verifyExpiredAt = LocalDateTime.now().plusDays(1);
     }
 }

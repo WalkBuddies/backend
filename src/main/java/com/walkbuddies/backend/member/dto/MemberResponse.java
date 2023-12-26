@@ -12,10 +12,12 @@ public class MemberResponse {
     private String email;
     private String name;
 
+    private MemberResponse(MemberEntity member) {
+        this.email = member.getEmail();
+        this.name = member.getName();
+    }
+
     public static MemberResponse fromEntity(MemberEntity member) {
-        return MemberResponse.builder()
-                .email(member.getEmail())
-                .name(member.getName())
-                .build();
+        return new MemberResponse(member);
     }
 }

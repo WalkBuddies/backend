@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.common;
+package com.walkbuddies.backend.member.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

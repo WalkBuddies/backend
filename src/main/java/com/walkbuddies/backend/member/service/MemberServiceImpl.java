@@ -1,8 +1,9 @@
 package com.walkbuddies.backend.member.service;
 
-import com.walkbuddies.backend.common.MailService;
 import com.walkbuddies.backend.exception.impl.*;
-import com.walkbuddies.backend.common.JwtTokenUtil;
+import com.walkbuddies.backend.member.cache.CacheNames;
+import com.walkbuddies.backend.member.email.EmailConfig;
+import com.walkbuddies.backend.member.jwt.JwtTokenUtil;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.dto.LoginRequest;
 import com.walkbuddies.backend.member.dto.MemberResponse;
@@ -11,7 +12,8 @@ import com.walkbuddies.backend.member.dto.SignUpRequest;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +31,9 @@ import java.util.regex.Pattern;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-    private final MailService mailService;
+    private final EmailConfig.MailService mailService;
+    private final RedisService redisService;
     private final BCryptPasswordEncoder encoder;
-
-    @Value("${jwt.secret.key}")
-    private String secretKey;
-    private final long EXPIRE_TIME_MS = 1000 * 60 * 60 * 24 * 7;
 
     @Override
     @Transactional
@@ -42,7 +41,7 @@ public class MemberServiceImpl implements MemberService {
         validateSignUpRequest(signUpRequest);
 
         String encodedPassword = encoder.encode(signUpRequest.getPassword());
-        MemberEntity member = signUpRequest.toEntity(encodedPassword);
+        MemberEntity member = signUpRequest.toEntity("USER", encodedPassword);
         member.createVerificationRequest(generateVerificationCode());
         sendVerificationEmail(member.getEmail(), member.getVerificationCode());
         memberRepository.save(member);
@@ -76,8 +75,10 @@ public class MemberServiceImpl implements MemberService {
         return MemberResponse.fromEntity(member);
     }
 
+    @Cacheable(cacheNames = CacheNames.LOGINUSER, key = "'login' + #p0.getEmail()", unless = "#result==null")
+    @Transactional
     @Override
-    public String login(LoginRequest request) {
+    public MemberResponse login(LoginRequest request) {
         MemberEntity member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(NotFoundMemberException::new);
 
@@ -89,18 +90,20 @@ public class MemberServiceImpl implements MemberService {
             throw new NotVerifiedException();
         }
 
-        String token = JwtTokenUtil.createToken(request.getEmail(), EXPIRE_TIME_MS, secretKey);
-        if (token == null) {
-            throw new RuntimeException("JWT 생성 실패");
-        }
-
-        return token;
+        return MemberResponse.fromEntity(member);
     }
 
+    @CacheEvict(cacheNames = CacheNames.USERBYEMAIL, key = "'login'+#p1")
+    @Transactional
     @Override
-    public void logout() {
-        String token = JwtTokenUtil.getToken();
-        // TODO:
+    public void logout(String accessToken, String email) {
+        Long expiration = JwtTokenUtil.getExpiration(accessToken);
+        redisService.setBlackList(accessToken, "logout", expiration);
+        if (redisService.hasKey(email)) {
+            redisService.deleteRefreshToken(email);
+        } else {
+            throw new AlreadyLogoutException();
+        }
     }
 
     @Override
@@ -197,7 +200,7 @@ public class MemberServiceImpl implements MemberService {
         // 패스워드 검증
         if (!isValidPassword(signUpRequest.getPassword())) {
             throw new PasswordException();
-        };
+        }
 
         // 필수 필드 확인
         if (signUpRequest.getName() == null || signUpRequest.getName().isEmpty()
