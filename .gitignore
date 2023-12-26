@@ -37,3 +37,5 @@ build/
 *.properties
 build
 .gradle
+/src/main/resources/tamplates
+.gitignore

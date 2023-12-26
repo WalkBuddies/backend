@@ -28,6 +28,9 @@ dependencies {
     // json 파싱 Jackson
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.16.0'
 
+    // Websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'

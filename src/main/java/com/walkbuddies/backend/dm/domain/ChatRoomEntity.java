@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.club.domain;
+package com.walkbuddies.backend.dm.domain;
 
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import jakarta.persistence.*;
@@ -7,28 +7,24 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Entity
-@Table(name = "my_club")
+@Table(name = "chat_room")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MyClubEntity {
+public class ChatRoomEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long myClubId;
+    private Long chatRoomId;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
-    private MemberEntity memberId;
+    @JoinColumn(name = "sender_id")
+    private MemberEntity senderId;
 
     @ManyToOne
-    @JoinColumn(name = "club_id")
-    private ClubEntity clubId;
+    @JoinColumn(name = "recipient_id")
+    private MemberEntity recipientId;
 
-    private Integer authority;
-    private LocalDate regDate;
 }
