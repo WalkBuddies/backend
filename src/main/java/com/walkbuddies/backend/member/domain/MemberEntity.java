@@ -2,15 +2,11 @@ package com.walkbuddies.backend.member.domain;
 
 import com.walkbuddies.backend.admin.dto.MemberDetailDto;
 import com.walkbuddies.backend.club.domain.TownEntity;
-import com.walkbuddies.backend.common.SHA256;
-import com.walkbuddies.backend.member.dto.SignUpDto;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "member")
@@ -18,7 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MemberEntity {
+public class MemberEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +28,14 @@ public class MemberEntity {
     private String email;
 
     @Column(nullable = false)
+    private String role;    // USER, ADMIN
+
+    @Column(nullable = false)
+    private boolean blocked;
+
+    @Column(nullable = false)
     private String password;
+    private LocalDateTime passwordUpdate;
 
     @Column(nullable = false)
     private String name;
@@ -42,38 +45,39 @@ public class MemberEntity {
 
     private Integer gender;
 
-    @Column
-    @Temporal(TemporalType.DATE)
-    private Date createAt;
+    private LocalDateTime createAt;
+    private LocalDateTime updateAt;
 
-    @Column
-    @Temporal(TemporalType.DATE)
-    private Date updateAt;
-
-    private Integer loginType;
-    private String imageUrl;
-    private String introduction;
-    private String salt;
-    private Date passwordUpdate;
-    private Integer socialCode;
-    private String oauthExternalId;
-    private String accessToken;
     private boolean verify;
     private String verificationCode;
-    private Date verifyExpiredAt;
-    private Date townVerificationDate;
+    private LocalDateTime verifyExpiredAt;
 
-    public MemberEntity(SignUpDto dto) {
-        String salt = SHA256.createSalt();
-        this.email = dto.getEmail();
-        this.password = SHA256.getEncrypt(dto.getPassword(), salt);
-        this.name = dto.getName();
-        this.nickname = dto.getNickname();
-        this.gender = dto.getGender();
-        this.createAt = new Date();
-        this.updateAt = new Date();
-        this.salt = salt;
-        this.passwordUpdate = new Date();
+    private String imageUrl;
+    private String introduction;
+
+    private Integer socialCode;
+    private String oauthExternalId;
+
+    private LocalDateTime townVerificationDate;
+
+    public void createVerificationRequest(String code) {
+        this.verify = false;
+        this.verificationCode = code;
+        this.verifyExpiredAt = LocalDateTime.now().plusDays(1);
+    }
+
+    public void verify() {
+        this.verify = true;
+        this.verificationCode = null;
+        this.verifyExpiredAt = null;
+    }
+
+    public void createPasswordRequest(String code, String tempPassword) {
+        this.verify = false;
+        this.verificationCode = code;
+        this.password = tempPassword;
+        this.passwordUpdate = LocalDateTime.now();
+        this.verifyExpiredAt = LocalDateTime.now().plusDays(1);
     }
 
     public static MemberDetailDto entityToDetail(MemberEntity memberEntity) {
