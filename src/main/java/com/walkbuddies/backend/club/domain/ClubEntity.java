@@ -36,6 +36,7 @@ public class ClubEntity {
     private Integer membersLimit;
     private Integer accessLimit;
     private Integer needGrant;
+    private boolean isSuspended;
     private LocalDate regDate;
     private LocalDate modDate;
 
@@ -50,6 +51,7 @@ public class ClubEntity {
                 .membersLimit(clubEntity.getMembersLimit())
                 .accessLimit(clubEntity.getAccessLimit())
                 .needGrant(clubEntity.getNeedGrant())
+                .isSuspended(clubEntity.isSuspended())
                 .regDate(clubEntity.getRegDate())
                 .modDate(clubEntity.getModDate())
                 .build();

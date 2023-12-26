@@ -27,5 +27,9 @@ public class ClubWaitingEntity {
     @JoinColumn(name = "memberId")
     private MemberEntity memberId;
 
+    @ManyToOne
+    @JoinColumn(name = "nickname")
+    private MemberEntity nickName;
+
     private String message;
 }
