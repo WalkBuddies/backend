@@ -28,6 +28,8 @@ public class ClubBoardDto {
   private Integer noticeYn;
   private Integer deleteYn;
   private Integer fileYn;
+  private Long prefaceId;
+
 
   }
 

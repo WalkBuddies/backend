@@ -1,8 +1,12 @@
 package com.walkbuddies.backend.club.controller;
 
+import com.walkbuddies.backend.club.domain.ClubPreface;
+import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.club.dto.ClubBoardSearch;
+import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.service.ClubBoardService;
+import com.walkbuddies.backend.common.response.ListResponse;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
 import java.util.List;
@@ -21,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ClubBoardController {
     private final ClubBoardService clubBoardService;
+
     //create
     @PostMapping("/write")
     public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<MultipartFile> files
@@ -86,6 +91,14 @@ public class ClubBoardController {
 
         SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "삭제 완료",
             null);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/preface/{clubId}")
+    public  ResponseEntity<ListResponse<ClubPrefaceDto>> getPreface(@PathVariable long clubId) {
+        List<ClubPrefaceDto> data = clubBoardService.getClubPreface(clubId);
+        ListResponse<ClubPrefaceDto> result = new ListResponse<>(HttpStatus.OK.value(), "말머리 로드", data);
 
         return ResponseEntity.ok(result);
     }

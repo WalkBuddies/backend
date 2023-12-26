@@ -1,6 +1,7 @@
 package com.walkbuddies.backend.club.domain;
 
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
+import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import jakarta.persistence.*;
@@ -37,6 +38,8 @@ public class ClubBoardEntity {
     private String nickname;
     private String title;
     private String content;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ClubPreface preface;
     @CreationTimestamp
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
@@ -48,8 +51,10 @@ public class ClubBoardEntity {
     @ColumnDefault("0")
     private Integer fileYn;
 
-    public void update(ClubBoardDto dto) {
+    public void update(ClubBoardDto dto, ClubPreface preface) {
+
         this.content = dto.getContent();
+        this.preface = preface;
         this.title = dto.getTitle();
         this.updateAt = LocalDateTime.now();
     }
