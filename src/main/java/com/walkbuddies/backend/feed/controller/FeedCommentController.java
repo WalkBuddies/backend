@@ -1,12 +1,13 @@
-package com.walkbuddies.backend.club.controller;
+package com.walkbuddies.backend.feed.controller;
 
 import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
-import com.walkbuddies.backend.club.service.ClubBoardCommentService;
-import com.walkbuddies.backend.common.response.ListResponse;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
-import java.util.List;
+import com.walkbuddies.backend.feed.domain.FeedCommentEntity;
+import com.walkbuddies.backend.feed.dto.FeedCommentDto;
+import com.walkbuddies.backend.feed.dto.FeedDto;
+import com.walkbuddies.backend.feed.service.FeedCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,21 +24,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/club/board")
-public class ClubBoardCommentController {
-  private final ClubBoardCommentService clubBoardCommentService;
+@RequestMapping("/feed/")
+public class FeedCommentController {
+  private final FeedCommentService feedCommentService;
 
 
   /**
    * 리플작성
-   * @param feedIdx : 원글 번호
-   * @param requestDto : 댓글dto
+   * @param boardIdx : 원글 번호
+   * @param dto : 댓글dto
    * @return
    */
-  @PostMapping("/{feedIdx}/comment")
-  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long feedIdx, @RequestBody RequestDto requestDto) {
+  @PostMapping("/{boardIdx}/comment")
+  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long boardIdx, @RequestBody FeedCommentDto dto) {
 
-    ResponseDto result = clubBoardCommentService.createComment(feedIdx, requestDto);
+    FeedCommentDto result = feedCommentService.createComment(boardIdx, dto);
 
     SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
         result.toString());
@@ -49,19 +50,17 @@ public class ClubBoardCommentController {
   //list
 
   @GetMapping("/{boardIdx}/comment-list")
-  public ResponseEntity<PageResponse<Page<ResponseDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
-       Pageable pageable
-      ,@PathVariable Long boardIdx) {
-
-    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardIdx);
-    PageResponse<Page<ResponseDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
+  public ResponseEntity<PageResponse<Page<FeedCommentDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
+                              Pageable pageable, @PathVariable Long boardIdx) {
+    Page<FeedCommentDto> result = feedCommentService.getCommentList(pageable, boardIdx);
+    PageResponse<Page<FeedCommentDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
         result);
     return ResponseEntity.ok(response);
   }
   //update
   @PostMapping("/comment-update")
-  public ResponseEntity<SingleResponse<String>> updateComment(@RequestBody RequestDto dto) {
-    ResponseDto result = clubBoardCommentService.updateComment(dto);
+  public ResponseEntity<SingleResponse<String>> updateComment(@RequestBody FeedCommentDto dto) {
+    FeedCommentDto result = feedCommentService.updateComment(dto);
     SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "수정완료", result.toString());
 
     return ResponseEntity.ok(response);
@@ -70,7 +69,7 @@ public class ClubBoardCommentController {
 
   @PostMapping("/{commentId}/comment-delete")
   public ResponseEntity<SingleResponse<String>> deleteComment(@PathVariable Long commentId) {
-    clubBoardCommentService.deleteComment(commentId);
+    feedCommentService.deleteComment(commentId);
     SingleResponse<String> response =  new SingleResponse<>(HttpStatus.OK.value(), "삭제완료", null);
 
     return ResponseEntity.ok(response);
