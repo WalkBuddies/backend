@@ -80,6 +80,13 @@ public class MemberEntity implements Serializable {
         this.verifyExpiredAt = LocalDateTime.now().plusDays(1);
     }
 
+    public void updateMember(String nickName, String intoroduction, String imageUrl) {
+        this.nickname = nickName;
+        this.introduction = intoroduction;
+        this.imageUrl = imageUrl;
+        this.updateAt = LocalDateTime.now();
+    }
+
     public static MemberDetailDto entityToDetail(MemberEntity memberEntity) {
 
         return MemberDetailDto.builder()
@@ -92,14 +99,11 @@ public class MemberEntity implements Serializable {
                 .gender(memberEntity.getGender())
                 .createAt(memberEntity.getCreateAt())
                 .updateAt(memberEntity.getUpdateAt())
-                .loginType(memberEntity.getLoginType())
                 .imageUrl(memberEntity.getImageUrl())
                 .introduction(memberEntity.getIntroduction())
-                .salt(memberEntity.getSalt())
                 .passwordUpdate(memberEntity.getPasswordUpdate())
                 .socialCode(memberEntity.getSocialCode())
                 .oauthExternalId(memberEntity.getOauthExternalId())
-                .accessToken(memberEntity.getAccessToken())
                 .verify(memberEntity.isVerify())
                 .verificationCode(memberEntity.getVerificationCode())
                 .verifyExpiredAt(memberEntity.getVerifyExpiredAt())

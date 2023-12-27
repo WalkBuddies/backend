@@ -1,6 +1,7 @@
 package com.walkbuddies.backend.member.controller;
 
 import com.walkbuddies.backend.common.response.SingleResponse;
+import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.dto.*;
 import com.walkbuddies.backend.member.jwt.JwtTokenUtil;
 import com.walkbuddies.backend.member.security.MemberDetails;
@@ -92,4 +93,32 @@ public class MemberController {
         return ResponseEntity.ok(new SingleResponse<>(HttpStatus.OK.value(), "토큰 재발행", tokenResponse));
     }
 
+    @GetMapping("/update")
+    public ResponseEntity<SingleResponse> updateForm(@AuthenticationPrincipal MemberDetails memberDetails) {
+        if (memberDetails != null) {
+            MemberEntity member = memberDetails.getMember();
+            UpdateMemberDto memberDto = UpdateMemberDto.fromEntity(member);
+            SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(), "회원정보 조회 완료.", memberDto);
+            return ResponseEntity.ok(response);
+        } else {
+            SingleResponse response = new SingleResponse<>(HttpStatus.UNAUTHORIZED.value(), "로그인 상태가 아닙니다.", null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<SingleResponse> updateMember(
+            @AuthenticationPrincipal MemberDetails memberDetails,
+            @RequestBody UpdateMemberDto updateMemberDto) {
+        if (memberDetails != null) {
+            MemberEntity member = memberDetails.getMember();
+            memberService.update(member, updateMemberDto);
+            UpdateMemberDto updatedMember = UpdateMemberDto.fromEntity(member);
+            SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(), "회원정보가 업데이트 되었습니다.", updatedMember);
+            return ResponseEntity.ok(response);
+        } else {
+            SingleResponse response = new SingleResponse<>(HttpStatus.UNAUTHORIZED.value(), "로그인 상태가 아닙니다.", null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
 }
