@@ -80,9 +80,9 @@ public class MemberEntity implements Serializable {
         this.verifyExpiredAt = LocalDateTime.now().plusDays(1);
     }
 
-    public void updateMember(String nickName, String intoroduction, String imageUrl) {
+    public void updateMember(String nickName, String introduction, String imageUrl) {
         this.nickname = nickName;
-        this.introduction = intoroduction;
+        this.introduction = introduction;
         this.imageUrl = imageUrl;
         this.updateAt = LocalDateTime.now();
     }
