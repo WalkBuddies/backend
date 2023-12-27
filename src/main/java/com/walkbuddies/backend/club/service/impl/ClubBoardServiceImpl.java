@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.club.service;
+package com.walkbuddies.backend.club.service.impl;
 
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
@@ -6,6 +6,7 @@ import com.walkbuddies.backend.club.dto.ClubBoardSearch;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardConvertDtoEntity;
 import com.walkbuddies.backend.club.repository.ClubBoardRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
+import com.walkbuddies.backend.club.service.ClubBoardService;
 import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.common.dto.FileDto;
 import com.walkbuddies.backend.common.service.FileServiceImpl;

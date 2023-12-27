@@ -30,13 +30,13 @@ public interface WeatherMidService {
     Object getWeatherMidLandFcst(String regId, String tmFc) throws JsonProcessingException;
 
     /**
-     * 지역코드를 기반으로 DB에 이미 저장되어있는 지역이라면 업데이트하고 없는 지역이라면 새로 추가하는 메서드
+     * 설정된 시간에 자동으로 지역코드를 기반으로
+     * DB에 이미 저장되어있는 지역이라면 업데이트하고 없는 지역이라면 새로 추가하는 메서드
      *
-     * @param tmFc
      * @return
      * @throws JsonProcessingException
      */
-    String updateWeatherMidData(String tmFc) throws JsonProcessingException;
+    void autoUpdateWeatherMidData() throws JsonProcessingException;
 
 
     /**
@@ -46,4 +46,12 @@ public interface WeatherMidService {
      * @return
      */
     List<WeatherMidDto> getWeatherMidData(String cityName);
+
+    /**
+     * 수동으로 지역코드를 기반으로 DB에 이미 저장되어있는 지역이라면 업데이트하고 없는 지역이라면 새로 추가하는 메서드
+     * @param tmFc
+     * @return
+     * @throws JsonProcessingException
+     */
+    String manualUpdateWeatherMidData(String tmFc) throws JsonProcessingException;
 }

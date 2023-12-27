@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.dm.domain;
 
+import com.walkbuddies.backend.dm.dto.DirectMessageDto;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,4 +37,16 @@ public class DirectMessageEntity {
     private String content;
     private String contentType;
     private LocalDateTime sendTime;
+
+    public static DirectMessageDto entityToDto(DirectMessageEntity directMessageEntity) {
+        return DirectMessageDto.builder()
+                .messageId(directMessageEntity.getMessageId())
+                .chatRoomId(directMessageEntity.getChatRoomId().getChatRoomId())
+                .senderId(directMessageEntity.getSenderId().getMemberId())
+                .recipientId(directMessageEntity.getRecipientId().getMemberId())
+                .content(directMessageEntity.getContent())
+                .contentType(directMessageEntity.getContentType())
+                .sendTime(directMessageEntity.getSendTime())
+                .build();
+    }
 }

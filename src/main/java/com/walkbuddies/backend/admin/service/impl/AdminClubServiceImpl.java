@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +51,7 @@ public class AdminClubServiceImpl implements AdminClubService {
                 .accessLimit(clubDto.getAccessLimit())
                 .needGrant(clubDto.getNeedGrant())
                 .regDate(clubEntity.getRegDate())
-                .modDate(LocalDate.now())
+                .modDate(LocalDateTime.now())
                 .build();
         clubRepository.save(updatedClubEntity);
 
