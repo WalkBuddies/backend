@@ -39,6 +39,7 @@ public class ClubBoardEntity {
     private String title;
     private String content;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prefaceId")
     private ClubPreface preface;
     @CreationTimestamp
     private LocalDateTime createAt;
