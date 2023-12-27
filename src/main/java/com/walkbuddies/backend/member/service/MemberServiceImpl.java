@@ -122,6 +122,16 @@ public class MemberServiceImpl implements MemberService {
         return MemberResponse.fromEntity(member);
     }
 
+    @Override
+    public MemberEntity getMemberEntity(Long memberId) {
+        Optional<MemberEntity> op = memberRepository.findByMemberId(memberId);
+        if (op.isEmpty()) {
+            throw new NotFoundMemberException();
+        }
+
+        return op.get();
+    }
+
     private String generateTempPassword() {
         final int MIN = 8;
         final int MAX = 16;

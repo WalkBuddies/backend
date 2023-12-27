@@ -13,11 +13,10 @@ import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.common.dto.FileDto;
-import com.walkbuddies.backend.common.service.FileServiceImpl;
+import com.walkbuddies.backend.common.service.FileService;
 import com.walkbuddies.backend.exception.impl.NoPostException;
 import com.walkbuddies.backend.exception.impl.NoResultException;
 import com.walkbuddies.backend.exception.impl.NotFoundClubException;
-import com.walkbuddies.backend.member.repository.MemberRepository;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -42,10 +41,10 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     private final PrefaceConvertDtoEntity prefaceConvertDtoEntity;
 
     private final ClubBoardConvertDtoEntity clubBoardConvertDtoEntity;
-    private final MemberRepository memberRepository;
-    private final FileServiceImpl fileService;
+    private final FileService fileService;
 
     /**
+     * 게시글 쓰기
      * 파일 있으면 파일업로드 후 dto 받아서 등록
      * @param files 파일목록
      * @param clubBoardDto 게시글 dto
@@ -55,21 +54,18 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     @Transactional
     public ClubBoardDto createPost(List<MultipartFile> files, ClubBoardDto clubBoardDto) {
         clubBoardDto.setFileYn(0);
+        List<FileDto> fileDtos = new ArrayList<>();
         if (files != null) {
-            List<FileEntity> fileEntities = fileService.uploadFiles(files);
-            List<FileDto> fileDtos = new ArrayList<>();
-            for (FileEntity entity : fileEntities) {
-                fileDtos.add(FileEntity.entityToDto(entity));
-            }
+            fileDtos = fileService.uploadFiles(files).stream().map(FileEntity::entityToDto).toList();
             clubBoardDto.setFileYn(1);
             clubBoardDto.setFileId(fileDtos);
         }
+
         clubBoardDto.setDeleteYn(0);
         clubBoardDto.setCreateAt(LocalDateTime.now());
 
 
         ClubBoardEntity result = clubBoardRepository.save(clubBoardConvertDtoEntity.dtoToEntity(clubBoardDto));
-        System.out.println(result);
         return clubBoardConvertDtoEntity.entityToDto(result);
 
     }
@@ -78,7 +74,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      * 게시글 상세보기
      * 삭제여부 체크후 0일 시 반환
      * @param boardIdx 게시글번호
-     * @return clubDto
+     * @return clubBoardDto
      */
 
     @Override
