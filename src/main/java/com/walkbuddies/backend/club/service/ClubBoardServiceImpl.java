@@ -20,7 +20,6 @@ import com.walkbuddies.backend.exception.impl.NotFoundClubException;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -77,7 +76,6 @@ public class ClubBoardServiceImpl implements ClubBoardService {
 
     /**
      * 게시글 상세보기
-     * to-be: 파일첨부 조회
      * 삭제여부 체크후 0일 시 반환
      * @param boardIdx 게시글번호
      * @return clubDto
@@ -85,21 +83,11 @@ public class ClubBoardServiceImpl implements ClubBoardService {
 
     @Override
     public ClubBoardDto getPost(Long boardIdx) {
-        Optional<ClubBoardEntity> optionalEntity = clubBoardRepository.findByClubBoardId(boardIdx);
-        ClubBoardDto result;
-
-        if (optionalEntity.isPresent()) {
-            ClubBoardEntity entity = optionalEntity.get();
-            result = clubBoardConvertDtoEntity.entityToDto(entity);
-
-            if (entity.getDeleteYn() == 1) {
-                throw new NoPostException();
-            }
-        } else {
+        ClubBoardEntity entity = getBoardEntity(boardIdx);
+        if (entity.getDeleteYn() == 1) {
             throw new NoPostException();
         }
-
-        return result;
+        return clubBoardConvertDtoEntity.entityToDto(entity);
     }
 
     /**
@@ -162,21 +150,13 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      */
     @Override
     public void deletePost(Long boardIdx) {
-        Optional<ClubBoardEntity> result =  clubBoardRepository.findByClubBoardId(boardIdx);
-        if (result.isEmpty()) {
-            throw new NoPostException();
-        }
-
-        ClubBoardDto updateDto = clubBoardConvertDtoEntity.entityToDto(result.get());
-
-        updateDto.setDeleteYn(1);
-        updateDto.setDeleteAt(LocalDateTime.now());
-        ClubBoardEntity request = clubBoardConvertDtoEntity.dtoToEntity(updateDto);
-        clubBoardRepository.save(request);
+        ClubBoardEntity entity = getBoardEntity(boardIdx);
+        entity.changeDeleteYn(1);
+        clubBoardRepository.save(entity);
     }
 
     /**
-     * 게시글 불러오기
+     * 게시글 entity 불러오기
      * @param boardIdx 원글번호
      * @return clubBoardEntity
      */
@@ -213,6 +193,17 @@ public class ClubBoardServiceImpl implements ClubBoardService {
             .map(prefaceConvertDtoEntity::prefaceEntityToDto).toList();
 
 
+    }
+
+    /**
+     * 게시글 복구
+     * @param boardIdx
+     */
+    @Override
+    public void CluBoardRestore(Long boardIdx) {
+        ClubBoardEntity entity = getBoardEntity(boardIdx);
+        entity.changeDeleteYn(0);
+        clubBoardRepository.save(entity);
     }
 
 

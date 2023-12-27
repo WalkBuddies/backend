@@ -66,8 +66,12 @@ public class ClubBoardCommentEntity {
     this.content = dto.getContent();
   }
 
-  public void delete() {
-    this.deleteYn = 1;
-    this.deleteAt = LocalDateTime.now();
+  public void changeDeleteYn(int deleteYn) {
+    this.deleteYn = deleteYn;
+    if (deleteYn == 1) {
+      this.deleteAt = LocalDateTime.now();
+    } else if (deleteYn == 0) {
+      this.deleteAt = null;
+    }
   }
 }
