@@ -20,21 +20,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/feed/")
+@RequestMapping("/feed")
 public class FeedCommentController {
   private final FeedCommentService feedCommentService;
 
 
   /**
    * 리플작성
-   * @param boardIdx : 원글 번호
+   * @param feedId : 원글 번호
    * @param dto : 댓글dto
    * @return
    */
-  @PostMapping("/{boardIdx}/comment")
-  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long boardIdx, @RequestBody FeedCommentDto dto) {
+  @PostMapping("/{feedId}/comment")
+  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long feedId, @RequestBody FeedCommentDto dto) {
 
-    FeedCommentDto result = feedCommentService.createComment(boardIdx, dto);
+    FeedCommentDto result = feedCommentService.createComment(feedId, dto);
 
     SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
         result.toString());
@@ -45,10 +45,10 @@ public class FeedCommentController {
 
   //list
 
-  @GetMapping("/{boardIdx}/comment-list")
+  @GetMapping("/{feedId}/comment-list")
   public ResponseEntity<PageResponse<Page<FeedCommentDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
-                              Pageable pageable, @PathVariable Long boardIdx) {
-    Page<FeedCommentDto> result = feedCommentService.getCommentList(pageable, boardIdx);
+                              Pageable pageable, @PathVariable Long feedId) {
+    Page<FeedCommentDto> result = feedCommentService.getCommentList(pageable, feedId);
     PageResponse<Page<FeedCommentDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
         result);
     return ResponseEntity.ok(response);

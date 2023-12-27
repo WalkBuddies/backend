@@ -3,10 +3,8 @@ package com.walkbuddies.backend.club.controller;
 import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.club.service.ClubBoardCommentService;
-import com.walkbuddies.backend.common.response.ListResponse;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,14 +28,14 @@ public class ClubBoardCommentController {
 
   /**
    * 리플작성
-   * @param feedIdx : 원글 번호
+   * @param boardId : 원글 번호
    * @param requestDto : 댓글dto
    * @return
    */
-  @PostMapping("/{feedIdx}/comment")
-  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long feedIdx, @RequestBody RequestDto requestDto) {
+  @PostMapping("/{boardId}/comment")
+  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long boardId, @RequestBody RequestDto requestDto) {
 
-    ResponseDto result = clubBoardCommentService.createComment(feedIdx, requestDto);
+    ResponseDto result = clubBoardCommentService.createComment(boardId, requestDto);
 
     SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
         result.toString());
@@ -48,12 +46,12 @@ public class ClubBoardCommentController {
 
   //list
 
-  @GetMapping("/{boardIdx}/comment-list")
+  @GetMapping("/{boardId}/comment-list")
   public ResponseEntity<PageResponse<Page<ResponseDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
        Pageable pageable
-      ,@PathVariable Long boardIdx) {
+      ,@PathVariable Long boardId) {
 
-    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardIdx);
+    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardId);
     PageResponse<Page<ResponseDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
         result);
     return ResponseEntity.ok(response);

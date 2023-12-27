@@ -1,6 +1,5 @@
 package com.walkbuddies.backend.feed.controller;
 
-import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
 import com.walkbuddies.backend.feed.dto.FeedDto;
@@ -40,11 +39,11 @@ public class FeedController {
   }
 
   //read
-  @GetMapping("/board-details/{boardIdx}")
-  public ResponseEntity<SingleResponse<FeedDto>> readBoard(@PathVariable Long boardIdx) {
+  @GetMapping("/feed-details/{feedId}")
+  public ResponseEntity<SingleResponse<FeedDto>> readBoard(@PathVariable Long feedId) {
 
     SingleResponse<FeedDto> result = new SingleResponse<>(HttpStatus.OK.value(), "조회 완료",
-        feedService.getFeed(boardIdx));
+        feedService.getFeed(feedId));
 
     return ResponseEntity.ok(result);
   }
@@ -75,9 +74,9 @@ public class FeedController {
 
   //delete
 
-  @GetMapping("/delete/{boardIdx}")
-  public ResponseEntity<SingleResponse<String>> deleteBoard(@PathVariable long boardIdx) {
-    feedService.deleteFeed(boardIdx);
+  @GetMapping("/delete/{feedId}")
+  public ResponseEntity<SingleResponse<String>> deleteBoard(@PathVariable long feedId) {
+    feedService.deleteFeed(feedId);
 
     SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "삭제 완료",
         null);
@@ -86,9 +85,9 @@ public class FeedController {
   }
 
 
-  @GetMapping("restore/{boardIdx}")
-  public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long boardIdx) {
-    feedService.restoreFeed(boardIdx);
+  @GetMapping("restore/{feedId}")
+  public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long feedId) {
+    feedService.restoreFeed(feedId);
 
     SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "복구 완료", null);
 
