@@ -1,6 +1,7 @@
 package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
+import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.club.dto.ClubBoardSearch;
 import java.util.List;
@@ -59,4 +60,5 @@ public interface ClubBoardService {
    * @return
    */
   ClubBoardEntity getBoardEntity(Long boardIdx);
+  List<ClubPrefaceDto> getClubPreface(Long clubIdx);
 }

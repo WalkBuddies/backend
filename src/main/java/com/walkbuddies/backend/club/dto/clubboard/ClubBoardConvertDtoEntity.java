@@ -2,6 +2,7 @@ package com.walkbuddies.backend.club.dto.clubboard;
 
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
 import com.walkbuddies.backend.club.repository.ClubRepository;
+import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 public class ClubBoardConvertDtoEntity {
   private final ClubRepository clubRepository;
   private final MemberRepository memberRepository;
+  private final ClubPrefaceRepository clubPrefaceRepository;
   public ClubBoardEntity dtoToEntity(ClubBoardDto dto) {
     return ClubBoardEntity.builder()
         .clubBoardId(dto.getClubBoardId())
@@ -27,6 +29,7 @@ public class ClubBoardConvertDtoEntity {
         .noticeYn(dto.getNoticeYn())
         .deleteYn(dto.getDeleteYn())
         .fileYn(dto.getFileYn())
+        .preface(clubPrefaceRepository.findByPrefaceId(dto.getPrefaceId()).get())
         .build();
   }
   public ClubBoardDto entityToDto(ClubBoardEntity entity) {
@@ -44,6 +47,7 @@ public class ClubBoardConvertDtoEntity {
         .noticeYn(entity.getNoticeYn())
         .deleteYn(entity.getDeleteYn())
         .fileYn(entity.getFileYn())
+        .prefaceId(entity.getPreface().getPrefaceId())
         .build();
   }
 }

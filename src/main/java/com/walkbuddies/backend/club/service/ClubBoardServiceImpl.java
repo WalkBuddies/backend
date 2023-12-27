@@ -1,19 +1,26 @@
 package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
+import com.walkbuddies.backend.club.domain.ClubEntity;
+import com.walkbuddies.backend.club.domain.ClubPreface;
+import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
+import com.walkbuddies.backend.club.dto.PrefaceConvertDtoEntity;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.club.dto.ClubBoardSearch;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardConvertDtoEntity;
 import com.walkbuddies.backend.club.repository.ClubBoardRepository;
+import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.common.dto.FileDto;
 import com.walkbuddies.backend.common.service.FileServiceImpl;
 import com.walkbuddies.backend.exception.impl.NoPostException;
 import com.walkbuddies.backend.exception.impl.NoResultException;
+import com.walkbuddies.backend.exception.impl.NotFoundClubException;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,7 +38,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class ClubBoardServiceImpl implements ClubBoardService {
     private final ClubBoardRepository clubBoardRepository;
+    private final ClubPrefaceRepository clubPrefaceRepository;
     private final ClubRepository clubRepository;
+    private final PrefaceConvertDtoEntity prefaceConvertDtoEntity;
+
     private final ClubBoardConvertDtoEntity clubBoardConvertDtoEntity;
     private final MemberRepository memberRepository;
     private final FileServiceImpl fileService;
@@ -138,7 +148,8 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     @Override
     public ClubBoardDto updatePost(ClubBoardDto clubBoardDto) {
         ClubBoardEntity entity = getBoardEntity(clubBoardDto.getClubBoardId());
-        entity.update(clubBoardDto);
+        ClubPreface preface = clubPrefaceRepository.findByPrefaceId(clubBoardDto.getPrefaceId()).get();
+        entity.update(clubBoardDto, preface);
         clubBoardRepository.save(entity);
 
         return clubBoardConvertDtoEntity.entityToDto(entity);
@@ -180,6 +191,29 @@ public class ClubBoardServiceImpl implements ClubBoardService {
         return op.get();
     }
 
+    /**
+     *
+     * @param clubIdx 클럽id
+     * @return clubPrefaceDto list
+     */
+    @Override
+    public List<ClubPrefaceDto> getClubPreface(Long clubIdx) {
+        Optional<ClubEntity> opClub = clubRepository.findByClubId(clubIdx);
+        if (opClub.isEmpty()) {
+            throw new NotFoundClubException();
+        }
+        ClubEntity entity = opClub.get();
+
+        Optional<List<ClubPreface>> opClubPreface = clubPrefaceRepository.findAllByClubId(entity);
+        if (opClubPreface.isEmpty()) {
+            throw new NoResultException();
+        }
+
+        return opClubPreface.get().stream()
+            .map(prefaceConvertDtoEntity::prefaceEntityToDto).toList();
+
+
+    }
 
 
 }
