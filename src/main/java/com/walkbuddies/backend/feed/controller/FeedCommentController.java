@@ -1,12 +1,8 @@
 package com.walkbuddies.backend.feed.controller;
 
-import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
-import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
-import com.walkbuddies.backend.feed.domain.FeedCommentEntity;
 import com.walkbuddies.backend.feed.dto.FeedCommentDto;
-import com.walkbuddies.backend.feed.dto.FeedDto;
 import com.walkbuddies.backend.feed.service.FeedCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

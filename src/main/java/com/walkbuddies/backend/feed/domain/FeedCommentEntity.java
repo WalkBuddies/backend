@@ -1,7 +1,5 @@
 package com.walkbuddies.backend.feed.domain;
 
-import com.walkbuddies.backend.club.domain.ClubBoardCommentEntity;
-import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.feed.dto.FeedCommentDto;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import jakarta.persistence.Entity;
@@ -13,7 +11,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.nio.MappedByteBuffer;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
