@@ -19,10 +19,17 @@ import org.springframework.stereotype.Service;
 public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
   private final ClubBoardCommentConvertDtoEntity clubBoardCommentConvertDtoEntity;
   private final ClubBoardRepository clubBoardRepository;
+  private final ClubBoardService clubBoardService;
 
   private final ClubBoardCommentRepository clubBoardCommentRepository;
 
-   @Override
+  /**
+   * 댓글쓰기
+   * @param boardIdx 원글번호
+   * @param requestDto 댓글요청 dto
+   * @return
+   */
+  @Override
   public ResponseDto createComment(Long boardIdx, RequestDto requestDto) {
       requestDto.setClubBoardId(boardIdx);
       ClubBoardCommentEntity entity = clubBoardCommentConvertDtoEntity.toEntity(requestDto);
@@ -35,47 +42,73 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
       return clubBoardCommentConvertDtoEntity.toDto(entity);
   }
 
+  /**
+   * 댓글목록불러오기
+   * @param pageable 페이징정보
+   * @param boardIdx 원글번호
+   * @return Page객체
+   */
   @Override
   public Page<ResponseDto> getCommentList(Pageable pageable, Long boardIdx) {
-    System.out.println("페이지넘버: " + pageable.getPageNumber());
-    ClubBoardEntity boardEntity = clubBoardRepository.findByClubBoardId(boardIdx).orElseThrow(
-        NoResultException::new);
+     ClubBoardEntity boardEntity = clubBoardService.getBoardEntity(boardIdx);
 
      Page<ClubBoardCommentEntity> response = clubBoardCommentRepository.findAllByClubBoardIdAndDeleteYn(pageable, boardEntity, 0);
 
-     Page<ResponseDto> result = clubBoardCommentConvertDtoEntity.toPageDto(response);
-
-    System.out.println(result);
-
-    return result;
+    return clubBoardCommentConvertDtoEntity.toPageDto(response);
 
   }
 
+  /**
+   * 댓글수정
+   * @param requestDto 댓글번호, 수정내용 필수
+   * @return
+   */
   @Override
   public ResponseDto updateComment(RequestDto requestDto) {
-     Optional<ClubBoardCommentEntity> optional = clubBoardCommentRepository.findByClubBoardCommentId(
-         requestDto.getClubBoardCommentId());
-     if (optional.isEmpty()) {
-       throw new NoResultException();
-     }
-     ClubBoardCommentEntity entity = optional.get();
+
+     ClubBoardCommentEntity entity = getCommentEntity(requestDto.getClubBoardCommentId());
      entity.updateContent(requestDto);
      clubBoardCommentRepository.save(entity);
 
     return clubBoardCommentConvertDtoEntity.toDto(entity);
   }
 
-  @Override
-  public void deleteComment(Long commentId) {
-     Optional<ClubBoardCommentEntity> optional = clubBoardCommentRepository.findByClubBoardCommentId(commentId);
-
+  /**
+   * 댓글entity 로드
+   * @param commentId 댓글번호
+   * @return
+   */
+  public ClubBoardCommentEntity getCommentEntity(Long commentId) {
+     Optional <ClubBoardCommentEntity> optional = clubBoardCommentRepository.findByClubBoardCommentId(commentId);
      if (optional.isEmpty()) {
        throw new NoResultException();
      }
-     ClubBoardCommentEntity entity = optional.get();
-     entity.delete();
+    return optional.get();
+  }
+
+  /**
+   * 댓글삭제
+   * @param commentId
+   */
+  @Override
+  public void deleteComment(Long commentId) {
+     ClubBoardCommentEntity entity = getCommentEntity(commentId);
+
+     entity.changeDeleteYn(1);
+
      clubBoardCommentRepository.save(entity);
 
+  }
+
+  /**
+   * 댓글 복구
+   * @param commentId
+   */
+  @Override
+  public void restoreComment(Long commentId) {
+    ClubBoardCommentEntity entity = getCommentEntity(commentId);
+    entity.changeDeleteYn(0);
+    clubBoardCommentRepository.save(entity);
   }
 
 

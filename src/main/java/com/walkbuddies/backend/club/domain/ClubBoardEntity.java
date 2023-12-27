@@ -60,4 +60,12 @@ public class ClubBoardEntity {
         this.updateAt = LocalDateTime.now();
     }
 
+    public void changeDeleteYn(int deleteYn) {
+        this.deleteYn = deleteYn;
+        if (deleteYn == 1) {
+            this.deleteAt = LocalDateTime.now();
+        } else if (deleteYn == 0) {
+            this.deleteAt = null;
+        }
+    }
 }

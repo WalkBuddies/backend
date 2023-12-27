@@ -55,10 +55,22 @@ public interface ClubBoardService {
   void deletePost(Long boardIdx);
 
   /**
-   * 게시글정보
+   * 게시글entity 불러오기
    * @param boardIdx
    * @return
    */
   ClubBoardEntity getBoardEntity(Long boardIdx);
+
+  /**
+   * 말머리불러오기
+   * @param clubIdx 클럽번호
+   * @return
+   */
   List<ClubPrefaceDto> getClubPreface(Long clubIdx);
+
+  /**
+   * 삭제글 복구
+   * @param boardIdx
+   */
+  void CluBoardRestore(Long boardIdx);
 }

@@ -102,4 +102,14 @@ public class ClubBoardController {
 
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("restore/{boardIdx}")
+    public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long boardIdx) {
+        clubBoardService.CluBoardRestore(boardIdx);
+
+        SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "복구 완료", null);
+
+        return ResponseEntity.ok(result);
+
+    }
 }
