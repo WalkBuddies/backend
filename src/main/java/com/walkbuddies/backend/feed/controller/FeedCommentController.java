@@ -46,9 +46,9 @@ public class FeedCommentController {
   //list
 
   @GetMapping("/{feedId}/comment-list")
-  public ResponseEntity<PageResponse<Page<FeedCommentDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
+  public ResponseEntity<PageResponse<Page<FeedCommentDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "feedCommentId", direction = Direction.DESC)
                               Pageable pageable, @PathVariable Long feedId) {
-    Page<FeedCommentDto> result = feedCommentService.getCommentList(pageable, feedId);
+    Page<FeedCommentDto> result = feedCommentService.getCommentList(pageable, feedId, 0);
     PageResponse<Page<FeedCommentDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
         result);
     return ResponseEntity.ok(response);
@@ -67,6 +67,14 @@ public class FeedCommentController {
   public ResponseEntity<SingleResponse<String>> deleteComment(@PathVariable Long commentId) {
     feedCommentService.deleteComment(commentId);
     SingleResponse<String> response =  new SingleResponse<>(HttpStatus.OK.value(), "삭제완료", null);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/{commentId}/comment-restore")
+  public ResponseEntity<SingleResponse<String>> restoreComment(@PathVariable Long commentId) {
+    feedCommentService.restoreComment(commentId);
+    SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "복구완료", null);
 
     return ResponseEntity.ok(response);
   }

@@ -32,12 +32,7 @@ public class FileEntity {
   private String saveName;
   private Long size;
   private LocalDateTime createAt;
-  private Integer deleteYn;
-  private LocalDateTime deleteAt;
-  @ManyToOne
-  private ClubBoardEntity boardId;
-  @ManyToOne
-  private FeedEntity feedId;
+
 
 
   public FileDto entityToDto(FileEntity entity) {
@@ -46,8 +41,6 @@ public class FileEntity {
         .originalName(entity.getOriginalName())
         .savedName(entity.getSaveName())
         .createAt(entity.getCreateAt())
-        .deleteYn(entity.getDeleteYn())
-        .deleteAt(entity.getDeleteAt())
         .size(entity.getSize())
         .build();
   }
@@ -58,8 +51,6 @@ public class FileEntity {
         .originalName(dto.getOriginalName())
         .saveName(dto.getSavedName())
         .createAt(dto.getCreateAt())
-        .deleteYn(dto.getDeleteYn())
-        .deleteAt(dto.getDeleteAt())
         .size(dto.getSize())
         .build();
   }

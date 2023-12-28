@@ -32,6 +32,7 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
   @Override
   public ResponseDto createComment(Long boardIdx, RequestDto requestDto) {
       requestDto.setClubBoardId(boardIdx);
+      requestDto.setDeleteYn(0);
       ClubBoardCommentEntity entity = convert.toEntity(requestDto);
       if (requestDto.getParentId() != null) {
         entity.updateParent(getCommentEntity(requestDto.getParentId()));
@@ -49,12 +50,10 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
    * @return
    */
   @Override
-  public Page<ResponseDto> getCommentList(Pageable pageable, Long boardId) {
+  public Page<ResponseDto> getCommentList(Pageable pageable, Long boardId, Integer deleteYn) {
      ClubBoardEntity boardEntity = clubBoardService.getBoardEntity(boardId);
-
-     Page<ClubBoardCommentEntity> result = clubBoardCommentRepository.findAllByClubBoardIdAndDeleteYn(pageable, boardEntity, 0);
-
-    return convert.toPageDto(result);
+     Page<ClubBoardCommentEntity> result = clubBoardCommentRepository.findAllByClubBoardIdAndDeleteYn(pageable, boardEntity, deleteYn);
+    return result.map(convert::toDto);
 
   }
 

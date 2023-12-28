@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface FeedCommentService {
   FeedCommentDto createComment(Long memberId, FeedCommentDto dto);
-  Page<FeedCommentDto> getCommentList(Pageable pageable, Long boardIdx);
+  Page<FeedCommentDto> getCommentList(Pageable pageable, Long boardIdx, Integer deleteYn);
   FeedCommentDto updateComment(FeedCommentDto requestDto);
   void deleteComment(Long commentId);
   void restoreComment(Long commentId);

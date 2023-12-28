@@ -5,6 +5,7 @@ import com.walkbuddies.backend.common.dto.FileDto;
 import com.walkbuddies.backend.common.service.FileService;
 import com.walkbuddies.backend.exception.impl.NoPostException;
 import com.walkbuddies.backend.feed.domain.FeedEntity;
+import com.walkbuddies.backend.feed.dto.FeedCommentConvertEntityDto;
 import com.walkbuddies.backend.feed.dto.FeedConvertEntityDto;
 import com.walkbuddies.backend.feed.dto.FeedDto;
 import com.walkbuddies.backend.feed.repository.FeedRepository;
@@ -13,6 +14,7 @@ import com.walkbuddies.backend.member.service.MemberService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ public class FeedServiceImpl implements FeedService {
   private final FeedRepository feedRepository;
   private final FeedConvertEntityDto feedConvertEntityDto;
   private final MemberService memberService;
+
 
   /**
    * 피드 쓰기
@@ -76,11 +79,12 @@ public class FeedServiceImpl implements FeedService {
    * @return
    */
   @Override
-  public Page<FeedDto> feedList(Pageable pageable, Long memberId) {
+  public Page<FeedDto> feedList(Pageable pageable, Long memberId, Integer deleteYn) {
     MemberEntity memberEntity = memberService.getMemberEntity(memberId);
-
-    return feedConvertEntityDto.toPageFeedDto(
-        feedRepository.findAllByMemberIdAndDeleteYn(pageable, memberEntity, 0));
+    Page<FeedEntity> result = feedRepository.findAllByMemberIdAndDeleteYn(pageable, memberEntity,
+        deleteYn);
+    Page<FeedDto> dtos = result.map(feedConvertEntityDto::entityToDto);
+    return dtos;
   }
 
   /**

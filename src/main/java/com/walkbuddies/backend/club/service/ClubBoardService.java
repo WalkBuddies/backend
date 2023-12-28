@@ -32,14 +32,14 @@ public interface ClubBoardService {
    * @param pageable (page 필요)
    * @return
    */
-  Page<ClubBoardDto> postList(Pageable pageable);
+  Page<ClubBoardDto> postList(Pageable pageable, Long clubId, Integer deleteYn);
   /**
    *
    * @param pageable (현재페이지 page)
    * @param search (검색키워드 keyword, 검색컬럼 type)
    * @return
    */
-  Page<ClubBoardDto> postSearchList(Pageable pageable, ClubBoardSearch search);
+  Page<ClubBoardDto> postSearchList(Pageable pageable, Long clubId, ClubBoardSearch search, Integer deleteYn);
   /**
    * 게시글 수정
    *

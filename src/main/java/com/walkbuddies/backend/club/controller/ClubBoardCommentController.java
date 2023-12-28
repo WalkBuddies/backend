@@ -33,12 +33,12 @@ public class ClubBoardCommentController {
    * @return
    */
   @PostMapping("/{boardId}/comment")
-  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long boardId, @RequestBody RequestDto requestDto) {
+  public ResponseEntity<SingleResponse<ResponseDto>> createComment(@PathVariable Long boardId, @RequestBody RequestDto requestDto) {
 
     ResponseDto result = clubBoardCommentService.createComment(boardId, requestDto);
 
-    SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
-        result.toString());
+    SingleResponse<ResponseDto> response = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
+        result);
 
     return ResponseEntity.ok(response);
 
@@ -51,7 +51,7 @@ public class ClubBoardCommentController {
        Pageable pageable
       ,@PathVariable Long boardId) {
 
-    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardId);
+    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardId, 0);
     PageResponse<Page<ResponseDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
         result);
     return ResponseEntity.ok(response);
@@ -71,6 +71,25 @@ public class ClubBoardCommentController {
     clubBoardCommentService.deleteComment(commentId);
     SingleResponse<String> response =  new SingleResponse<>(HttpStatus.OK.value(), "삭제완료", null);
 
+    return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/{commentId}/comment-restore")
+  public ResponseEntity<SingleResponse<String>> restoreComment(@PathVariable Long commentId) {
+    clubBoardCommentService.restoreComment(commentId);
+    SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "복구완료", null);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{boardId}/deleted-comment-list")
+  public ResponseEntity<PageResponse<Page<ResponseDto>>> deletedCommentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
+                                                        Pageable pageable
+                                                      ,@PathVariable Long boardId) {
+
+    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardId, 1);
+    PageResponse<Page<ResponseDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
+        result);
     return ResponseEntity.ok(response);
   }
 }

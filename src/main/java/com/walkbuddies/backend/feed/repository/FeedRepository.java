@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FeedRepository extends JpaRepository<FeedEntity, Long> {
   Optional<FeedEntity> findByFeedId(Long feedId);
-  Page<FeedEntity> findAllByMemberIdAndDeleteYn(Pageable pageable, MemberEntity entity, int deleteYn);
+  Page<FeedEntity> findAllByMemberIdAndDeleteYn(Pageable pageable, MemberEntity entity, Integer deleteYn);
 }

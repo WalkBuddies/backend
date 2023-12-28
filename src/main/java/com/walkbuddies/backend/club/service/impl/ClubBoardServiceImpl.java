@@ -92,8 +92,10 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      * @return
      */
     @Override
-    public Page<ClubBoardDto> postList(Pageable pageable) {
-        return clubBoardRepository.findAllByDeleteYn(pageable, 0).map(clubBoardConvertDtoEntity::entityToDto);
+    public Page<ClubBoardDto> postList(Pageable pageable, Long clubId, Integer deleteYn) {
+        ClubEntity entity = getClubEntity(clubId);
+
+        return clubBoardRepository.findAllByClubIdAndDeleteYn(pageable, entity, deleteYn).map(clubBoardConvertDtoEntity::entityToDto);
     }
 
     /**
@@ -103,14 +105,16 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      * @return
      */
     @Override
-    public Page<ClubBoardDto> postSearchList(Pageable pageable, ClubBoardSearch search) {
+    public Page<ClubBoardDto> postSearchList(Pageable pageable, Long clubId, ClubBoardSearch search, Integer deleteYn) {
+        ClubEntity entity = getClubEntity(clubId);
         Page<ClubBoardDto> result = switch (search.getType()) {
-            case "제목" -> clubBoardRepository.findByTitleContainingAndDeleteYn(pageable, search.getKeyword(), 0)
+            case "제목" -> clubBoardRepository.findByClubIdAndTitleContainingAndDeleteYn(pageable, entity, search.getKeyword(), deleteYn)
                 .map(clubBoardConvertDtoEntity::entityToDto);
-
-            case "작성자" -> clubBoardRepository.findByNicknameContainingAndDeleteYn(pageable, search.getKeyword(), 0)
+            case "작성자" -> clubBoardRepository.findByClubIdAndNicknameContainingAndDeleteYn(pageable, entity, search.getKeyword(), deleteYn)
                 .map(clubBoardConvertDtoEntity::entityToDto);
-            case "내용" -> clubBoardRepository.findByContentContainingAndDeleteYn(pageable, search.getKeyword(), 0)
+            case "내용" -> clubBoardRepository.findByClubIdAndContentContainingAndDeleteYn(pageable, entity, search.getKeyword(), deleteYn)
+                .map(clubBoardConvertDtoEntity::entityToDto);
+            case "말머리" -> clubBoardRepository.findByClubIdAndPrefaceAndDeleteYn(pageable, entity,  search.getKeyword(), deleteYn)
                 .map(clubBoardConvertDtoEntity::entityToDto);
             default -> throw new NoResultException();
         };
@@ -216,5 +220,13 @@ public class ClubBoardServiceImpl implements ClubBoardService {
         clubBoardRepository.save(entity);
     }
 
+    public ClubEntity getClubEntity(Long clubId) {
+        Optional<ClubEntity> op = clubRepository.findByClubId(clubId);
+        if (op.isEmpty()) {
+            throw new NotFoundClubException();
+        }
+
+        return op.get();
+    }
 
 }

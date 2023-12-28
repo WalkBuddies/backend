@@ -15,6 +15,5 @@ public interface ClubBoardCommentRepository extends JpaRepository<ClubBoardComme
   Page<ClubBoardCommentEntity> findAllByClubBoardIdAndDeleteYn(Pageable pageable, ClubBoardEntity boardEntity, int deleteYn);
 
   Optional<ClubBoardCommentEntity> findByClubBoardCommentId(Long clubBoardCommentId);
-//  List<ClubBoardCommentEntity> findAllByClubBoardIdAndDeleteYn(Pageable pageable, ClubBoardEntity entity, int deleteYn);
 
 }

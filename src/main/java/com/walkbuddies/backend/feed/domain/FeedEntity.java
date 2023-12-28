@@ -33,7 +33,6 @@ public class FeedEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long feedId;
-
   @ManyToOne (fetch = FetchType.LAZY)
   @JoinColumn(name = "memberId")
   private MemberEntity memberId;
