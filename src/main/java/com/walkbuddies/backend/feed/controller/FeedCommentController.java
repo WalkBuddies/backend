@@ -1,10 +1,9 @@
-package com.walkbuddies.backend.club.controller;
+package com.walkbuddies.backend.feed.controller;
 
-import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
-import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
-import com.walkbuddies.backend.club.service.ClubBoardCommentService;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
+import com.walkbuddies.backend.feed.dto.FeedCommentDto;
+import com.walkbuddies.backend.feed.service.FeedCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,21 +20,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/club/board")
-public class ClubBoardCommentController {
-  private final ClubBoardCommentService clubBoardCommentService;
+@RequestMapping("/feed")
+public class FeedCommentController {
+  private final FeedCommentService feedCommentService;
 
 
   /**
    * 리플작성
-   * @param boardId : 원글 번호
-   * @param requestDto : 댓글dto
+   * @param feedId : 원글 번호
+   * @param dto : 댓글dto
    * @return
    */
-  @PostMapping("/{boardId}/comment")
-  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long boardId, @RequestBody RequestDto requestDto) {
+  @PostMapping("/{feedId}/comment")
+  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long feedId, @RequestBody FeedCommentDto dto) {
 
-    ResponseDto result = clubBoardCommentService.createComment(boardId, requestDto);
+    FeedCommentDto result = feedCommentService.createComment(feedId, dto);
 
     SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
         result.toString());
@@ -46,20 +45,18 @@ public class ClubBoardCommentController {
 
   //list
 
-  @GetMapping("/{boardId}/comment-list")
-  public ResponseEntity<PageResponse<Page<ResponseDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
-       Pageable pageable
-      ,@PathVariable Long boardId) {
-
-    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardId);
-    PageResponse<Page<ResponseDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
+  @GetMapping("/{feedId}/comment-list")
+  public ResponseEntity<PageResponse<Page<FeedCommentDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
+                              Pageable pageable, @PathVariable Long feedId) {
+    Page<FeedCommentDto> result = feedCommentService.getCommentList(pageable, feedId);
+    PageResponse<Page<FeedCommentDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
         result);
     return ResponseEntity.ok(response);
   }
   //update
   @PostMapping("/comment-update")
-  public ResponseEntity<SingleResponse<String>> updateComment(@RequestBody RequestDto dto) {
-    ResponseDto result = clubBoardCommentService.updateComment(dto);
+  public ResponseEntity<SingleResponse<String>> updateComment(@RequestBody FeedCommentDto dto) {
+    FeedCommentDto result = feedCommentService.updateComment(dto);
     SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "수정완료", result.toString());
 
     return ResponseEntity.ok(response);
@@ -68,7 +65,7 @@ public class ClubBoardCommentController {
 
   @PostMapping("/{commentId}/comment-delete")
   public ResponseEntity<SingleResponse<String>> deleteComment(@PathVariable Long commentId) {
-    clubBoardCommentService.deleteComment(commentId);
+    feedCommentService.deleteComment(commentId);
     SingleResponse<String> response =  new SingleResponse<>(HttpStatus.OK.value(), "삭제완료", null);
 
     return ResponseEntity.ok(response);

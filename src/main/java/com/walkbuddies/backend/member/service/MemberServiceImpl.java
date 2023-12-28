@@ -123,10 +123,20 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+
+    public MemberEntity getMemberEntity(Long memberId) {
+        Optional<MemberEntity> op = memberRepository.findByMemberId(memberId);
+        if (op.isEmpty()) {
+            throw new NotFoundMemberException();
+        }
+
+        return op.get();
+
     public String getNameById(Long memberId) {
         MemberEntity member = memberRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);
         return member.getName();
+
     }
 
     private String generateTempPassword() {

@@ -1,8 +1,7 @@
-package com.walkbuddies.backend.club.domain;
+package com.walkbuddies.backend.feed.domain;
 
-import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
+import com.walkbuddies.backend.feed.dto.FeedCommentDto;
 import com.walkbuddies.backend.member.domain.MemberEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -20,49 +19,46 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Entity
-@Table(name = "club_board_reply")
+@Table(name = "feedComment")
 @Builder
-@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClubBoardCommentEntity {
+@Getter
+public class FeedCommentEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long clubBoardCommentId;
+  private  Long feedCommentId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "memberId", nullable = false)
   private MemberEntity memberId;
 
-  private String nickname;
-
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "clubBoardId", nullable = false)
-  private ClubBoardEntity clubBoardId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "feedId", nullable = false)
+  private FeedEntity feedId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parentId")
-  private ClubBoardCommentEntity parentId;
+  private FeedCommentEntity parentId;
 
   @OneToMany(mappedBy = "parentId", fetch = FetchType.EAGER, orphanRemoval = true)
-  private List<ClubBoardCommentEntity> childrenId;
+  private List<FeedCommentEntity> childrenId;
 
   private String content;
   @CreationTimestamp
   private LocalDateTime createAt;
   private LocalDateTime updateAt;
+
   @ColumnDefault("0")
   private Integer deleteYn;
   private LocalDateTime deleteAt;
 
-  public void updateParent(ClubBoardCommentEntity parentId) {
+  public void updateParent(FeedCommentEntity parentId) {
     this.parentId = parentId;
   }
-  public void updateContent(RequestDto dto) {
+  public void updateContent(FeedCommentDto dto) {
     this.content = dto.getContent();
     this.updateAt = LocalDateTime.now();
   }
@@ -75,4 +71,5 @@ public class ClubBoardCommentEntity {
       this.deleteAt = null;
     }
   }
+
 }

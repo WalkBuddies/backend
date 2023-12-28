@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.member.service;
 
+import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.dto.LoginRequest;
 import com.walkbuddies.backend.member.dto.MemberResponse;
 import com.walkbuddies.backend.member.dto.ResetPasswordRequest;
@@ -18,5 +19,9 @@ public interface MemberService {
 
     MemberResponse resetPassword(ResetPasswordRequest request);
 
+    MemberEntity getMemberEntity(Long memberId);
+
+
     String getNameById(Long memberId);
+
 }

@@ -6,7 +6,6 @@ import com.walkbuddies.backend.club.dto.clubboardcomment.ClubBoardCommentConvert
 import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.club.repository.ClubBoardCommentRepository;
-import com.walkbuddies.backend.club.repository.ClubBoardRepository;
 import com.walkbuddies.backend.exception.impl.NoResultException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
-  private final ClubBoardCommentConvertDtoEntity clubBoardCommentConvertDtoEntity;
-  private final ClubBoardRepository clubBoardRepository;
+  private final ClubBoardCommentConvertDtoEntity convert;
   private final ClubBoardService clubBoardService;
 
   private final ClubBoardCommentRepository clubBoardCommentRepository;
@@ -32,29 +30,29 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
   @Override
   public ResponseDto createComment(Long boardIdx, RequestDto requestDto) {
       requestDto.setClubBoardId(boardIdx);
-      ClubBoardCommentEntity entity = clubBoardCommentConvertDtoEntity.toEntity(requestDto);
+      ClubBoardCommentEntity entity = convert.toEntity(requestDto);
       if (requestDto.getParentId() != null) {
-        entity.updateParent(clubBoardCommentRepository.findById(requestDto.getParentId()).get());
+        entity.updateParent(getCommentEntity(requestDto.getParentId()));
       }
 
       clubBoardCommentRepository.save(entity);
 
-      return clubBoardCommentConvertDtoEntity.toDto(entity);
+      return convert.toDto(entity);
   }
 
   /**
    * 댓글목록불러오기
    * @param pageable 페이징정보
-   * @param boardIdx 원글번호
-   * @return Page객체
+   * @param boardId 원글번호
+   * @return
    */
   @Override
-  public Page<ResponseDto> getCommentList(Pageable pageable, Long boardIdx) {
-     ClubBoardEntity boardEntity = clubBoardService.getBoardEntity(boardIdx);
+  public Page<ResponseDto> getCommentList(Pageable pageable, Long boardId) {
+     ClubBoardEntity boardEntity = clubBoardService.getBoardEntity(boardId);
 
-     Page<ClubBoardCommentEntity> response = clubBoardCommentRepository.findAllByClubBoardIdAndDeleteYn(pageable, boardEntity, 0);
+     Page<ClubBoardCommentEntity> result = clubBoardCommentRepository.findAllByClubBoardIdAndDeleteYn(pageable, boardEntity, 0);
 
-    return clubBoardCommentConvertDtoEntity.toPageDto(response);
+    return convert.toPageDto(result);
 
   }
 
@@ -70,7 +68,7 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
      entity.updateContent(requestDto);
      clubBoardCommentRepository.save(entity);
 
-    return clubBoardCommentConvertDtoEntity.toDto(entity);
+    return convert.toDto(entity);
   }
 
   /**
