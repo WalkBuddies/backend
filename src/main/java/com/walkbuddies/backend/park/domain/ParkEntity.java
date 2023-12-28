@@ -1,6 +1,6 @@
 package com.walkbuddies.backend.park.domain;
 
-import com.walkbuddies.backend.park.dto.ParkDto;
+import com.walkbuddies.backend.park.dto.ParkRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,14 +33,14 @@ public class ParkEntity {
     @Column(name = "convenience_facility")
     private String convenienceFacility;
 
-    public static ParkEntity convertToEntity(ParkDto parkDto) {
+    public static ParkEntity convertToEntity(ParkRequest parkRequest) {
         return ParkEntity.builder()
-                .parkName(parkDto.getParkName())
-                .longitude(Double.valueOf(parkDto.getLongitude()))
-                .latitude(Double.valueOf(parkDto.getLatitude()))
-                .address(parkDto.getAddress())
-                .sportFacility(parkDto.getSportFacility())
-                .convenienceFacility(parkDto.getConvenienceFacility())
+                .parkName(parkRequest.getParkName())
+                .longitude(Double.valueOf(parkRequest.getLongitude()))
+                .latitude(Double.valueOf(parkRequest.getLatitude()))
+                .address(parkRequest.getAddress())
+                .sportFacility(parkRequest.getSportFacility())
+                .convenienceFacility(parkRequest.getConvenienceFacility())
                 .build();
     }
 
