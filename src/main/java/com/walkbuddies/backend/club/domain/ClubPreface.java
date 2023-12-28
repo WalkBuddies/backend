@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.club.domain;
 
+import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +24,9 @@ public class ClubPreface {
     @ManyToOne
     @JoinColumn(name = "club_id")
     private ClubEntity clubId;
+
+    public void update(ClubPrefaceDto dto) {
+        this.preface = dto.getPreface();
+
+    }
 }

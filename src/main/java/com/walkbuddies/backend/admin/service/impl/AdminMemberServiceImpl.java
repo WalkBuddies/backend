@@ -1,14 +1,18 @@
 package com.walkbuddies.backend.admin.service.impl;
 
 import com.walkbuddies.backend.admin.dto.MemberDetailDto;
+import com.walkbuddies.backend.admin.dto.MemberStatus;
 import com.walkbuddies.backend.admin.service.AdminMemberService;
+import com.walkbuddies.backend.exception.impl.NotFoundMemberException;
 import com.walkbuddies.backend.exception.impl.NotFoundNameException;
 import com.walkbuddies.backend.exception.impl.NotFoundNickNameException;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -91,6 +95,49 @@ public class AdminMemberServiceImpl implements AdminMemberService {
 
 
         return MemberEntity.entityToDetail(member);
+    }
+
+    /**
+     * 해당 유저의 Role, Block 상태를 변경하는 메서드
+     * @param memberStatus
+     * @return
+     */
+    @Transactional
+    @Override
+    public MemberDetailDto memberBlock(MemberStatus memberStatus) {
+
+        Optional<MemberEntity> memberEntity = memberRepository.findByMemberId(memberStatus.getMemberId());
+        if (memberEntity.isEmpty()) {
+            throw new NotFoundMemberException();
+        }
+
+        MemberEntity member = memberEntity.get();
+        MemberEntity updatedMemberEntity = MemberEntity.builder()
+                .memberId(member.getMemberId())
+                .townId(member.getTownId())
+                .email(member.getEmail())
+                .role(memberStatus.getRole())
+                .blocked(memberStatus.getIsBlock())
+                .password(member.getPassword())
+                .passwordUpdate(member.getPasswordUpdate())
+                .name(member.getName())
+                .nickname(member.getNickname())
+                .gender(member.getGender())
+                .createAt(member.getCreateAt())
+                .updateAt(LocalDateTime.now())
+                .verify(member.isVerify())
+                .verificationCode(member.getVerificationCode())
+                .verifyExpiredAt(member.getVerifyExpiredAt())
+                .imageUrl(member.getImageUrl())
+                .introduction(member.getIntroduction())
+                .socialCode(member.getSocialCode())
+                .oauthExternalId(member.getOauthExternalId())
+                .townVerificationDate(member.getTownVerificationDate())
+                .build();
+
+        memberRepository.save(updatedMemberEntity);
+
+        return MemberEntity.entityToDetail(updatedMemberEntity);
     }
 
 }

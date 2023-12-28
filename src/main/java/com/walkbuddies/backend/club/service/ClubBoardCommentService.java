@@ -13,11 +13,11 @@ public interface ClubBoardCommentService {
 
   /**
    * 댓글쓰기
-   * @param boardIdx
+   * @param boardId
    * @param requestDto
    * @return
    */
-  ResponseDto createComment(Long boardIdx, RequestDto requestDto);
+  ResponseDto createComment(Long boardId, RequestDto requestDto);
 
   /**
    * 댓글리스트호출

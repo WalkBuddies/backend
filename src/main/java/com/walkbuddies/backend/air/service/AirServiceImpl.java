@@ -12,6 +12,7 @@ import com.walkbuddies.backend.common.CommonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -35,6 +37,7 @@ public class AirServiceImpl implements AirService {
     private final ObjectMapper objectMapper;
     final AirServiceRepository airServiceRepository;
     private final CommonService commonService;
+    private final RedisTemplate<String, AirServiceDto> airRedisTemplate;
 
     /**
      * api dataTime 항목을 dateTimeFormat으로 변환하는 메소드
@@ -54,7 +57,7 @@ public class AirServiceImpl implements AirService {
      *
      * @param apiUrl
      * @return 통신결과 jsonString 리턴
-     * @throws IOException
+     * @throws
      */
     public String getApiInfo(String apiUrl) throws URISyntaxException {
 
@@ -81,6 +84,7 @@ public class AirServiceImpl implements AirService {
                 .path("items");
     }
 
+    private static final String REDIS_KEY_PREFIX = "air:stationCode:";
 
     /**
      * (수정진행중)
@@ -88,30 +92,44 @@ public class AirServiceImpl implements AirService {
      * 최근접측정소를 찾은 후 측정소 코드를 통해 db에 저장된 정보가 없다면 미세먼지 api에서 정보를 받음
      * db에 저장된 정보가 조회시간보다 1시간 이내면 db의 정보를 반환, 아니면 api에서 정보를 받음
      *
-     * @param tmX
-     * @param tmY
+     * @param X 경도
+     * @param Y 위도
      * @return
      * @throws IOException
      */
-    public AirServiceDto getAirInfo(double tmX, double tmY) throws IOException, URISyntaxException {
-        MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tmX, tmY);
-        AirServiceDto result = new AirServiceDto();
-        LocalDateTime now = LocalDateTime.now();
-        Optional<AirServiceEntity> checkDb = airServiceRepository.findByStationCode(msrstnDto.getStationCode());
+    public AirServiceDto getAirInfo(double X, double Y)
+        throws URISyntaxException, JsonProcessingException {
+        double[] tm = commonService.GeoToTm(X, Y);
+        MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tm[0], tm[1]);
 
-        if (checkDb.isPresent()) {
-            AirServiceEntity airServiceEntity = checkDb.get();
-            if (airServiceEntity.getDataTime().isBefore(now.minusHours(1))) {
+        AirServiceDto result ;
+        LocalDateTime now = LocalDateTime.now();
+
+        String redisKey = REDIS_KEY_PREFIX + msrstnDto.getStationCode();
+
+        // Redis에서 데이터 조회
+        AirServiceDto cachedData = airRedisTemplate.opsForValue().get(redisKey);
+
+        if (cachedData != null) {
+            // Redis에 데이터가 존재하면 반환
+            return cachedData;
+        } else {
+            // Redis에 데이터가 없으면 DB 또는 API에서 데이터 가져오기
+            Optional<AirServiceEntity> checkDb = airServiceRepository.findByStationCode(msrstnDto.getStationCode());
+            if (checkDb.isPresent()) {
+                AirServiceEntity airServiceEntity = checkDb.get();
+                if (airServiceEntity.getDataTime().isBefore(now.minusHours(1))) {
+                    AirServiceEntity data = getAirInfoFromApi(msrstnDto);
+                    saveApiData(data);
+                    result = AirServiceEntity.entityToDto(data);
+                } else {
+                    result = AirServiceEntity.entityToDto(airServiceEntity);
+                }
+            } else {
                 AirServiceEntity data = getAirInfoFromApi(msrstnDto);
                 saveApiData(data);
                 result = AirServiceEntity.entityToDto(data);
-            } else {
-                result = AirServiceEntity.entityToDto(airServiceEntity);
             }
-        } else {
-            AirServiceEntity data = getAirInfoFromApi(msrstnDto);
-            saveApiData(data);
-            result = AirServiceEntity.entityToDto(data);
         }
 
         return result;
@@ -126,7 +144,7 @@ public class AirServiceImpl implements AirService {
      * @throws IOException
      */
     public MsrstnDto getNearbyMsrstnInfoFromApi(double tmX, double tmY)
-            throws IOException, URISyntaxException {
+            throws JsonProcessingException, URISyntaxException {
         String apiUrl = "http://apis.data.go.kr/B552584/MsrstnInfoInqireSvc/getNearbyMsrstnList?"
                 + "tmX=" + tmX
                 + "&tmY=" + tmY
@@ -147,7 +165,7 @@ public class AirServiceImpl implements AirService {
      * @throws IOException
      */
     public AirServiceEntity getAirInfoFromApi(MsrstnDto msrstnDto)
-            throws IOException {
+            throws JsonProcessingException {
 
         RestTemplate restTemplate = new RestTemplate();
         UriComponents complexUrl = UriComponentsBuilder
@@ -155,7 +173,7 @@ public class AirServiceImpl implements AirService {
                 .queryParam("dataTerm", "daily")
                 .queryParam("returnType", "json")
                 .queryParam("ver", "1.4")
-                .queryParam("serviceKey", "eGMtdRftJiYZQLaCrsbuga7lhzTOZ5YjKsXxB4onZefxLAEtGf49DZr1S+e6rJyiTRHtKL2J001cnCC+h52ieQ==")
+                .queryParam("serviceKey", API_KEY)
                 .queryParam("stationName", msrstnDto.getStationName()).encode().build();
         String result = restTemplate.getForObject(complexUrl.toUri(), String.class);
         JsonNode items = jsonParser(result);
@@ -182,24 +200,13 @@ public class AirServiceImpl implements AirService {
      */
     private void saveApiData(AirServiceEntity airServiceEntity) {
 
+        // Redis key
+        String redisKey = REDIS_KEY_PREFIX + airServiceEntity.getStationCode();
+
+        // 데이터를 Redis에 저장 (유효시간은 1시간으로 설정)
+        airRedisTemplate.opsForValue().set(redisKey, AirServiceEntity.entityToDto(airServiceEntity), Duration.ofHours(1));
+
         airServiceRepository.save(airServiceEntity);
-    }
-
-    /**
-     * 즐겨찾기 미세먼지 조회
-     *
-     * @param x 경도
-     * @param y 위도
-     * @return
-     * @throws URISyntaxException
-     * @throws IOException
-     */
-    @Override
-    public AirServiceDto getBookmarkAirInfo(double x, double y)
-            throws URISyntaxException, IOException {
-        double[] tmArr = commonService.GeoToTm(x, y);
-
-        return getAirInfo(tmArr[0], tmArr[1]);
     }
 
 

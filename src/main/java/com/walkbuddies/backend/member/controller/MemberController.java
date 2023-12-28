@@ -91,7 +91,6 @@ public class MemberController {
     @PostMapping("/town")
     public ResponseEntity<SingleResponse> addTown(
             @AuthenticationPrincipal MemberDetails memberDetails,
-//            @PathVariable Long memberId,
             @RequestParam("longitude") Double longitude,
             @RequestParam("latitude") Double latitude) {
         Long memberId = memberDetails.getMember().getMemberId();
@@ -101,13 +100,5 @@ public class MemberController {
                 memberService.addTown(memberId, memberService.getDong(longitude, latitude)));
 
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/getdong")
-    public Long getLegalDong(
-            @RequestParam("longitude") Double longitude,
-            @RequestParam("latitude") Double latitude
-    ) {
-        return memberService.getDong(longitude, latitude);
     }
 }

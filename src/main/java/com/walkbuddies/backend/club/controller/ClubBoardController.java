@@ -28,22 +28,22 @@ public class ClubBoardController {
 
     //create
     @PostMapping("/write")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<MultipartFile> files
+    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<Long> fileId
                                                         ,@RequestPart(value = "board") ClubBoardDto clubBoardDto) {
-        System.out.println(clubBoardDto.toString());
-        ClubBoardDto response = clubBoardService.createPost(files, clubBoardDto);
-        SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
+        System.out.println(fileId);
+        ClubBoardDto response = clubBoardService.createPost(fileId, clubBoardDto);
+        SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.CREATED.value(), "작성완료",
             response);
 
         return ResponseEntity.ok(result);
     }
 
     //read
-    @GetMapping("/board-details/{boardIdx}")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> readBoard(@PathVariable Long boardIdx) {
+    @GetMapping("/board-details/{boardId}")
+    public ResponseEntity<SingleResponse<ClubBoardDto>> readBoard(@PathVariable Long boardId) {
 
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.OK.value(), "조회 완료",
-                                     clubBoardService.getPost(boardIdx));
+                                     clubBoardService.getPost(boardId));
 
         return ResponseEntity.ok(result);
     }
@@ -73,9 +73,9 @@ public class ClubBoardController {
     //update
 
     @PostMapping("/update")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> updateBoard(@RequestBody ClubBoardDto clubBoardDto) {
+    public ResponseEntity<SingleResponse<ClubBoardDto>> updateBoard(@RequestPart(value = "board") ClubBoardDto clubBoardDto, @RequestPart(value = "files", required = false) List<Long> fileId) {
 
-        ClubBoardDto data = clubBoardService.updatePost(clubBoardDto);
+        ClubBoardDto data = clubBoardService.updatePost(clubBoardDto, fileId);
 
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.OK.value(), "수정 완료",
             data);
@@ -85,9 +85,9 @@ public class ClubBoardController {
 
     //delete
 
-    @GetMapping("/delete/{boardIdx}")
-    public ResponseEntity<SingleResponse<String>> deleteBoard(@PathVariable long boardIdx) {
-        clubBoardService.deletePost(boardIdx);
+    @GetMapping("/delete/{boardId}")
+    public ResponseEntity<SingleResponse<String>> deleteBoard(@PathVariable long boardId) {
+        clubBoardService.deletePost(boardId);
 
         SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "삭제 완료",
             null);
@@ -103,9 +103,9 @@ public class ClubBoardController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("restore/{boardIdx}")
-    public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long boardIdx) {
-        clubBoardService.CluBoardRestore(boardIdx);
+    @GetMapping("/restore/{boardId}")
+    public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long boardId) {
+        clubBoardService.CluBoardRestore(boardId);
 
         SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "복구 완료", null);
 

@@ -32,7 +32,8 @@ public class ClubBoardEntity {
     @JoinColumn(name = "memeberId")
     private MemberEntity memberId;
 
-    @OneToMany(mappedBy = "fileId", orphanRemoval = true)
+    @OneToMany(orphanRemoval = true)
+    @JoinColumn(name = "boardId")
     private List<FileEntity> fileId;
 
     private String nickname;

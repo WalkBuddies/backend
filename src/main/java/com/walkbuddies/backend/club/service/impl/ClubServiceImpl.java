@@ -1,17 +1,22 @@
-package com.walkbuddies.backend.club.service;
+package com.walkbuddies.backend.club.service.impl;
 
 import com.walkbuddies.backend.club.domain.ClubEntity;
+import com.walkbuddies.backend.club.domain.ClubPreface;
 import com.walkbuddies.backend.club.domain.ClubWaitingEntity;
 import com.walkbuddies.backend.club.domain.MyClubEntity;
 import com.walkbuddies.backend.club.domain.TownEntity;
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
 import com.walkbuddies.backend.club.dto.ClubParameter;
+import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import com.walkbuddies.backend.club.dto.ClubUpdateParameter;
+import com.walkbuddies.backend.club.dto.PrefaceConvertDtoEntity;
+import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.club.repository.ClubWaitingRepository;
 import com.walkbuddies.backend.club.repository.MyClubRepository;
 import com.walkbuddies.backend.club.repository.TownRepository;
+import com.walkbuddies.backend.club.service.ClubService;
 import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
@@ -20,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +41,8 @@ public class ClubServiceImpl implements ClubService {
     private final MemberRepository memberRepository;
     private final ClubWaitingRepository clubWaitingRepository;
     private final TownRepository townRepository;
+    private final PrefaceConvertDtoEntity prefaceConvert;
+    private final ClubPrefaceRepository clubPrefaceRepository;
 
     /**
      * 소모임을 생성하는 메서드.
@@ -64,7 +72,7 @@ public class ClubServiceImpl implements ClubService {
                 .membersLimit(clubDto.getMembersLimit())
                 .accessLimit(clubDto.getAccessLimit())
                 .needGrant(clubDto.getNeedGrant())
-                .regDate(LocalDate.now())
+                .regDate(LocalDateTime.now())
                 .build();
 
         clubRepository.save(clubEntity);
@@ -205,7 +213,7 @@ public class ClubServiceImpl implements ClubService {
                 .accessLimit(clubEntity.getAccessLimit())
                 .needGrant(clubEntity.getNeedGrant())
                 .regDate(clubEntity.getRegDate())
-                .modDate(LocalDate.now())
+                .modDate(LocalDateTime.now())
                 .build();
         clubRepository.save(updatedClubEntity);
 
@@ -288,7 +296,7 @@ public class ClubServiceImpl implements ClubService {
                 .accessLimit(clubEntity.getAccessLimit())
                 .needGrant(clubEntity.getNeedGrant())
                 .regDate(clubEntity.getRegDate())
-                .modDate(LocalDate.now())
+                .modDate(LocalDateTime.now())
                 .build();
         clubRepository.save(updatedClubEntity);
 
@@ -330,7 +338,7 @@ public class ClubServiceImpl implements ClubService {
                 .accessLimit(clubEntity.getAccessLimit())
                 .needGrant(clubEntity.getNeedGrant())
                 .regDate(clubEntity.getRegDate())
-                .modDate(LocalDate.now())
+                .modDate(LocalDateTime.now())
                 .build();
         clubRepository.save(updatedClubEntity);
 
@@ -384,7 +392,7 @@ public class ClubServiceImpl implements ClubService {
                 .accessLimit(clubUpdateParameter.getAccessLimit())
                 .needGrant(clubUpdateParameter.getNeedGrant())
                 .regDate(clubEntity.getRegDate())
-                .modDate(LocalDate.now())
+                .modDate(LocalDateTime.now())
                 .build();
         clubRepository.save(updatedClubEntity);
 
@@ -422,6 +430,50 @@ public class ClubServiceImpl implements ClubService {
         }
 
         return clubDtos;
+    }
+
+    /**
+     * 말머리 생성
+     * @param clubPrefaceDto
+     * @return
+     */
+    @Override
+    public ClubPrefaceDto createPreface(ClubPrefaceDto clubPrefaceDto) {
+        ClubPreface entity = prefaceConvert.prefaceDtoToEntity(clubPrefaceDto);
+        clubPrefaceRepository.save(entity);
+
+        return prefaceConvert.prefaceEntityToDto(entity);
+    }
+
+    /**
+     * 말머리 수정
+     * @param clubPrefaceDto
+     * @return
+     */
+    @Override
+    public ClubPrefaceDto updatePreface(ClubPrefaceDto clubPrefaceDto) {
+               ClubPreface entity = getPrefaceEntity(clubPrefaceDto.getPrefaceId());
+        entity.update(clubPrefaceDto);
+        clubPrefaceRepository.save(entity);
+        return prefaceConvert.prefaceEntityToDto(entity);
+    }
+
+    /**
+     * 말머리 삭제
+     * @param prefaceId
+     */
+    @Override
+    public void deletePreface(Long prefaceId) {
+        ClubPreface entity = getPrefaceEntity(prefaceId);
+        clubPrefaceRepository.delete(entity);
+
+    }
+    private ClubPreface getPrefaceEntity(Long prefaceId) {
+        Optional<ClubPreface> op = clubPrefaceRepository.findByPrefaceId(prefaceId);
+        if (op.isEmpty()) {
+            throw new NotFoundPrefaceException();
+        }
+        return op.get();
     }
 
     private ClubEntity getClubEntity(Long clubId) {

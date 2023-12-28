@@ -5,14 +5,21 @@ import com.walkbuddies.backend.dm.domain.DirectMessageEntity;
 import com.walkbuddies.backend.dm.dto.DirectMessageDto;
 import com.walkbuddies.backend.dm.repository.ChatRoomRepository;
 import com.walkbuddies.backend.dm.repository.DirectMessageRepository;
+import com.walkbuddies.backend.exception.impl.NotFoundChatRoom;
 import com.walkbuddies.backend.exception.impl.NotFoundMemberException;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
+import com.walkbuddies.backend.weather.dto.WeatherMidDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,7 +30,14 @@ public class DirectMessageServiceImpl implements DirectMessageService {
     private final MemberRepository memberRepository;
     private final DirectMessageRepository directMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final RedisTemplate<String, List<DirectMessageDto>> messageRedisTemplate;
 
+    /**
+     * 1 : 1 채팅 메서드
+     * 채팅 내용을 DB에 저장
+     * @param directMessageDto
+     */
+    @Transactional
     @Override
     public void sendMessage(DirectMessageDto directMessageDto) {
 
@@ -50,6 +64,44 @@ public class DirectMessageServiceImpl implements DirectMessageService {
                 .sendTime(LocalDateTime.now())
                 .build();
         directMessageRepository.save(directMessageEntity);
+    }
+
+    private static final String REDIS_KEY_PREFIX = "chat:roomId:";
+    /**
+     * 해당하는 채팅방의 채팅 내역을 불러오는 메서드
+     * @param chatRoomId
+     * @return
+     */
+    @Override
+    public List<DirectMessageDto> getMessage(Long chatRoomId) {
+
+        String redisKey = REDIS_KEY_PREFIX + chatRoomId;
+        List<DirectMessageDto> directMessageDtos = new ArrayList<>();
+
+        // Redis에서 데이터 조회
+        List<DirectMessageDto> cachedData = messageRedisTemplate.opsForValue().get(redisKey);
+
+        if (cachedData != null) {
+            // Redis에 데이터가 존재하면 반환
+            return cachedData;
+        } else {
+            Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
+            if (optionalChatRoom.isEmpty()) {
+                throw new NotFoundChatRoom();
+            }
+
+            ChatRoomEntity chatRoom = optionalChatRoom.get();
+            Optional<List<DirectMessageEntity>> directMessageEntities = directMessageRepository.findByChatRoomId(chatRoom);
+
+            for (DirectMessageEntity directMessageEntity : directMessageEntities.get()){
+                directMessageDtos.add(DirectMessageEntity.entityToDto(directMessageEntity));
+            }
+
+            // Redis에 데이터 저장 (유효시간은 1시간으로 설정)
+            messageRedisTemplate.opsForValue().set(redisKey, directMessageDtos, Duration.ofHours(1));
+        }
+
+        return directMessageDtos;
     }
 
 

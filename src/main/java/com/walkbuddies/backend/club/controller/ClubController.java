@@ -1,8 +1,10 @@
 package com.walkbuddies.backend.club.controller;
 
+import com.walkbuddies.backend.club.domain.ClubPreface;
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
 import com.walkbuddies.backend.club.dto.ClubParameter;
+import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import com.walkbuddies.backend.club.dto.ClubUpdateParameter;
 import com.walkbuddies.backend.club.service.ClubService;
 import com.walkbuddies.backend.common.response.ListResponse;
@@ -98,4 +100,29 @@ public class ClubController {
                "가입한 소모임 목록을 불러왔습니다.", clubService.getMyClub(clubParameter));
        return ResponseEntity.ok(listResponse);
     }
+    @PostMapping("/club/preface/{clubId}/new")
+    public ResponseEntity<SingleResponse<ClubPrefaceDto>> createPreface(@PathVariable Long clubId, @RequestBody ClubPrefaceDto dto) {
+        dto.setClubId(clubId);
+        SingleResponse<ClubPrefaceDto> response = new SingleResponse<>(HttpStatus.CREATED.value(), "말머리가 생성 완료 되었습니다.",
+            clubService.createPreface(dto));
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/club/preface/{clubId}/update")
+    public ResponseEntity<SingleResponse<ClubPrefaceDto>> updatePreface(@PathVariable Long clubId, @RequestBody ClubPrefaceDto dto) {
+        dto.setClubId(clubId);
+        SingleResponse<ClubPrefaceDto> response = new SingleResponse<>(HttpStatus.OK.value(), "말머리가 수정 완료 되었습니다",
+            clubService.updatePreface(dto));
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/club/preface/{prefaceId}")
+    public ResponseEntity<SingleResponse<ClubPrefaceDto>> deletePreface(@PathVariable Long prefaceId) {
+        clubService.deletePreface(prefaceId);
+        SingleResponse<ClubPrefaceDto> response = new SingleResponse<>(HttpStatus.OK.value(), "말머리가 삭제 되었습니다", null);
+
+        return ResponseEntity.ok(response);
+
+    }
+
 }

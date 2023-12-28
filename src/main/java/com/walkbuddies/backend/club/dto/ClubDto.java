@@ -5,6 +5,7 @@ import com.walkbuddies.backend.club.repository.ClubRepository;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -22,6 +23,6 @@ public class ClubDto {
     private Integer accessLimit;
     private Integer needGrant;
     private Boolean isSuspended;
-    private LocalDate regDate;
-    private LocalDate modDate;
+    private LocalDateTime regDate;
+    private LocalDateTime modDate;
 }

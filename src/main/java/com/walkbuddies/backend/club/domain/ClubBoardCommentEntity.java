@@ -64,6 +64,7 @@ public class ClubBoardCommentEntity {
   }
   public void updateContent(RequestDto dto) {
     this.content = dto.getContent();
+    this.updateAt = LocalDateTime.now();
   }
 
   public void changeDeleteYn(int deleteYn) {

@@ -101,9 +101,9 @@ public class MemberServiceImpl implements MemberService {
             throw new PasswordMismatchException();
         }
 
-//        if (!member.isVerify()) {
-//            throw new NotVerifiedException();
-//        }
+       if (!member.isVerify()) {
+           throw new NotVerifiedException();
+       }
 
         return MemberResponse.fromEntity(member);
     }
@@ -186,6 +186,20 @@ public class MemberServiceImpl implements MemberService {
         member.setTown(town);
 
         return new MemberTownResponse(member);
+    }
+
+    public MemberEntity getMemberEntity(Long memberId) {
+        Optional<MemberEntity> op = memberRepository.findByMemberId(memberId);
+        if (op.isEmpty()) {
+            throw new NotFoundMemberException();
+        }
+
+        return op.get();
+    }
+    public String getNameById(Long memberId) {
+        MemberEntity member = memberRepository.findById(memberId)
+                .orElseThrow(NotFoundMemberException::new);
+        return member.getName();
     }
 
     private String generateTempPassword() {

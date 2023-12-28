@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.club.service;
+package com.walkbuddies.backend.club.service.impl;
 
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
 import com.walkbuddies.backend.club.domain.ClubEntity;
@@ -11,14 +11,12 @@ import com.walkbuddies.backend.club.dto.clubboard.ClubBoardConvertDtoEntity;
 import com.walkbuddies.backend.club.repository.ClubBoardRepository;
 import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
-import com.walkbuddies.backend.common.domain.FileEntity;
+import com.walkbuddies.backend.club.service.ClubBoardService;
 import com.walkbuddies.backend.common.dto.FileDto;
-import com.walkbuddies.backend.common.service.FileServiceImpl;
+import com.walkbuddies.backend.common.service.FileService;
 import com.walkbuddies.backend.exception.impl.NoPostException;
 import com.walkbuddies.backend.exception.impl.NoResultException;
 import com.walkbuddies.backend.exception.impl.NotFoundClubException;
-import com.walkbuddies.backend.member.repository.MemberRepository;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -42,34 +39,32 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     private final PrefaceConvertDtoEntity prefaceConvertDtoEntity;
 
     private final ClubBoardConvertDtoEntity clubBoardConvertDtoEntity;
-    private final MemberRepository memberRepository;
-    private final FileServiceImpl fileService;
+    private final FileService fileService;
 
     /**
+     * 게시글 쓰기
      * 파일 있으면 파일업로드 후 dto 받아서 등록
-     * @param files 파일목록
+     * @param fileId 파일목록
      * @param clubBoardDto 게시글 dto
      * @return
      */
     @Override
     @Transactional
-    public ClubBoardDto createPost(List<MultipartFile> files, ClubBoardDto clubBoardDto) {
+    public ClubBoardDto createPost(List<Long> fileId, ClubBoardDto clubBoardDto) {
         clubBoardDto.setFileYn(0);
-        if (files != null) {
-            List<FileEntity> fileEntities = fileService.uploadFiles(files);
-            List<FileDto> fileDtos = new ArrayList<>();
-            for (FileEntity entity : fileEntities) {
-                fileDtos.add(FileEntity.entityToDto(entity));
-            }
+        List<FileDto> fileDtos;
+        if (fileId != null) {
+
+            fileDtos = fileService.findFilesById(fileId);
             clubBoardDto.setFileYn(1);
             clubBoardDto.setFileId(fileDtos);
         }
+
         clubBoardDto.setDeleteYn(0);
         clubBoardDto.setCreateAt(LocalDateTime.now());
 
 
         ClubBoardEntity result = clubBoardRepository.save(clubBoardConvertDtoEntity.dtoToEntity(clubBoardDto));
-        System.out.println(result);
         return clubBoardConvertDtoEntity.entityToDto(result);
 
     }
@@ -78,12 +73,13 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      * 게시글 상세보기
      * 삭제여부 체크후 0일 시 반환
      * @param boardIdx 게시글번호
-     * @return clubDto
+     * @return clubBoardDto
      */
 
     @Override
     public ClubBoardDto getPost(Long boardIdx) {
         ClubBoardEntity entity = getBoardEntity(boardIdx);
+
         if (entity.getDeleteYn() == 1) {
             throw new NoPostException();
         }
@@ -131,12 +127,26 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      * 게시글 수정
      * to-be : 업로드 파일 수정
      * @param clubBoardDto 수정 dto
+     * @param fileId 파일id 목록
      * @return 수정된 dto
      */
     @Override
-    public ClubBoardDto updatePost(ClubBoardDto clubBoardDto) {
+    public ClubBoardDto updatePost(ClubBoardDto clubBoardDto, List<Long> fileId) {
         ClubBoardEntity entity = getBoardEntity(clubBoardDto.getClubBoardId());
-        ClubPreface preface = clubPrefaceRepository.findByPrefaceId(clubBoardDto.getPrefaceId()).get();
+        if ( fileId.isEmpty()) {
+            clubBoardDto.setFileYn(0);
+            clubBoardDto.setFileId(null);
+        } else {
+            List<FileDto> fileDtos = fileService.findFilesById(fileId);
+            clubBoardDto.setFileId(fileDtos);
+            clubBoardDto.setFileYn(1);
+        }
+
+        Optional<ClubPreface> op = clubPrefaceRepository.findByPrefaceId(clubBoardDto.getPrefaceId());
+        if (op.isEmpty()) {
+            throw new NoResultException();
+        }
+        ClubPreface preface = op.get();
         entity.update(clubBoardDto, preface);
         clubBoardRepository.save(entity);
 
