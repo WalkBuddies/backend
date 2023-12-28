@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.club.service;
+package com.walkbuddies.backend.club.service.impl;
 
 import com.walkbuddies.backend.club.domain.ClubBoardCommentEntity;
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
@@ -6,6 +6,8 @@ import com.walkbuddies.backend.club.dto.clubboardcomment.ClubBoardCommentConvert
 import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.club.repository.ClubBoardCommentRepository;
+import com.walkbuddies.backend.club.service.ClubBoardCommentService;
+import com.walkbuddies.backend.club.service.ClubBoardService;
 import com.walkbuddies.backend.exception.impl.NoResultException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.walkbuddies.backend.club.dto.clubboardcomment;
 
 import com.walkbuddies.backend.club.domain.ClubBoardCommentEntity;
-import com.walkbuddies.backend.club.service.ClubBoardServiceImpl;
+import com.walkbuddies.backend.club.service.impl.ClubBoardServiceImpl;
 import com.walkbuddies.backend.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
