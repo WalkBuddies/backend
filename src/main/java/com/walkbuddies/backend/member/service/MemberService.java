@@ -17,4 +17,6 @@ public interface MemberService {
     void logout(String accessToken, String email);
 
     MemberResponse resetPassword(ResetPasswordRequest request);
+
+    String getNameById(Long memberId);
 }
