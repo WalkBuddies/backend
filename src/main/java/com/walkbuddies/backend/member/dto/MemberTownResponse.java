@@ -1,6 +1,5 @@
 package com.walkbuddies.backend.member.dto;
 
-import com.walkbuddies.backend.club.domain.TownEntity;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import lombok.*;
 

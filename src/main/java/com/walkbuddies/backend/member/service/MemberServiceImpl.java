@@ -170,9 +170,8 @@ public class MemberServiceImpl implements MemberService {
             JsonNode jsonNode = objectMapper.readTree(jsonResponse);
             JsonNode resultsNode = jsonNode.path("results").path(0);
             JsonNode codeNode = resultsNode.path("code").path("id");
-            String codeId = codeNode.asText();
 
-            return codeId;
+            return codeNode.asText();
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -43,7 +43,7 @@ public class MemberController {
     public ResponseEntity<SingleResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
         MemberResponse memberResponse = memberService.login(loginRequest);
         TokenResponse tokenResponse = jwtTokenUtil.createTokenByLogin(memberResponse.getEmail(), "USER");
-        response.addHeader(jwtTokenUtil.AUTHORIZATION_HEADER, tokenResponse.getAccessToken());
+        response.addHeader(JwtTokenUtil.AUTHORIZATION_HEADER, tokenResponse.getAccessToken());
         SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
                 "로그인 되었습니다.",
                 tokenResponse);
