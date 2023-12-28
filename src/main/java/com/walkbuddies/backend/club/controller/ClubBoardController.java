@@ -30,7 +30,8 @@ public class ClubBoardController {
     @PostMapping("/write")
     public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<Long> fileId
                                                         ,@RequestPart(value = "board") ClubBoardDto clubBoardDto) {
-        ClubBoardDto response = clubBoardService.createPost(fileId, clubBoardDto );
+        System.out.println(fileId);
+        ClubBoardDto response = clubBoardService.createPost(fileId, clubBoardDto);
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.CREATED.value(), "작성완료",
             response);
 

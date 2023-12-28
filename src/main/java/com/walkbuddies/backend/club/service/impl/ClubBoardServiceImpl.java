@@ -12,14 +12,11 @@ import com.walkbuddies.backend.club.repository.ClubBoardRepository;
 import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.club.service.ClubBoardService;
-import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.common.dto.FileDto;
-import com.walkbuddies.backend.common.repository.FileRepository;
 import com.walkbuddies.backend.common.service.FileService;
 import com.walkbuddies.backend.exception.impl.NoPostException;
 import com.walkbuddies.backend.exception.impl.NoResultException;
 import com.walkbuddies.backend.exception.impl.NotFoundClubException;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -83,6 +79,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     @Override
     public ClubBoardDto getPost(Long boardIdx) {
         ClubBoardEntity entity = getBoardEntity(boardIdx);
+
         if (entity.getDeleteYn() == 1) {
             throw new NoPostException();
         }
@@ -145,7 +142,11 @@ public class ClubBoardServiceImpl implements ClubBoardService {
             clubBoardDto.setFileYn(1);
         }
 
-        ClubPreface preface = clubPrefaceRepository.findByPrefaceId(clubBoardDto.getPrefaceId()).get();
+        Optional<ClubPreface> op = clubPrefaceRepository.findByPrefaceId(clubBoardDto.getPrefaceId());
+        if (op.isEmpty()) {
+            throw new NoResultException();
+        }
+        ClubPreface preface = op.get();
         entity.update(clubBoardDto, preface);
         clubBoardRepository.save(entity);
 

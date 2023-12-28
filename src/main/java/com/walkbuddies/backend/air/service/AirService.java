@@ -16,12 +16,12 @@ public interface AirService {
      * 최근접측정소를 찾은 후 측정소 코드를 통해 db에 저장된 정보가 없다면 미세먼지 api에서 정보를 받음
      * db에 저장된 정보가 조회시간보다 1시간 이내면 db의 정보를 반환, 아니면 api에서 정보를 받음
      *
-     * @param tmX
-     * @param tmY
+     * @param x
+     * @param y
      * @return
      * @throws IOException
      */
-    AirServiceDto getAirInfo(double tmX, double tmY) throws IOException, URISyntaxException;
+    AirServiceDto getAirInfo(double x, double y) throws IOException, URISyntaxException;
 
     /**
      * 요청받은 좌표로부터 최근접측정소를 찾는 api 호출

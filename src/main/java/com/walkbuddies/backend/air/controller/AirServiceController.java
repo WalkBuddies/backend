@@ -21,9 +21,9 @@ public class AirServiceController {
     private final AirService airService;
 
     @GetMapping("/data")
-    public ResponseEntity<?> getAirInfo(@RequestParam double tmX, @RequestParam double tmY)
+    public ResponseEntity<?> getAirInfo(@RequestParam double x, @RequestParam double y)
             throws IOException, URISyntaxException {
-        AirServiceDto result = this.airService.getAirInfo(tmX, tmY);
+        AirServiceDto result = this.airService.getAirInfo(x, y);
         return ResponseEntity.ok(result);
     }
 

@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileServiceImpl implements FileService{
   private final String UPLOADPATH = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files";
   private final FileRepository fileRepository;
+  private final FileEntity fileEntity;
 
   /**
    * 파일저장이름 생성
@@ -90,7 +91,7 @@ public class FileServiceImpl implements FileService{
   public List<FileDto> findFilesById(List<Long> fileId) {
     List<FileDto> dtos = new ArrayList<>();
     for (Long id : fileId) {
-      FileEntity.entityToDto(getFileEntity(id));
+      dtos.add(fileEntity.entityToDto(getFileEntity(id)));
     }
     return dtos;
   }
@@ -106,7 +107,7 @@ public class FileServiceImpl implements FileService{
       return null;
     }
     fileRepository.saveAll(files);
-    return FileEntity.entityListToDtoList(files);
+    return fileEntity.entityListToDtoList(files);
   }
 
   /**
