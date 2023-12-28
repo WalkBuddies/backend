@@ -43,6 +43,9 @@ public class DirectMessageServiceImpl implements DirectMessageService {
         MemberEntity sender = getMemberEntity(directMessageDto.getSenderId());
         MemberEntity recipient = getMemberEntity(directMessageDto.getRecipientId());
 
+        MemberEntity firstMember = (sender.getMemberId() < recipient.getMemberId()) ? sender : recipient;
+        MemberEntity secondMember = (sender.getMemberId() < recipient.getMemberId()) ? recipient : sender;
+
         // 메시지를 전송할 대상의 WebSocket 주소
         String destination = "/user/" + directMessageDto.getRecipientId() + "/topic/private";
 
@@ -50,7 +53,7 @@ public class DirectMessageServiceImpl implements DirectMessageService {
         simpMessagingTemplate.convertAndSend(destination, directMessageDto);
 
         // ChatRoom DB 저장
-        Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findBySenderIdAndRecipientId(sender, recipient);
+        Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findBySenderIdAndRecipientId(firstMember, secondMember);
         ChatRoomEntity chatRoom = optionalChatRoom.orElseGet(() -> createChatRoom(sender, recipient));
 
         // DirectMessage DB 저장

@@ -289,7 +289,16 @@ public class WeatherMidServiceImpl implements WeatherMidService {
         List<WeatherMidDto> cachedData = weatherMidRedisTemplate.opsForValue().get(redisKey);
 
         if (cachedData != null) {
-            // Redis에 데이터가 존재하면 반환
+            // Redis에 데이터가 존재하면 DB와 비교하여 업데이트
+            WeatherMidEntity result = weatherMidRepository.findByCityName(cityName)
+                    .orElseThrow(() -> new NoSuchElementException("도시 이름이 없습니다: " + cityName));
+
+            if (!cachedData.equals(List.of(WeatherMidEntity.dtoToEntity(result)))) {
+                // Redis에 저장된 데이터가 DB와 다르면 Redis의 데이터를 업데이트
+                cachedData = List.of(WeatherMidEntity.dtoToEntity(result));
+                weatherMidRedisTemplate.opsForValue().set(redisKey, cachedData, Duration.ofHours(1));
+            }
+
             return cachedData;
         } else {
             // Redis에 데이터가 없으면 DB에서 조회 후 Redis에 저장
