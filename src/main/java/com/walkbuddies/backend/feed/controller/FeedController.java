@@ -15,11 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/feed")
@@ -29,7 +27,7 @@ public class FeedController {
 
   //create
   @PostMapping("/write")
-  public ResponseEntity<SingleResponse<FeedDto>> createBoard(@RequestPart(value = "files", required = false) List<Long> files
+  public ResponseEntity<SingleResponse<FeedDto>> createFeed(@RequestPart(value = "files", required = false) List<Long> files
       ,@RequestPart(value = "board") FeedDto feedDto) {
     FeedDto response = feedService.createFeed(files, feedDto);
     SingleResponse<FeedDto> result = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
@@ -50,9 +48,9 @@ public class FeedController {
 
   //list : 검색기능 포함
   @GetMapping("/list/{memberId}")
-  public ResponseEntity<PageResponse<Page<FeedDto>>> boardList(@PathVariable Long memberId, @PageableDefault(page = 0, size = 20, sort = "clubBoardId", direction = Sort.Direction.DESC)
+  public ResponseEntity<PageResponse<Page<FeedDto>>> boardList(@PathVariable Long memberId, @PageableDefault(page = 0, size = 20, sort = "feedId", direction = Sort.Direction.DESC)
   Pageable pageable) {
-    Page<FeedDto> data = feedService.feedList(pageable, memberId);
+    Page<FeedDto> data = feedService.feedList(pageable, memberId, 0);
 
     PageResponse<Page<FeedDto>> result = new PageResponse<>(HttpStatus.OK.value(), "검색 완료",
         data);
@@ -74,7 +72,7 @@ public class FeedController {
 
   //delete
 
-  @GetMapping("/delete/{feedId}")
+  @PostMapping("/delete/{feedId}")
   public ResponseEntity<SingleResponse<String>> deleteBoard(@PathVariable long feedId) {
     feedService.deleteFeed(feedId);
 
@@ -85,14 +83,5 @@ public class FeedController {
   }
 
 
-  @GetMapping("restore/{feedId}")
-  public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long feedId) {
-    feedService.restoreFeed(feedId);
-
-    SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "복구 완료", null);
-
-    return ResponseEntity.ok(result);
-
-  }
 
 }

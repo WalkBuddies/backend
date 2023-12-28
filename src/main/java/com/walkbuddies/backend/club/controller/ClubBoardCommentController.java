@@ -33,12 +33,12 @@ public class ClubBoardCommentController {
    * @return
    */
   @PostMapping("/{boardId}/comment")
-  public ResponseEntity<SingleResponse<String>> createComment(@PathVariable Long boardId, @RequestBody RequestDto requestDto) {
+  public ResponseEntity<SingleResponse<ResponseDto>> createComment(@PathVariable Long boardId, @RequestBody RequestDto requestDto) {
 
     ResponseDto result = clubBoardCommentService.createComment(boardId, requestDto);
 
-    SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
-        result.toString());
+    SingleResponse<ResponseDto> response = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
+        result);
 
     return ResponseEntity.ok(response);
 
@@ -51,7 +51,7 @@ public class ClubBoardCommentController {
        Pageable pageable
       ,@PathVariable Long boardId) {
 
-    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardId);
+    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardId, 0);
     PageResponse<Page<ResponseDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
         result);
     return ResponseEntity.ok(response);
@@ -73,4 +73,6 @@ public class ClubBoardCommentController {
 
     return ResponseEntity.ok(response);
   }
+
+
 }

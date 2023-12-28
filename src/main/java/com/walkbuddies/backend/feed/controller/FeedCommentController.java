@@ -46,9 +46,9 @@ public class FeedCommentController {
   //list
 
   @GetMapping("/{feedId}/comment-list")
-  public ResponseEntity<PageResponse<Page<FeedCommentDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
+  public ResponseEntity<PageResponse<Page<FeedCommentDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "feedCommentId", direction = Direction.DESC)
                               Pageable pageable, @PathVariable Long feedId) {
-    Page<FeedCommentDto> result = feedCommentService.getCommentList(pageable, feedId);
+    Page<FeedCommentDto> result = feedCommentService.getCommentList(pageable, feedId, 0);
     PageResponse<Page<FeedCommentDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
         result);
     return ResponseEntity.ok(response);
@@ -70,4 +70,6 @@ public class FeedCommentController {
 
     return ResponseEntity.ok(response);
   }
+
+
 }
