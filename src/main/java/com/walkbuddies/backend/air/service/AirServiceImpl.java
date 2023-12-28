@@ -57,7 +57,7 @@ public class AirServiceImpl implements AirService {
      *
      * @param apiUrl
      * @return 통신결과 jsonString 리턴
-     * @throws IOException
+     * @throws
      */
     public String getApiInfo(String apiUrl) throws URISyntaxException {
 
@@ -97,7 +97,8 @@ public class AirServiceImpl implements AirService {
      * @return
      * @throws IOException
      */
-    public AirServiceDto getAirInfo(double X, double Y) throws IOException, URISyntaxException {
+    public AirServiceDto getAirInfo(double X, double Y)
+        throws URISyntaxException, JsonProcessingException {
         double[] tm = commonService.GeoToTm(X, Y);
         MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tm[0], tm[1]);
 
@@ -143,7 +144,7 @@ public class AirServiceImpl implements AirService {
      * @throws IOException
      */
     public MsrstnDto getNearbyMsrstnInfoFromApi(double tmX, double tmY)
-            throws IOException, URISyntaxException {
+            throws JsonProcessingException, URISyntaxException {
         String apiUrl = "http://apis.data.go.kr/B552584/MsrstnInfoInqireSvc/getNearbyMsrstnList?"
                 + "tmX=" + tmX
                 + "&tmY=" + tmY
@@ -164,7 +165,7 @@ public class AirServiceImpl implements AirService {
      * @throws IOException
      */
     public AirServiceEntity getAirInfoFromApi(MsrstnDto msrstnDto)
-            throws IOException {
+            throws JsonProcessingException {
 
         RestTemplate restTemplate = new RestTemplate();
         UriComponents complexUrl = UriComponentsBuilder
@@ -206,23 +207,6 @@ public class AirServiceImpl implements AirService {
         airRedisTemplate.opsForValue().set(redisKey, AirServiceEntity.entityToDto(airServiceEntity), Duration.ofHours(1));
 
         airServiceRepository.save(airServiceEntity);
-    }
-
-    /**
-     * 즐겨찾기 미세먼지 조회
-     *
-     * @param x 경도
-     * @param y 위도
-     * @return
-     * @throws URISyntaxException
-     * @throws IOException
-     */
-    @Override
-    public AirServiceDto getBookmarkAirInfo(double x, double y)
-            throws URISyntaxException, IOException {
-        double[] tmArr = commonService.GeoToTm(x, y);
-
-        return getAirInfo(tmArr[0], tmArr[1]);
     }
 
 
