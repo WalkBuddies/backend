@@ -10,6 +10,7 @@ import com.walkbuddies.backend.feed.dto.FeedDto;
 import com.walkbuddies.backend.feed.repository.FeedRepository;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.service.MemberService;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -30,21 +31,24 @@ public class FeedServiceImpl implements FeedService {
   /**
    * 피드 쓰기
    * 파일 있으면 업로드 후 dto에 등록
-   * @param files multipartfile 리스트
+   * @param fileId multipartfile 리스트
    * @param dto 피드 dto
    * @return
    */
   @Override
   @Transactional
-  public FeedDto createFeed(List<MultipartFile> files, FeedDto dto) {
+  public FeedDto createFeed(List<Long> fileId, FeedDto dto) {
     dto.setFileYn(0);
-    if (files != null) {
-      List<FileDto> fileDtos = fileService.uploadFiles(files).stream().map(FileEntity::entityToDto).toList();
+    List<FileDto> fileDtos;
+    if (fileId != null) {
+      fileDtos = fileService.findFilesById(fileId);
       dto.setFileYn(1);
       dto.setFileId(fileDtos);
     }
-    FeedEntity result = feedRepository.save(feedConvertEntityDto.dtoToEntity(dto));
+    dto.setDeleteYn(0);
+    dto.setCreateAt(LocalDateTime.now());
 
+    FeedEntity result = feedRepository.save(feedConvertEntityDto.dtoToEntity(dto));
 
     return feedConvertEntityDto.entityToDto(result);
   }
@@ -82,11 +86,21 @@ public class FeedServiceImpl implements FeedService {
   /**
    * 피드 업데이트
    * @param dto 업데이트 요청 dto
+   * @param fileId 수정된 fileId
    * @return 업데이트 후 dto
    */
   @Override
-  public FeedDto updateFeed(FeedDto dto) {
+  public FeedDto updateFeed(List<Long> fileId, FeedDto dto) {
     FeedEntity entity = getFeedEntity(dto.getFeedId());
+    if (fileId.isEmpty()) {
+      dto.setFileYn(0);
+      dto.setFileId(null);
+    } else {
+      List<FileDto> fileDtos = fileService.findFilesById(fileId);
+      dto.setFileId(fileDtos);
+      dto.setFileYn(1);
+    }
+
     entity.update(dto);
     feedRepository.save(entity);
     return feedConvertEntityDto.entityToDto(entity);
