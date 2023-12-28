@@ -1,22 +1,30 @@
 package com.walkbuddies.backend.member.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.walkbuddies.backend.club.domain.TownEntity;
+import com.walkbuddies.backend.club.repository.TownRepository;
 import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.cache.CacheNames;
+import com.walkbuddies.backend.member.dto.*;
 import com.walkbuddies.backend.member.email.EmailConfig;
 import com.walkbuddies.backend.member.jwt.JwtTokenUtil;
 import com.walkbuddies.backend.member.domain.MemberEntity;
-import com.walkbuddies.backend.member.dto.LoginRequest;
-import com.walkbuddies.backend.member.dto.MemberResponse;
-import com.walkbuddies.backend.member.dto.ResetPasswordRequest;
-import com.walkbuddies.backend.member.dto.SignUpRequest;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
@@ -31,9 +39,16 @@ import java.util.regex.Pattern;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+    private final TownRepository townRepository;
     private final EmailConfig.MailService mailService;
     private final RedisService redisService;
     private final BCryptPasswordEncoder encoder;
+
+    @Value("${naver-api-key-id}")
+    private String naverApiKeyId;
+
+    @Value("${naver-api-key-secret}")
+    private String naverApiKeySecret;
 
     @Override
     @Transactional
@@ -86,9 +101,9 @@ public class MemberServiceImpl implements MemberService {
             throw new PasswordMismatchException();
         }
 
-        if (!member.isVerify()) {
-            throw new NotVerifiedException();
-        }
+//        if (!member.isVerify()) {
+//            throw new NotVerifiedException();
+//        }
 
         return MemberResponse.fromEntity(member);
     }
@@ -120,6 +135,58 @@ public class MemberServiceImpl implements MemberService {
         sendPasswordEmail(member.getEmail(), code, tempPassword);
 
         return MemberResponse.fromEntity(member);
+    }
+
+    @Override
+    public String getNameById(Long memberId) {
+        MemberEntity member = memberRepository.findById(memberId)
+                .orElseThrow(NotFoundMemberException::new);
+        return member.getName();
+    }
+
+    @Override
+    public Long getDong(Double longitude, Double latitude) {
+        String apiUrl = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc" +
+                "?request=coordsToaddr&coords=" + latitude + "," + longitude +
+                "&sourcecrs=epsg:4326&output=json&orders=legalcode";
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-NCP-APIGW-API-KEY-ID", naverApiKeyId);
+        headers.set("X-NCP-APIGW-API-KEY", naverApiKeySecret);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> responseEntity = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class);
+
+        Long codeId = Long.valueOf(parseDongCodeFromJson(responseEntity.getBody()));
+        return codeId;
+    }
+
+    private String parseDongCodeFromJson(String jsonResponse) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(jsonResponse);
+            JsonNode resultsNode = jsonNode.path("results").path(0);
+            JsonNode codeNode = resultsNode.path("code").path("id");
+            String codeId = codeNode.asText();
+
+            return codeId;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public MemberTownResponse addTown(Long memberId, Long townId) {
+        MemberEntity member = memberRepository.findById(memberId)
+                .orElseThrow(NotFoundMemberException::new);
+        TownEntity town = townRepository.findById(townId)
+                .orElseThrow(NotFoundTownException::new);
+
+        member.setTown(town);
+
+        return new MemberTownResponse(member);
     }
 
     private String generateTempPassword() {

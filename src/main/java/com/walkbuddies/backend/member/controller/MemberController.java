@@ -44,7 +44,9 @@ public class MemberController {
         MemberResponse memberResponse = memberService.login(loginRequest);
         TokenResponse tokenResponse = jwtTokenUtil.createTokenByLogin(memberResponse.getEmail(), "USER");
         response.addHeader(jwtTokenUtil.AUTHORIZATION_HEADER, tokenResponse.getAccessToken());
-        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "로그인 성공", tokenResponse);
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
+                "로그인 되었습니다.",
+                tokenResponse);
         return ResponseEntity.ok(singleResponse);
     }
 
@@ -52,11 +54,13 @@ public class MemberController {
     public ResponseEntity<SingleResponse> logout(
             @AuthenticationPrincipal MemberDetails memberDetails,
             HttpServletRequest request) {
-        log.info("로그아웃 - memberDetails: {}", memberDetails);
+
         if (memberDetails != null) {
             String accessToken = jwtTokenUtil.resolveToken(request);
             memberService.logout(accessToken, memberDetails.getUsername());
-            SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(), "로그아웃 되었습니다.", null);
+            SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(),
+                    "로그아웃 되었습니다.",
+                    null);
             return ResponseEntity.ok(response);
         } else {
             SingleResponse response = new SingleResponse<>(HttpStatus.UNAUTHORIZED.value(), "로그인 상태가 아닙니다.", null);
@@ -77,19 +81,33 @@ public class MemberController {
     public ResponseEntity<SingleResponse> reissueToken(
             @AuthenticationPrincipal MemberDetails memberDetails,
             @RequestBody ReissueTokenRequest tokenRequest) {
-        if (memberDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new SingleResponse<>(HttpStatus.UNAUTHORIZED.value(), "Unauthorized", null));
-        }
 
         MemberResponse memberResponse = MemberResponse.fromEntity(memberDetails.getMember());
-        if (memberResponse == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new SingleResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null));
-        }
 
         TokenResponse tokenResponse = jwtTokenUtil.reissueToken(memberResponse.getEmail(), "USER", tokenRequest.getRefreshToken());
         return ResponseEntity.ok(new SingleResponse<>(HttpStatus.OK.value(), "토큰 재발행", tokenResponse));
     }
 
+    @PostMapping("/town")
+    public ResponseEntity<SingleResponse> addTown(
+            @AuthenticationPrincipal MemberDetails memberDetails,
+//            @PathVariable Long memberId,
+            @RequestParam("longitude") Double longitude,
+            @RequestParam("latitude") Double latitude) {
+        Long memberId = memberDetails.getMember().getMemberId();
+
+        SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(),
+                "동네 인증되었습니다.",
+                memberService.addTown(memberId, memberService.getDong(longitude, latitude)));
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getdong")
+    public Long getLegalDong(
+            @RequestParam("longitude") Double longitude,
+            @RequestParam("latitude") Double latitude
+    ) {
+        return memberService.getDong(longitude, latitude);
+    }
 }
