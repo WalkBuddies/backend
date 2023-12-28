@@ -24,11 +24,11 @@ public class AirServiceController {
 
     @GetMapping("/data")
     public ResponseEntity<SingleResponse<AirServiceDto>> getAirInfo(@RequestParam double x, @RequestParam double y)
-        throws URISyntaxException, JsonProcessingException {
+            throws URISyntaxException, IOException {
+      
         AirServiceDto result = this.airService.getAirInfo(x, y);
         SingleResponse<AirServiceDto> response = new SingleResponse<>(HttpStatus.OK.value(), "조회 완료", result);
         return ResponseEntity.ok(response);
     }
-
 
 }

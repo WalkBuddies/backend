@@ -39,7 +39,7 @@ public class AdminClubServiceImpl implements AdminClubService {
         ClubDto clubDto = ClubEntity.entityToDto(clubEntity);
 
         MemberEntity memberEntity = getMemberEntity(clubDto.getOwnerId());
-        TownEntity townEntity = townRepository.findByTownId(clubDto.getTownId());
+        TownEntity townEntity = townRepository.findByTownId(clubDto.getTownId()).get();
 
         ClubEntity updatedClubEntity = ClubEntity.builder()
                 .clubId(clubDto.getClubId())

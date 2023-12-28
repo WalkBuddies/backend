@@ -84,7 +84,7 @@ public class AirServiceImpl implements AirService {
                 .path("items");
     }
 
-    private static final String REDIS_KEY_PREFIX = "air:stationCode:";
+    private static final String REDIS_KEY_PREFIX = "air:stationName:";
 
     /**
      * (수정진행중)
@@ -98,14 +98,15 @@ public class AirServiceImpl implements AirService {
      * @throws IOException
      */
     public AirServiceDto getAirInfo(double X, double Y)
-        throws URISyntaxException, JsonProcessingException {
+            throws URISyntaxException, JsonProcessingException {
+      
         double[] tm = commonService.GeoToTm(X, Y);
         MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tm[0], tm[1]);
 
         AirServiceDto result ;
         LocalDateTime now = LocalDateTime.now();
 
-        String redisKey = REDIS_KEY_PREFIX + msrstnDto.getStationCode();
+        String redisKey = REDIS_KEY_PREFIX + msrstnDto.getStationName();
 
         // Redis에서 데이터 조회
         AirServiceDto cachedData = airRedisTemplate.opsForValue().get(redisKey);
@@ -208,6 +209,5 @@ public class AirServiceImpl implements AirService {
 
         airServiceRepository.save(airServiceEntity);
     }
-
 
 }
