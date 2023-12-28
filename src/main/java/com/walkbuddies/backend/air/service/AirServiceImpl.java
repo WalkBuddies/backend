@@ -57,7 +57,7 @@ public class AirServiceImpl implements AirService {
      *
      * @param apiUrl
      * @return 통신결과 jsonString 리턴
-     * @throws IOException
+     * @throws
      */
     public String getApiInfo(String apiUrl) throws URISyntaxException {
 
@@ -84,7 +84,7 @@ public class AirServiceImpl implements AirService {
                 .path("items");
     }
 
-    private static final String REDIS_KEY_PREFIX = "air:stationCode:";
+    private static final String REDIS_KEY_PREFIX = "air:stationName:";
 
     /**
      * (수정진행중)
@@ -92,17 +92,20 @@ public class AirServiceImpl implements AirService {
      * 최근접측정소를 찾은 후 측정소 코드를 통해 db에 저장된 정보가 없다면 미세먼지 api에서 정보를 받음
      * db에 저장된 정보가 조회시간보다 1시간 이내면 db의 정보를 반환, 아니면 api에서 정보를 받음
      *
-     * @param tmX
-     * @param tmY
+     * @param X 경도
+     * @param Y 위도
      * @return
      * @throws IOException
      */
-    public AirServiceDto getAirInfo(double tmX, double tmY) throws IOException, URISyntaxException {
-        MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tmX, tmY);
-        AirServiceDto result = new AirServiceDto();
+    public AirServiceDto getAirInfo(double X, double Y)
+            throws URISyntaxException, JsonProcessingException {
+        double[] tm = commonService.GeoToTm(X, Y);
+        MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tm[0], tm[1]);
+
+        AirServiceDto result ;
         LocalDateTime now = LocalDateTime.now();
 
-        String redisKey = REDIS_KEY_PREFIX + msrstnDto.getStationCode();
+        String redisKey = REDIS_KEY_PREFIX + msrstnDto.getStationName();
 
         // Redis에서 데이터 조회
         AirServiceDto cachedData = airRedisTemplate.opsForValue().get(redisKey);
@@ -141,7 +144,7 @@ public class AirServiceImpl implements AirService {
      * @throws IOException
      */
     public MsrstnDto getNearbyMsrstnInfoFromApi(double tmX, double tmY)
-            throws IOException, URISyntaxException {
+            throws JsonProcessingException, URISyntaxException {
         String apiUrl = "http://apis.data.go.kr/B552584/MsrstnInfoInqireSvc/getNearbyMsrstnList?"
                 + "tmX=" + tmX
                 + "&tmY=" + tmY
@@ -162,7 +165,7 @@ public class AirServiceImpl implements AirService {
      * @throws IOException
      */
     public AirServiceEntity getAirInfoFromApi(MsrstnDto msrstnDto)
-            throws IOException {
+            throws JsonProcessingException {
 
         RestTemplate restTemplate = new RestTemplate();
         UriComponents complexUrl = UriComponentsBuilder
@@ -205,23 +208,5 @@ public class AirServiceImpl implements AirService {
 
         airServiceRepository.save(airServiceEntity);
     }
-
-    /**
-     * 즐겨찾기 미세먼지 조회
-     *
-     * @param x 경도
-     * @param y 위도
-     * @return
-     * @throws URISyntaxException
-     * @throws IOException
-     */
-    @Override
-    public AirServiceDto getBookmarkAirInfo(double x, double y)
-            throws URISyntaxException, IOException {
-        double[] tmArr = commonService.GeoToTm(x, y);
-
-        return getAirInfo(tmArr[0], tmArr[1]);
-    }
-
 
 }

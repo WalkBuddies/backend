@@ -43,14 +43,4 @@ public interface AirService {
      */
     AirServiceEntity getAirInfoFromApi(MsrstnDto msrstnDto) throws IOException, URISyntaxException;
 
-    /**
-     * 즐겨찾기 미세먼지 조회
-     *
-     * @param x 경도
-     * @param y 위도
-     * @return
-     * @throws URISyntaxException
-     * @throws IOException
-     */
-    AirServiceDto getBookmarkAirInfo(double x, double y) throws URISyntaxException, IOException;
 }

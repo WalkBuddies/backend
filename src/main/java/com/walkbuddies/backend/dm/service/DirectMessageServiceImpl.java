@@ -5,11 +5,10 @@ import com.walkbuddies.backend.dm.domain.DirectMessageEntity;
 import com.walkbuddies.backend.dm.dto.DirectMessageDto;
 import com.walkbuddies.backend.dm.repository.ChatRoomRepository;
 import com.walkbuddies.backend.dm.repository.DirectMessageRepository;
-import com.walkbuddies.backend.exception.impl.NotFoundChatRoom;
+import com.walkbuddies.backend.exception.impl.NotFoundChatRoomException;
 import com.walkbuddies.backend.exception.impl.NotFoundMemberException;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
-import com.walkbuddies.backend.weather.dto.WeatherMidDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -87,7 +86,7 @@ public class DirectMessageServiceImpl implements DirectMessageService {
         } else {
             Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
             if (optionalChatRoom.isEmpty()) {
-                throw new NotFoundChatRoom();
+                throw new NotFoundChatRoomException();
             }
 
             ChatRoomEntity chatRoom = optionalChatRoom.get();

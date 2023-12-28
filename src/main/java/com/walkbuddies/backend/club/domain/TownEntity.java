@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class TownEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long townId;
 
     private String townName;
