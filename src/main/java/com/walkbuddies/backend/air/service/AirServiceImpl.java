@@ -99,6 +99,7 @@ public class AirServiceImpl implements AirService {
      */
     public AirServiceDto getAirInfo(double X, double Y)
             throws URISyntaxException, JsonProcessingException {
+      
         double[] tm = commonService.GeoToTm(X, Y);
         MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tm[0], tm[1]);
 

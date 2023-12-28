@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +31,8 @@ public class ClubBoardController {
     @PostMapping("/write")
     public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<Long> fileId
                                                         ,@RequestPart(value = "board") ClubBoardDto clubBoardDto) {
-        ClubBoardDto response = clubBoardService.createPost(fileId, clubBoardDto );
+        System.out.println(fileId);
+        ClubBoardDto response = clubBoardService.createPost(fileId, clubBoardDto);
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.CREATED.value(), "작성완료",
             response);
 
@@ -48,20 +50,21 @@ public class ClubBoardController {
     }
 
     //list : 검색기능 포함
-    @GetMapping("/list")
+    @GetMapping("/list/{clubId}")
     public ResponseEntity<PageResponse<Page<ClubBoardDto>>> boardList(@PageableDefault(page = 0, size = 20, sort = "clubBoardId", direction = Sort.Direction.DESC)
                                                         Pageable pageable,
+                                                        @PathVariable(value = "clubId") Long clubId,
                                                         @RequestParam(value = "keyword", required = false) String keyword,
                                                         @RequestParam(value = "type", required = false) String type) {
         Page<ClubBoardDto> data;
         if (keyword == null) {
-            data = clubBoardService.postList(pageable);
+            data = clubBoardService.postList(pageable, clubId, 0);
         } else {
             ClubBoardSearch search = ClubBoardSearch.builder()
                 .keyword(keyword)
                 .type(type)
                 .build();
-            data = clubBoardService.postSearchList(pageable, search);
+            data = clubBoardService.postSearchList(pageable, clubId, search, 0);
         }
 
         PageResponse<Page<ClubBoardDto>> result = new PageResponse<>(HttpStatus.OK.value(), "검색 완료",
@@ -84,7 +87,7 @@ public class ClubBoardController {
 
     //delete
 
-    @GetMapping("/delete/{boardId}")
+    @PostMapping("/delete/{boardId}")
     public ResponseEntity<SingleResponse<String>> deleteBoard(@PathVariable long boardId) {
         clubBoardService.deletePost(boardId);
 
@@ -102,13 +105,5 @@ public class ClubBoardController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/restore/{boardId}")
-    public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long boardId) {
-        clubBoardService.CluBoardRestore(boardId);
 
-        SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "복구 완료", null);
-
-        return ResponseEntity.ok(result);
-
-    }
 }

@@ -32,7 +32,8 @@ public class ClubBoardEntity {
     @JoinColumn(name = "memeberId")
     private MemberEntity memberId;
 
-    @OneToMany(mappedBy = "fileId", orphanRemoval = true)
+    @OneToMany(orphanRemoval = true)
+    @JoinColumn(name = "clubBoardId")
     private List<FileEntity> fileId;
 
     private String nickname;
@@ -45,11 +46,8 @@ public class ClubBoardEntity {
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
     private LocalDateTime deleteAt;
-    @ColumnDefault("0")
     private Integer noticeYn;
-    @ColumnDefault("0")
     private Integer deleteYn;
-    @ColumnDefault("0")
     private Integer fileYn;
 
     public void update(ClubBoardDto dto, ClubPreface preface) {

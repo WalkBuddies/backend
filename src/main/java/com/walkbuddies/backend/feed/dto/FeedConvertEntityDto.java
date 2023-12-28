@@ -11,15 +11,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class FeedConvertEntityDto {
   private final MemberService memberService;
+  private final FileEntity fileEntity;
   public FeedEntity dtoToEntity(FeedDto dto) {
     return FeedEntity.builder()
         .feedId(dto.getFeedId())
         .memberId(memberService.getMemberEntity(dto.getMemberId()))
-        .fileId(FileEntity.dtoListToEntityList(dto.getFileId()))
+        .fileId(fileEntity.dtoListToEntityList(dto.getFileId()))
         .title(dto.getTitle())
         .content(dto.getContent())
         .createAt(dto.getCreateAt())
         .updateAt(dto.getUpdateAt())
+        .fileYn(dto.getFileYn())
         .deleteAt(dto.getDeleteAt())
         .deleteYn(dto.getDeleteYn())
         .build();
@@ -30,7 +32,7 @@ public class FeedConvertEntityDto {
         .feedId(entity.getFeedId())
         .memberId(entity.getMemberId().getMemberId())
         .fileYn(entity.getFileYn())
-        .fileId(FileEntity.entityListToDtoList(entity.getFileId()))
+        .fileId(fileEntity.entityListToDtoList(entity.getFileId()))
         .title(entity.getTitle())
         .content(entity.getContent())
         .createAt(entity.getCreateAt())
@@ -45,7 +47,7 @@ public class FeedConvertEntityDto {
         .feedId(entity.getFeedId())
         .memberId(entity.getMemberId().getMemberId())
         .fileYn(entity.getFileYn())
-        .fileId(FileEntity.entityListToDtoList(entity.getFileId()))
+        .fileId(fileEntity.entityListToDtoList(entity.getFileId()))
         .title(entity.getTitle())
         .content(entity.getContent())
         .createAt(entity.getCreateAt())

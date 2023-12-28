@@ -32,6 +32,7 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
   @Override
   public ResponseDto createComment(Long boardIdx, RequestDto requestDto) {
       requestDto.setClubBoardId(boardIdx);
+      requestDto.setDeleteYn(0);
       ClubBoardCommentEntity entity = convert.toEntity(requestDto);
       if (requestDto.getParentId() != null) {
         entity.updateParent(getCommentEntity(requestDto.getParentId()));
@@ -46,15 +47,14 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
    * 댓글목록불러오기
    * @param pageable 페이징정보
    * @param boardId 원글번호
+   * @param deleteYn 삭제여부(0, 1)
    * @return
    */
   @Override
-  public Page<ResponseDto> getCommentList(Pageable pageable, Long boardId) {
+  public Page<ResponseDto> getCommentList(Pageable pageable, Long boardId, Integer deleteYn) {
      ClubBoardEntity boardEntity = clubBoardService.getBoardEntity(boardId);
-
-     Page<ClubBoardCommentEntity> result = clubBoardCommentRepository.findAllByClubBoardIdAndDeleteYn(pageable, boardEntity, 0);
-
-    return convert.toPageDto(result);
+     Page<ClubBoardCommentEntity> result = clubBoardCommentRepository.findAllByClubBoardIdAndDeleteYn(pageable, boardEntity, deleteYn);
+    return result.map(convert::toDto);
 
   }
 
@@ -98,17 +98,6 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
 
      clubBoardCommentRepository.save(entity);
 
-  }
-
-  /**
-   * 댓글 복구
-   * @param commentId
-   */
-  @Override
-  public void restoreComment(Long commentId) {
-    ClubBoardCommentEntity entity = getCommentEntity(commentId);
-    entity.changeDeleteYn(0);
-    clubBoardCommentRepository.save(entity);
   }
 
 

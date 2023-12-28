@@ -33,11 +33,11 @@ public class FeedEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long feedId;
-
   @ManyToOne (fetch = FetchType.LAZY)
   @JoinColumn(name = "memberId")
   private MemberEntity memberId;
-  @OneToMany(mappedBy = "fileId", orphanRemoval = true)
+  @OneToMany(orphanRemoval = true)
+  @JoinColumn(name = "feedId")
   private List<FileEntity> fileId;
   private String title;
   private String content;

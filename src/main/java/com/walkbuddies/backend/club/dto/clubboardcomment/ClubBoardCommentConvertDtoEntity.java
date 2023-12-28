@@ -30,7 +30,7 @@ public class ClubBoardCommentConvertDtoEntity {
   }
 
   public ResponseDto toDto(ClubBoardCommentEntity entity) {
-
+    System.out.println(entity.getContent());
       return ResponseDto.builder()
           .clubBoardCommentId(entity.getClubBoardCommentId())
           .memberId(entity.getMemberId().getMemberId())

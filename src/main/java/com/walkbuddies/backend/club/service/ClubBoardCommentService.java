@@ -25,7 +25,7 @@ public interface ClubBoardCommentService {
    * @param boardIdx
    * @return
    */
-  Page<ResponseDto> getCommentList(Pageable pageable, Long boardIdx);
+  Page<ResponseDto> getCommentList(Pageable pageable, Long boardIdx, Integer deleteYn);
 
   /**
    * 댓글수정
@@ -40,11 +40,7 @@ public interface ClubBoardCommentService {
    */
   void deleteComment(Long commentId);
 
-  /**
-   * 댓글복구
-   * @param commentId
-   */
-  void restoreComment(Long commentId);
+
 
   /**
    * 댓글entity 로드

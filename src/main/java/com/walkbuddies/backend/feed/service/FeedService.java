@@ -13,9 +13,8 @@ public interface FeedService {
 
   FeedDto createFeed(List<Long> files, FeedDto dto);
   FeedDto getFeed(Long feedIdx);
-  Page<FeedDto> feedList( Pageable pageable, Long memberId);
+  Page<FeedDto> feedList( Pageable pageable, Long memberId, Integer deleteYn);
   FeedDto updateFeed(List<Long> files, FeedDto dto);
   void deleteFeed(Long feedIdx);
-  FeedEntity getFeedEntity(Long feedIdx);
-  void restoreFeed(Long feedIdx);
+  FeedEntity getFeedEntity(Long feedId);
 }
