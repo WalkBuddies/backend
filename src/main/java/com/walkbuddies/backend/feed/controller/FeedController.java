@@ -83,24 +83,5 @@ public class FeedController {
   }
 
 
-  @PostMapping("/restore/{feedId}")
-  public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable Long feedId) {
-    feedService.restoreFeed(feedId);
 
-    SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "복구 완료", null);
-
-    return ResponseEntity.ok(result);
-
-  }
-
-  @GetMapping("/deleted-list/{memberId}")
-  public ResponseEntity<PageResponse<Page<FeedDto>>> deletedList(@PathVariable Long memberId, @PageableDefault(page = 0, size = 20, sort = "feedId", direction = Sort.Direction.DESC)
-  Pageable pageable) {
-    Page<FeedDto> data = feedService.feedList(pageable, memberId, 1);
-
-    PageResponse<Page<FeedDto>> result = new PageResponse<>(HttpStatus.OK.value(), "검색 완료",
-        data);
-
-    return ResponseEntity.ok(result);
-  }
 }

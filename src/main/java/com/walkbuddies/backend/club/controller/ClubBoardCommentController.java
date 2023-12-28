@@ -74,22 +74,5 @@ public class ClubBoardCommentController {
     return ResponseEntity.ok(response);
   }
 
-  @PostMapping("/{commentId}/comment-restore")
-  public ResponseEntity<SingleResponse<String>> restoreComment(@PathVariable Long commentId) {
-    clubBoardCommentService.restoreComment(commentId);
-    SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "복구완료", null);
 
-    return ResponseEntity.ok(response);
-  }
-
-  @GetMapping("/{boardId}/deleted-comment-list")
-  public ResponseEntity<PageResponse<Page<ResponseDto>>> deletedCommentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
-                                                        Pageable pageable
-                                                      ,@PathVariable Long boardId) {
-
-    Page<ResponseDto> result = clubBoardCommentService.getCommentList(pageable, boardId, 1);
-    PageResponse<Page<ResponseDto>> response = new PageResponse<>(HttpStatus.OK.value(), "댓글조회 완료",
-        result);
-    return ResponseEntity.ok(response);
-  }
 }

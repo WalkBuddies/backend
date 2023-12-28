@@ -105,37 +105,5 @@ public class ClubBoardController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/restore/{boardId}")
-    public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long boardId) {
-        clubBoardService.CluBoardRestore(boardId);
 
-        SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "복구 완료", null);
-
-        return ResponseEntity.ok(result);
-
-    }
-
-    //삭제된 글 조회(어드민용)
-    @GetMapping("/deleted-list")
-    public ResponseEntity<PageResponse<Page<ClubBoardDto>>> deletedList(@PageableDefault(page = 0, size = 20, sort = "clubBoardId", direction = Sort.Direction.DESC)
-    Pageable pageable,
-        @PathVariable(value = "clubId") Long clubId,
-        @RequestParam(value = "keyword", required = false) String keyword,
-        @RequestParam(value = "type", required = false) String type) {
-        Page<ClubBoardDto> data;
-        if (keyword == null) {
-            data = clubBoardService.postList(pageable, clubId, 1);
-        } else {
-            ClubBoardSearch search = ClubBoardSearch.builder()
-                .keyword(keyword)
-                .type(type)
-                .build();
-            data = clubBoardService.postSearchList(pageable, clubId, search, 1);
-        }
-
-        PageResponse<Page<ClubBoardDto>> result = new PageResponse<>(HttpStatus.OK.value(), "검색 완료",
-            data);
-
-        return ResponseEntity.ok(result);
-    }
 }

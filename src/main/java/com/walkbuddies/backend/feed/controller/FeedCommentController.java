@@ -71,11 +71,5 @@ public class FeedCommentController {
     return ResponseEntity.ok(response);
   }
 
-  @PostMapping("/{commentId}/comment-restore")
-  public ResponseEntity<SingleResponse<String>> restoreComment(@PathVariable Long commentId) {
-    feedCommentService.restoreComment(commentId);
-    SingleResponse<String> response = new SingleResponse<>(HttpStatus.OK.value(), "복구완료", null);
 
-    return ResponseEntity.ok(response);
-  }
 }

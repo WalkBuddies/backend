@@ -14,7 +14,6 @@ public interface FeedCommentService {
   Page<FeedCommentDto> getCommentList(Pageable pageable, Long boardIdx, Integer deleteYn);
   FeedCommentDto updateComment(FeedCommentDto requestDto);
   void deleteComment(Long commentId);
-  void restoreComment(Long commentId);
 
   FeedCommentEntity getFeedCommentEntity(Long feedId);
 

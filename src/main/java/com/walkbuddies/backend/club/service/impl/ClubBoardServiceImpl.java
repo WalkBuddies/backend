@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.club.service.impl;
 
+import com.walkbuddies.backend.club.domain.ClubBoardCommentEntity;
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
 import com.walkbuddies.backend.club.domain.ClubEntity;
 import com.walkbuddies.backend.club.domain.ClubPreface;
@@ -8,6 +9,7 @@ import com.walkbuddies.backend.club.dto.PrefaceConvertDtoEntity;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.club.dto.ClubBoardSearch;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardConvertDtoEntity;
+import com.walkbuddies.backend.club.repository.ClubBoardCommentRepository;
 import com.walkbuddies.backend.club.repository.ClubBoardRepository;
 import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
@@ -37,10 +39,10 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     private final ClubPrefaceRepository clubPrefaceRepository;
     private final ClubRepository clubRepository;
     private final PrefaceConvertDtoEntity prefaceConvertDtoEntity;
+    private final ClubBoardCommentRepository boardCommentRepository;
 
     private final ClubBoardConvertDtoEntity clubBoardConvertDtoEntity;
     private final FileService fileService;
-
     /**
      * 게시글 쓰기
      * 파일 있으면 파일업로드 후 dto 받아서 등록
@@ -72,13 +74,13 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     /**
      * 게시글 상세보기
      * 삭제여부 체크후 0일 시 반환
-     * @param boardIdx 게시글번호
+     * @param boardId 게시글번호
      * @return clubBoardDto
      */
 
     @Override
-    public ClubBoardDto getPost(Long boardIdx) {
-        ClubBoardEntity entity = getBoardEntity(boardIdx);
+    public ClubBoardDto getPost(Long boardId) {
+        ClubBoardEntity entity = getBoardEntity(boardId);
 
         if (entity.getDeleteYn() == 1) {
             throw new NoPostException();
@@ -102,6 +104,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      *
      * @param pageable (현재페이지 page)
      * @param search (검색키워드 keyword, 검색컬럼 type)
+     * @param deleteYn 삭제여부 (0, 1)
      * @return
      */
     @Override
@@ -160,23 +163,35 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     /**
      * 게시글 삭제(deleteYn 1로 수정 후 저장)
      *
-     * @param boardIdx 원글 번호
+     * @param boardId 원글 번호
      */
     @Override
-    public void deletePost(Long boardIdx) {
-        ClubBoardEntity entity = getBoardEntity(boardIdx);
+    @Transactional
+    public void deletePost(Long boardId) {
+        ClubBoardEntity entity = getBoardEntity(boardId);
         entity.changeDeleteYn(1);
         clubBoardRepository.save(entity);
+
+        Optional<List<ClubBoardCommentEntity>> op = boardCommentRepository.findAllByClubBoardId(entity);
+        if (op.isEmpty()) {
+            return;
+        }
+        List<ClubBoardCommentEntity> entities = op.get();
+        for (ClubBoardCommentEntity et : entities) {
+            et.changeDeleteYn(1);
+            boardCommentRepository.save(et);
+        }
+
     }
 
     /**
      * 게시글 entity 불러오기
-     * @param boardIdx 원글번호
+     * @param boardId 원글번호
      * @return clubBoardEntity
      */
     @Override
-    public ClubBoardEntity getBoardEntity(Long boardIdx) {
-        Optional<ClubBoardEntity> op = clubBoardRepository.findByClubBoardId(boardIdx);
+    public ClubBoardEntity getBoardEntity(Long boardId) {
+        Optional<ClubBoardEntity> op = clubBoardRepository.findByClubBoardId(boardId);
 
         if (op.isEmpty()) {
             throw new NoPostException();
@@ -187,12 +202,12 @@ public class ClubBoardServiceImpl implements ClubBoardService {
 
     /**
      *
-     * @param clubIdx 클럽id
+     * @param clubId 클럽id
      * @return clubPrefaceDto list
      */
     @Override
-    public List<ClubPrefaceDto> getClubPreface(Long clubIdx) {
-        Optional<ClubEntity> opClub = clubRepository.findByClubId(clubIdx);
+    public List<ClubPrefaceDto> getClubPreface(Long clubId) {
+        Optional<ClubEntity> opClub = clubRepository.findByClubId(clubId);
         if (opClub.isEmpty()) {
             throw new NotFoundClubException();
         }
@@ -209,16 +224,6 @@ public class ClubBoardServiceImpl implements ClubBoardService {
 
     }
 
-    /**
-     * 게시글 복구
-     * @param boardIdx
-     */
-    @Override
-    public void CluBoardRestore(Long boardIdx) {
-        ClubBoardEntity entity = getBoardEntity(boardIdx);
-        entity.changeDeleteYn(0);
-        clubBoardRepository.save(entity);
-    }
 
     public ClubEntity getClubEntity(Long clubId) {
         Optional<ClubEntity> op = clubRepository.findByClubId(clubId);

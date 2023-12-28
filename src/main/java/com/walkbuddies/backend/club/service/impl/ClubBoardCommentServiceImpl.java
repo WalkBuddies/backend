@@ -47,6 +47,7 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
    * 댓글목록불러오기
    * @param pageable 페이징정보
    * @param boardId 원글번호
+   * @param deleteYn 삭제여부(0, 1)
    * @return
    */
   @Override
@@ -97,17 +98,6 @@ public class ClubBoardCommentServiceImpl implements ClubBoardCommentService {
 
      clubBoardCommentRepository.save(entity);
 
-  }
-
-  /**
-   * 댓글 복구
-   * @param commentId
-   */
-  @Override
-  public void restoreComment(Long commentId) {
-    ClubBoardCommentEntity entity = getCommentEntity(commentId);
-    entity.changeDeleteYn(0);
-    clubBoardCommentRepository.save(entity);
   }
 
 

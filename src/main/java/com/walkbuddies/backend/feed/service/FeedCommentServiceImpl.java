@@ -45,13 +45,14 @@ public class FeedCommentServiceImpl implements FeedCommentService {
    * 댓글목록 불러오기
    * @param pageable 페이지정보
    * @param feedId 원글번호
+   * @param deleteYn 삭제여부
    * @return
    */
   @Override
   public Page<FeedCommentDto> getCommentList(Pageable pageable, Long feedId, Integer deleteYn) {
     FeedEntity entity = feedService.getFeedEntity(feedId);
     System.out.println(entity.toString());
-    Page<FeedCommentEntity> result = feedCommentRepository.findAllByFeedIdAndDeleteYn(pageable, entity, 0);
+    Page<FeedCommentEntity> result = feedCommentRepository.findAllByFeedIdAndDeleteYn(pageable, entity, deleteYn);
 
     return convert.toPageDto(result);
   }
@@ -81,16 +82,7 @@ public class FeedCommentServiceImpl implements FeedCommentService {
     feedCommentRepository.save(entity);
   }
 
-  /**
-   * 댓글복구
-   * @param commentId
-   */
-  @Override
-  public void restoreComment(Long commentId) {
-    FeedCommentEntity entity = getFeedCommentEntity(commentId);
-    entity.changeDeleteYn(0);
-    feedCommentRepository.save(entity);
-  }
+
 
   /**
    * 댓글entity 로드
