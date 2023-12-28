@@ -1,8 +1,12 @@
 package com.walkbuddies.backend.club.controller;
 
+import com.walkbuddies.backend.club.domain.ClubPreface;
+import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.club.dto.ClubBoardSearch;
+import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.service.ClubBoardService;
+import com.walkbuddies.backend.common.response.ListResponse;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
 import java.util.List;
@@ -21,24 +25,24 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ClubBoardController {
     private final ClubBoardService clubBoardService;
+
     //create
     @PostMapping("/write")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<MultipartFile> files
+    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<Long> fileId
                                                         ,@RequestPart(value = "board") ClubBoardDto clubBoardDto) {
-        System.out.println(clubBoardDto.toString());
-        ClubBoardDto response = clubBoardService.createPost(files, clubBoardDto);
-        SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
+        ClubBoardDto response = clubBoardService.createPost(fileId, clubBoardDto );
+        SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.CREATED.value(), "작성완료",
             response);
 
         return ResponseEntity.ok(result);
     }
 
     //read
-    @GetMapping("/board-details/{boardIdx}")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> readBoard(@PathVariable Long boardIdx) {
+    @GetMapping("/board-details/{boardId}")
+    public ResponseEntity<SingleResponse<ClubBoardDto>> readBoard(@PathVariable Long boardId) {
 
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.OK.value(), "조회 완료",
-                                     clubBoardService.getPost(boardIdx));
+                                     clubBoardService.getPost(boardId));
 
         return ResponseEntity.ok(result);
     }
@@ -68,9 +72,9 @@ public class ClubBoardController {
     //update
 
     @PostMapping("/update")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> updateBoard(@RequestBody ClubBoardDto clubBoardDto) {
+    public ResponseEntity<SingleResponse<ClubBoardDto>> updateBoard(@RequestPart(value = "board") ClubBoardDto clubBoardDto, @RequestPart(value = "files", required = false) List<Long> fileId) {
 
-        ClubBoardDto data = clubBoardService.updatePost(clubBoardDto);
+        ClubBoardDto data = clubBoardService.updatePost(clubBoardDto, fileId);
 
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.OK.value(), "수정 완료",
             data);
@@ -80,13 +84,31 @@ public class ClubBoardController {
 
     //delete
 
-    @GetMapping("/delete/{boardIdx}")
-    public ResponseEntity<SingleResponse<String>> deleteBoard(@PathVariable long boardIdx) {
-        clubBoardService.deletePost(boardIdx);
+    @GetMapping("/delete/{boardId}")
+    public ResponseEntity<SingleResponse<String>> deleteBoard(@PathVariable long boardId) {
+        clubBoardService.deletePost(boardId);
 
         SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "삭제 완료",
             null);
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/preface/{clubId}")
+    public  ResponseEntity<ListResponse<ClubPrefaceDto>> getPreface(@PathVariable long clubId) {
+        List<ClubPrefaceDto> data = clubBoardService.getClubPreface(clubId);
+        ListResponse<ClubPrefaceDto> result = new ListResponse<>(HttpStatus.OK.value(), "말머리 로드", data);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/restore/{boardId}")
+    public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long boardId) {
+        clubBoardService.CluBoardRestore(boardId);
+
+        SingleResponse<String> result = new SingleResponse<>(HttpStatus.OK.value(), "복구 완료", null);
+
+        return ResponseEntity.ok(result);
+
     }
 }

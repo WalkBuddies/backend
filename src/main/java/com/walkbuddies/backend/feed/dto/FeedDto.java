@@ -1,35 +1,33 @@
-package com.walkbuddies.backend.club.dto.clubboard;
-
+package com.walkbuddies.backend.feed.dto;
 
 import com.walkbuddies.backend.common.dto.FileDto;
-import java.util.List;
-import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.stereotype.Component;
 
-@Builder
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-
-public class ClubBoardDto {
-
-  private Long clubBoardId;
-  private Long clubId;
+@Component
+public class FeedDto {
+  private Long feedId;
   private Long memberId;
   private List<FileDto> fileId;
-  private String nickname;
   private String title;
   private String content;
   private LocalDateTime createAt;
   private LocalDateTime updateAt;
   private LocalDateTime deleteAt;
-  private Integer noticeYn;
   private Integer deleteYn;
   private Integer fileYn;
-  private Long prefaceId;
 
-
-  }
-
+}

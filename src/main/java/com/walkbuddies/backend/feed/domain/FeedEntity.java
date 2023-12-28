@@ -1,8 +1,8 @@
-package com.walkbuddies.backend.club.domain;
+package com.walkbuddies.backend.feed.domain;
 
-import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
+import com.walkbuddies.backend.common.domain.FileEntity;
+import com.walkbuddies.backend.feed.dto.FeedDto;
 import com.walkbuddies.backend.member.domain.MemberEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,55 +18,43 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Entity
-@Table(name = "club_board_reply")
+@Table(name = "feed")
 @Builder
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-public class ClubBoardCommentEntity {
+@AllArgsConstructor
+@ToString
+public class FeedEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long clubBoardCommentId;
+  private Long feedId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberId", nullable = false)
+  @ManyToOne (fetch = FetchType.LAZY)
+  @JoinColumn(name = "memberId")
   private MemberEntity memberId;
-
-  private String nickname;
-
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "clubBoardId", nullable = false)
-  private ClubBoardEntity clubBoardId;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "parentId")
-  private ClubBoardCommentEntity parentId;
-
-  @OneToMany(mappedBy = "parentId", fetch = FetchType.EAGER, orphanRemoval = true)
-  private List<ClubBoardCommentEntity> childrenId;
-
+  @OneToMany(mappedBy = "fileId", orphanRemoval = true)
+  private List<FileEntity> fileId;
+  private String title;
   private String content;
   @CreationTimestamp
   private LocalDateTime createAt;
   private LocalDateTime updateAt;
+  private LocalDateTime deleteAt;
   @ColumnDefault("0")
   private Integer deleteYn;
-  private LocalDateTime deleteAt;
+  @ColumnDefault("0")
+  private Integer fileYn;
 
-  public void updateParent(ClubBoardCommentEntity parentId) {
-    this.parentId = parentId;
-  }
-  public void updateContent(RequestDto dto) {
+  public void update (FeedDto dto) {
     this.content = dto.getContent();
+    this.title = dto.getTitle();
     this.updateAt = LocalDateTime.now();
   }
-
   public void changeDeleteYn(int deleteYn) {
     this.deleteYn = deleteYn;
     if (deleteYn == 1) {
@@ -75,4 +63,5 @@ public class ClubBoardCommentEntity {
       this.deleteAt = null;
     }
   }
+
 }

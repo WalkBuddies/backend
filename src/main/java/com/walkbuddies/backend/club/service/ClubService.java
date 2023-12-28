@@ -3,6 +3,7 @@ package com.walkbuddies.backend.club.service;
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
 import com.walkbuddies.backend.club.dto.ClubParameter;
+import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import com.walkbuddies.backend.club.dto.ClubUpdateParameter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -85,4 +86,24 @@ public interface ClubService {
      * @return
      */
     List<ClubDto> getMyClub(ClubParameter clubParameter);
+
+    /**
+     * 말머리 만들기
+     * @param clubPrefaceDto
+     * @return
+     */
+    ClubPrefaceDto createPreface(ClubPrefaceDto clubPrefaceDto);
+
+    /**
+     * 말머리 수정
+     * @param clubPrefaceDto
+     * @return
+     */
+    ClubPrefaceDto updatePreface(ClubPrefaceDto clubPrefaceDto);
+
+    /**
+     * 말머리 삭제
+     * @param prefaceId
+     */
+    void deletePreface(Long prefaceId);
 }

@@ -15,7 +15,7 @@ public class MemberDetailDto {
     private Long townId;
     private String email;
     private String role;
-    private boolean blocked;
+    private Boolean blocked;
     private String password;
     private String name;
     private String nickName;
@@ -27,7 +27,7 @@ public class MemberDetailDto {
     private LocalDateTime passwordUpdate;
     private Integer socialCode;
     private String oauthExternalId;
-    private boolean verify;
+    private Boolean verify;
     private String verificationCode;
     private LocalDateTime verifyExpiredAt;
     private LocalDateTime townVerificationDate;

@@ -44,7 +44,9 @@ public class MemberController {
         MemberResponse memberResponse = memberService.login(loginRequest);
         TokenResponse tokenResponse = jwtTokenUtil.createTokenByLogin(memberResponse.getEmail(), "USER");
         response.addHeader(jwtTokenUtil.AUTHORIZATION_HEADER, tokenResponse.getAccessToken());
-        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "로그인 성공", tokenResponse);
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
+                "로그인 되었습니다.",
+                tokenResponse);
         return ResponseEntity.ok(singleResponse);
     }
 
@@ -52,11 +54,13 @@ public class MemberController {
     public ResponseEntity<SingleResponse> logout(
             @AuthenticationPrincipal MemberDetails memberDetails,
             HttpServletRequest request) {
-        log.info("로그아웃 - memberDetails: {}", memberDetails);
+
         if (memberDetails != null) {
             String accessToken = jwtTokenUtil.resolveToken(request);
             memberService.logout(accessToken, memberDetails.getUsername());
-            SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(), "로그아웃 되었습니다.", null);
+            SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(),
+                    "로그아웃 되었습니다.",
+                    null);
             return ResponseEntity.ok(response);
         } else {
             SingleResponse response = new SingleResponse<>(HttpStatus.UNAUTHORIZED.value(), "로그인 상태가 아닙니다.", null);
