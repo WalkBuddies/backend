@@ -1,10 +1,8 @@
 package com.walkbuddies.backend.admin.dto;
 
 import lombok.*;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -16,6 +14,8 @@ public class MemberDetailDto {
     private Long memberId;
     private Long townId;
     private String email;
+    private String role;
+    private Boolean blocked;
     private String password;
     private String name;
     private String nickName;
@@ -27,8 +27,7 @@ public class MemberDetailDto {
     private LocalDateTime passwordUpdate;
     private Integer socialCode;
     private String oauthExternalId;
-    private String accessToken;
-    private boolean verify;
+    private Boolean verify;
     private String verificationCode;
     private LocalDateTime verifyExpiredAt;
     private LocalDateTime townVerificationDate;

@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.club.service;
+package com.walkbuddies.backend.club.service.impl;
 
 import com.walkbuddies.backend.club.domain.ClubEntity;
 import com.walkbuddies.backend.club.domain.ClubPreface;
@@ -16,6 +16,7 @@ import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.club.repository.ClubWaitingRepository;
 import com.walkbuddies.backend.club.repository.MyClubRepository;
 import com.walkbuddies.backend.club.repository.TownRepository;
+import com.walkbuddies.backend.club.service.ClubService;
 import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -70,7 +72,7 @@ public class ClubServiceImpl implements ClubService {
                 .membersLimit(clubDto.getMembersLimit())
                 .accessLimit(clubDto.getAccessLimit())
                 .needGrant(clubDto.getNeedGrant())
-                .regDate(LocalDate.now())
+                .regDate(LocalDateTime.now())
                 .build();
 
         clubRepository.save(clubEntity);
@@ -211,7 +213,7 @@ public class ClubServiceImpl implements ClubService {
                 .accessLimit(clubEntity.getAccessLimit())
                 .needGrant(clubEntity.getNeedGrant())
                 .regDate(clubEntity.getRegDate())
-                .modDate(LocalDate.now())
+                .modDate(LocalDateTime.now())
                 .build();
         clubRepository.save(updatedClubEntity);
 
@@ -294,7 +296,7 @@ public class ClubServiceImpl implements ClubService {
                 .accessLimit(clubEntity.getAccessLimit())
                 .needGrant(clubEntity.getNeedGrant())
                 .regDate(clubEntity.getRegDate())
-                .modDate(LocalDate.now())
+                .modDate(LocalDateTime.now())
                 .build();
         clubRepository.save(updatedClubEntity);
 
@@ -336,7 +338,7 @@ public class ClubServiceImpl implements ClubService {
                 .accessLimit(clubEntity.getAccessLimit())
                 .needGrant(clubEntity.getNeedGrant())
                 .regDate(clubEntity.getRegDate())
-                .modDate(LocalDate.now())
+                .modDate(LocalDateTime.now())
                 .build();
         clubRepository.save(updatedClubEntity);
 
@@ -390,7 +392,7 @@ public class ClubServiceImpl implements ClubService {
                 .accessLimit(clubUpdateParameter.getAccessLimit())
                 .needGrant(clubUpdateParameter.getNeedGrant())
                 .regDate(clubEntity.getRegDate())
-                .modDate(LocalDate.now())
+                .modDate(LocalDateTime.now())
                 .build();
         clubRepository.save(updatedClubEntity);
 

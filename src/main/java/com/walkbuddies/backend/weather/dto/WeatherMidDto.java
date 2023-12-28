@@ -4,6 +4,7 @@ import com.walkbuddies.backend.weather.domain.WeatherMidEntity;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,6 @@ public class WeatherMidDto {
     private String wf7Am;
     private String wf7Pm;
 
-    private LocalDate regDate;
-    private LocalDate modDate;
+    private LocalDateTime regDate;
+    private LocalDateTime modDate;
 }

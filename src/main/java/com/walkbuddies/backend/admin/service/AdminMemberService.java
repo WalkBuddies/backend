@@ -1,6 +1,7 @@
 package com.walkbuddies.backend.admin.service;
 
 import com.walkbuddies.backend.admin.dto.MemberDetailDto;
+import com.walkbuddies.backend.admin.dto.MemberStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,4 +36,10 @@ public interface AdminMemberService {
      */
     MemberDetailDto getMemberNickName(String nickName);
 
+    /**
+     * 해당 유저의 Role, Block 상태를 변경하는 메서드
+     * @param memberStatus
+     * @return
+     */
+    MemberDetailDto memberBlock(MemberStatus memberStatus);
 }

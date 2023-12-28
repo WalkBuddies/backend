@@ -86,6 +86,8 @@ public class MemberEntity implements Serializable {
                 .memberId(memberEntity.getMemberId())
                 .townId(memberEntity.getTownId().getTownId())
                 .email(memberEntity.getEmail())
+                .role(memberEntity.getRole())
+                .blocked(memberEntity.isBlocked())
                 .password(memberEntity.getPassword())
                 .name(memberEntity.getName())
                 .nickName(memberEntity.getNickname())
