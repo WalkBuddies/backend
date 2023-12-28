@@ -28,9 +28,9 @@ public class ClubBoardController {
 
     //create
     @PostMapping("/write")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<MultipartFile> files
+    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<Long> fileId
                                                         ,@RequestPart(value = "board") ClubBoardDto clubBoardDto) {
-        ClubBoardDto response = clubBoardService.createPost(files, clubBoardDto);
+        ClubBoardDto response = clubBoardService.createPost(fileId, clubBoardDto );
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.CREATED.value(), "작성완료",
             response);
 
@@ -72,9 +72,9 @@ public class ClubBoardController {
     //update
 
     @PostMapping("/update")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> updateBoard(@RequestBody ClubBoardDto clubBoardDto) {
+    public ResponseEntity<SingleResponse<ClubBoardDto>> updateBoard(@RequestPart(value = "board") ClubBoardDto clubBoardDto, @RequestPart(value = "files", required = false) List<Long> fileId) {
 
-        ClubBoardDto data = clubBoardService.updatePost(clubBoardDto);
+        ClubBoardDto data = clubBoardService.updatePost(clubBoardDto, fileId);
 
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.OK.value(), "수정 완료",
             data);

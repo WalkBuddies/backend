@@ -29,7 +29,7 @@ public class FeedController {
 
   //create
   @PostMapping("/write")
-  public ResponseEntity<SingleResponse<FeedDto>> createBoard(@RequestPart(value = "files", required = false) List<MultipartFile> files
+  public ResponseEntity<SingleResponse<FeedDto>> createBoard(@RequestPart(value = "files", required = false) List<Long> files
       ,@RequestPart(value = "board") FeedDto feedDto) {
     FeedDto response = feedService.createFeed(files, feedDto);
     SingleResponse<FeedDto> result = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
@@ -62,9 +62,9 @@ public class FeedController {
   //update
 
   @PostMapping("/update")
-  public ResponseEntity<SingleResponse<FeedDto>> updateBoard(@RequestBody FeedDto dto) {
+  public ResponseEntity<SingleResponse<FeedDto>> updateBoard(@RequestPart(value = "files", required = false) List<Long> fileId, @RequestPart(value = "board") FeedDto dto) {
 
-    FeedDto data = feedService.updateFeed(dto);
+    FeedDto data = feedService.updateFeed(fileId, dto);
 
     SingleResponse<FeedDto> result = new SingleResponse<>(HttpStatus.OK.value(), "수정 완료",
         data);

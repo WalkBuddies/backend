@@ -14,11 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ClubBoardService {
   /**
    * 파일 있으면 파일업로드 후 dto 받아서 등록
-   * @param files 파일목록
+   * @param fileId 파일ID목록
    * @param clubBoardDto 게시글 dto
    * @return
    */
-  ClubBoardDto createPost(List<MultipartFile> files, ClubBoardDto clubBoardDto);
+  ClubBoardDto createPost(List<Long> fileId, ClubBoardDto clubBoardDto);
   /**
    * 게시글 상세보기
    * to-be: 파일첨부 조회
@@ -44,9 +44,10 @@ public interface ClubBoardService {
    * 게시글 수정
    *
    * @param clubBoardDto 수정 dto
+   * @param fileId 수정된 파일id 리스트
    * @return 수정된 dto
    */
-  ClubBoardDto updatePost(ClubBoardDto clubBoardDto);
+  ClubBoardDto updatePost(ClubBoardDto clubBoardDto, List<Long> fileId);
   /**
    * 게시글 삭제(deleteYn 1로 수정 후 저장)
    *

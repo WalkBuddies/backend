@@ -13,6 +13,7 @@ import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.common.dto.FileDto;
+import com.walkbuddies.backend.common.repository.FileRepository;
 import com.walkbuddies.backend.common.service.FileService;
 import com.walkbuddies.backend.exception.impl.NoPostException;
 import com.walkbuddies.backend.exception.impl.NoResultException;
@@ -46,17 +47,18 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     /**
      * 게시글 쓰기
      * 파일 있으면 파일업로드 후 dto 받아서 등록
-     * @param files 파일목록
+     * @param fileId 파일목록
      * @param clubBoardDto 게시글 dto
      * @return
      */
     @Override
     @Transactional
-    public ClubBoardDto createPost(List<MultipartFile> files, ClubBoardDto clubBoardDto) {
+    public ClubBoardDto createPost(List<Long> fileId, ClubBoardDto clubBoardDto) {
         clubBoardDto.setFileYn(0);
-        List<FileDto> fileDtos = new ArrayList<>();
-        if (files != null) {
-            fileDtos = fileService.uploadFiles(files).stream().map(FileEntity::entityToDto).toList();
+        List<FileDto> fileDtos;
+        if (fileId != null) {
+
+            fileDtos = fileService.findFilesById(fileId);
             clubBoardDto.setFileYn(1);
             clubBoardDto.setFileId(fileDtos);
         }
@@ -127,11 +129,21 @@ public class ClubBoardServiceImpl implements ClubBoardService {
      * 게시글 수정
      * to-be : 업로드 파일 수정
      * @param clubBoardDto 수정 dto
+     * @param fileId 파일id 목록
      * @return 수정된 dto
      */
     @Override
-    public ClubBoardDto updatePost(ClubBoardDto clubBoardDto) {
+    public ClubBoardDto updatePost(ClubBoardDto clubBoardDto, List<Long> fileId) {
         ClubBoardEntity entity = getBoardEntity(clubBoardDto.getClubBoardId());
+        if ( fileId.isEmpty()) {
+            clubBoardDto.setFileYn(0);
+            clubBoardDto.setFileId(null);
+        } else {
+            List<FileDto> fileDtos = fileService.findFilesById(fileId);
+            clubBoardDto.setFileId(fileDtos);
+            clubBoardDto.setFileYn(1);
+        }
+
         ClubPreface preface = clubPrefaceRepository.findByPrefaceId(clubBoardDto.getPrefaceId()).get();
         entity.update(clubBoardDto, preface);
         clubBoardRepository.save(entity);
