@@ -82,6 +82,10 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     @Override
     public ClubBoardDto getPost(Long boardIdx) {
         ClubBoardEntity entity = getBoardEntity(boardIdx);
+        List<FileEntity> es = entity.getFileId();
+        for (FileEntity fe : es) {
+            System.out.println(fe.toString());
+        }
         if (entity.getDeleteYn() == 1) {
             throw new NoPostException();
         }

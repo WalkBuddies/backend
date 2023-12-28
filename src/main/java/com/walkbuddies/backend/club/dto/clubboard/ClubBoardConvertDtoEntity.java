@@ -14,13 +14,14 @@ public class ClubBoardConvertDtoEntity {
   private final ClubRepository clubRepository;
   private final MemberRepository memberRepository;
   private final ClubPrefaceRepository clubPrefaceRepository;
+  private final FileEntity fileEntity;
   public ClubBoardEntity dtoToEntity(ClubBoardDto dto) {
     return ClubBoardEntity.builder()
         .clubBoardId(dto.getClubBoardId())
         .clubId(clubRepository.findByClubId(dto.getClubId()).get())
         .memberId(memberRepository.findByMemberId(dto.getMemberId()).get())
         .nickname(dto.getNickname())
-        .fileId(FileEntity.dtoListToEntityList(dto.getFileId()))
+        .fileId(fileEntity.dtoListToEntityList(dto.getFileId()))
         .title(dto.getTitle())
         .content(dto.getContent())
         .createAt(dto.getCreateAt())
@@ -35,7 +36,7 @@ public class ClubBoardConvertDtoEntity {
   public ClubBoardDto entityToDto(ClubBoardEntity entity) {
     return ClubBoardDto.builder()
         .clubBoardId(entity.getClubBoardId())
-        .fileId(FileEntity.entityListToDtoList(entity.getFileId()))
+        .fileId(fileEntity.entityListToDtoList(entity.getFileId()))
         .clubId(entity.getClubId().getClubId())
         .memberId(entity.getMemberId().getMemberId())
         .nickname(entity.getNickname())

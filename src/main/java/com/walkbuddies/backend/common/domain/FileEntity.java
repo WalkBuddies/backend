@@ -1,10 +1,13 @@
 package com.walkbuddies.backend.common.domain;
 
+import com.walkbuddies.backend.club.domain.ClubBoardEntity;
 import com.walkbuddies.backend.common.dto.FileDto;
+import com.walkbuddies.backend.feed.domain.FeedEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,10 +34,13 @@ public class FileEntity {
   private LocalDateTime createAt;
   private Integer deleteYn;
   private LocalDateTime deleteAt;
+  @ManyToOne
+  private ClubBoardEntity boardId;
+  @ManyToOne
+  private FeedEntity feedId;
 
 
-  public static FileDto entityToDto(FileEntity entity) {
-
+  public FileDto entityToDto(FileEntity entity) {
     return FileDto.builder()
         .fileId(entity.getFileId())
         .originalName(entity.getOriginalName())
@@ -46,7 +52,7 @@ public class FileEntity {
         .build();
   }
 
-  public static FileEntity dtoToEntity(FileDto dto) {
+  public FileEntity dtoToEntity(FileDto dto) {
     return FileEntity.builder()
         .fileId(dto.getFileId())
         .originalName(dto.getOriginalName())
@@ -58,8 +64,8 @@ public class FileEntity {
         .build();
   }
 
-  public static List<FileDto> entityListToDtoList(List<FileEntity> files) {
-    if (files==null) {
+  public List<FileDto> entityListToDtoList(List<FileEntity> files) {
+    if (files == null) {
       return null;
     }
     List<FileDto> result = new ArrayList<>();
@@ -69,7 +75,7 @@ public class FileEntity {
     return result;
   }
 
-  public static List<FileEntity> dtoListToEntityList(List<FileDto> files) {
+  public List<FileEntity> dtoListToEntityList(List<FileDto> files) {
     if (files == null) {
       return null;
     }

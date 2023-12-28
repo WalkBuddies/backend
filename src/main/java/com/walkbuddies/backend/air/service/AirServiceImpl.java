@@ -88,14 +88,16 @@ public class AirServiceImpl implements AirService {
      * 최근접측정소를 찾은 후 측정소 코드를 통해 db에 저장된 정보가 없다면 미세먼지 api에서 정보를 받음
      * db에 저장된 정보가 조회시간보다 1시간 이내면 db의 정보를 반환, 아니면 api에서 정보를 받음
      *
-     * @param tmX
-     * @param tmY
+     * @param X 경도
+     * @param Y 위도
      * @return
      * @throws IOException
      */
-    public AirServiceDto getAirInfo(double tmX, double tmY) throws IOException, URISyntaxException {
-        MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tmX, tmY);
-        AirServiceDto result = new AirServiceDto();
+    public AirServiceDto getAirInfo(double X, double Y) throws IOException, URISyntaxException {
+        double[] tm = commonService.GeoToTm(X, Y);
+        MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tm[0], tm[1]);
+
+        AirServiceDto result ;
         LocalDateTime now = LocalDateTime.now();
         Optional<AirServiceEntity> checkDb = airServiceRepository.findByStationCode(msrstnDto.getStationCode());
 
