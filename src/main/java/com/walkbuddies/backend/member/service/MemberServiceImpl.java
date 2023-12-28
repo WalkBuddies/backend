@@ -131,7 +131,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         return op.get();
-
+    }
     public String getNameById(Long memberId) {
         MemberEntity member = memberRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);

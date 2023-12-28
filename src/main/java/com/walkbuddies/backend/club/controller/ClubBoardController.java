@@ -102,7 +102,7 @@ public class ClubBoardController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("restore/{boardId}")
+    @GetMapping("/restore/{boardId}")
     public ResponseEntity<SingleResponse<String>> restoreBoard(@PathVariable long boardId) {
         clubBoardService.CluBoardRestore(boardId);
 
