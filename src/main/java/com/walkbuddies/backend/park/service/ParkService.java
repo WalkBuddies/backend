@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.park.service;
 
+import com.walkbuddies.backend.park.dto.ParkDetailResponse;
 import com.walkbuddies.backend.park.dto.ParkDistanceResponse;
 import com.walkbuddies.backend.park.dto.ParkRequest;
 import com.walkbuddies.backend.park.dto.ParkResponse;
@@ -70,7 +71,7 @@ public interface ParkService {
      * @param parkId
      * @return
      */
-    ParkResponse getParkInfo(Long parkId);
+    ParkDetailResponse getParkInfo(Long parkId);
 
     /**
      * 공원 정보 추가

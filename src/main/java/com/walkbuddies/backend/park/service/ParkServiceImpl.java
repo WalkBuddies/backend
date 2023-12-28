@@ -11,6 +11,7 @@ import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import com.walkbuddies.backend.park.domain.FavoriteParkEntity;
 import com.walkbuddies.backend.park.domain.ParkEntity;
+import com.walkbuddies.backend.park.dto.ParkDetailResponse;
 import com.walkbuddies.backend.park.dto.ParkDistanceResponse;
 import com.walkbuddies.backend.park.dto.ParkRequest;
 import com.walkbuddies.backend.park.dto.ParkResponse;
@@ -196,11 +197,11 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public ParkResponse getParkInfo(Long parkId) {
+    public ParkDetailResponse getParkInfo(Long parkId) {
         ParkEntity park = parkRepository.findById(parkId)
                 .orElseThrow(NotFoundParkException::new);
 
-        return ParkResponse.convertToDto(park);
+        return ParkDetailResponse.convertToDto(park);
     }
 
     @Override

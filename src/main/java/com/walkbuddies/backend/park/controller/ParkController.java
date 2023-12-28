@@ -3,6 +3,7 @@ package com.walkbuddies.backend.park.controller;
 import com.walkbuddies.backend.common.response.ListResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
 import com.walkbuddies.backend.member.service.MemberService;
+import com.walkbuddies.backend.park.dto.ParkDetailResponse;
 import com.walkbuddies.backend.park.dto.ParkDistanceResponse;
 import com.walkbuddies.backend.park.dto.ParkRequest;
 import com.walkbuddies.backend.park.dto.ParkResponse;
@@ -44,7 +45,7 @@ public class ParkController {
 
     @GetMapping("/{parkId}")
     public ResponseEntity<SingleResponse> getParkInfo(@PathVariable Long parkId) {
-        ParkResponse parkResponse = parkService.getParkInfo(parkId);
+        ParkDetailResponse parkResponse = parkService.getParkInfo(parkId);
         SingleResponse response = new SingleResponse(HttpStatus.OK.value(),
                 "공원 정보를 조회했습니다.",
                 parkResponse);
