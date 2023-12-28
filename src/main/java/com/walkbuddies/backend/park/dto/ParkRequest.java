@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ParkDto {
+public class ParkRequest {
     private Long parkId;
     private String parkName;
     private String latitude;
@@ -19,8 +19,8 @@ public class ParkDto {
 
     private Double distance;
 
-    public static ParkDto convertToDto(ParkEntity parkEntity) {
-        return ParkDto.builder()
+    public static ParkRequest convertToDto(ParkEntity parkEntity) {
+        return ParkRequest.builder()
                 .parkId(parkEntity.getParkId())
                 .parkName(parkEntity.getParkName())
                 .latitude(String.valueOf(parkEntity.getLatitude()))

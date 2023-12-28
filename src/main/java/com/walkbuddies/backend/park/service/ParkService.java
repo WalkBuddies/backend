@@ -1,6 +1,8 @@
 package com.walkbuddies.backend.park.service;
 
-import com.walkbuddies.backend.park.dto.ParkDto;
+import com.walkbuddies.backend.park.dto.ParkDistanceResponse;
+import com.walkbuddies.backend.park.dto.ParkRequest;
+import com.walkbuddies.backend.park.dto.ParkResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,14 +46,14 @@ public interface ParkService {
      * @param response
      * @return
      */
-    List<ParkDto> parseApiResponse(String response);
+    List<ParkRequest> parseApiResponse(String response);
 
     /**
      * 주소가 이미 존재하는 경우 업데이트, 없다면 저장
      *
-     * @param parkDtoList
+     * @param parkRequestList
      */
-    void saveAllParks(List<ParkDto> parkDtoList);
+    void saveAllParks(List<ParkRequest> parkRequestList);
 
     /**
      * 위도, 경도를 받아 반경 1km 내의 공원 목록을 반환
@@ -60,7 +62,7 @@ public interface ParkService {
      * @param latitude
      * @return
      */
-    List<ParkDto> getParkList(Double longitude, Double latitude);
+    List<ParkDistanceResponse> getParkList(Double longitude, Double latitude);
 
     /**
      * parkId로 공원 정보를 반환
@@ -68,14 +70,14 @@ public interface ParkService {
      * @param parkId
      * @return
      */
-    ParkDto getParkInfo(Long parkId);
+    ParkResponse getParkInfo(Long parkId);
 
     /**
      * 공원 정보 추가
      *
-     * @param parkDto
+     * @param parkRequest
      */
-    void addPark(ParkDto parkDto);
+    ParkResponse addPark(ParkRequest parkRequest);
 
     /**
      * 공원 정보 수정
@@ -83,14 +85,15 @@ public interface ParkService {
      * @param parkId
      * @param newDto
      */
-    void updatePark(Long parkId, ParkDto newDto);
+    ParkResponse updatePark(Long parkId, ParkRequest newDto);
 
     /**
      * 공원 정보 삭제
      *
      * @param parkId
+     * @return
      */
-    void deletePark(Long parkId);
+    ParkResponse deletePark(Long parkId);
 
     /**
      * 멤버가 즐겨찾기한 공원 목록 조회
@@ -98,21 +101,23 @@ public interface ParkService {
      * @param memberId
      * @return
      */
-    List<ParkDto> getFavoritePark(Long memberId);
+    List<ParkResponse> getFavoritePark(Long memberId);
 
     /**
      * 공원 즐겨찾기 추가
      *
      * @param memberId
      * @param parkId
+     * @return
      */
-    void addFavoritePark(Long memberId, Long parkId);
+    ParkResponse addFavoritePark(Long memberId, Long parkId);
 
     /**
      * 공원 즐겨찾기 삭제
      *
      * @param memberId
      * @param parkId
+     * @return
      */
-    void deleteFavoritePark(Long memberId, Long parkId);
+    ParkResponse deleteFavoritePark(Long memberId, Long parkId);
 }

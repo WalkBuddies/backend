@@ -4,11 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.walkbuddies.backend.exception.impl.NotFoundFavoriteParkException;
+import com.walkbuddies.backend.exception.impl.NotFoundMemberException;
+import com.walkbuddies.backend.exception.impl.NotFoundParkException;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import com.walkbuddies.backend.park.domain.FavoriteParkEntity;
 import com.walkbuddies.backend.park.domain.ParkEntity;
-import com.walkbuddies.backend.park.dto.ParkDto;
+import com.walkbuddies.backend.park.dto.ParkDistanceResponse;
+import com.walkbuddies.backend.park.dto.ParkRequest;
+import com.walkbuddies.backend.park.dto.ParkResponse;
 import com.walkbuddies.backend.park.repository.FavoriteParkRepository;
 import com.walkbuddies.backend.park.repository.ParkRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,8 +55,8 @@ public class ParkServiceImpl implements ParkService {
                 break;
             }
 
-            List<ParkDto> parkDtoList = parseApiResponse(response);
-            saveAllParks(parkDtoList);
+            List<ParkRequest> parkRequestList = parseApiResponse(response);
+            saveAllParks(parkRequestList);
 
             log.info("pageNo: " + pageNo);
             pageNo++;
@@ -106,7 +111,7 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public List<ParkDto> parseApiResponse(String response) {
+    public List<ParkRequest> parseApiResponse(String response) {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode;
         try {
@@ -124,180 +129,175 @@ public class ParkServiceImpl implements ParkService {
         }
 
         ArrayNode parkArrayNode = (ArrayNode) itemsNode;
-        List<ParkDto> parkDtoList = new ArrayList<>();
+        List<ParkRequest> parkRequestList = new ArrayList<>();
         for (JsonNode parkNode : parkArrayNode) {
-            ParkDto parkDto = new ParkDto();
+            ParkRequest parkRequest = new ParkRequest();
 
-            parkDto.setParkName(parkNode.path("parkNm").asText());
+            parkRequest.setParkName(parkNode.path("parkNm").asText());
 
             if (parkNode.has("latitude")) {
-                parkDto.setLatitude(parkNode.path("latitude").asText());
+                parkRequest.setLatitude(parkNode.path("latitude").asText());
             }
 
             if (parkNode.has("longitude")) {
-                parkDto.setLongitude(parkNode.path("longitude").asText());
+                parkRequest.setLongitude(parkNode.path("longitude").asText());
             }
 
-            parkDto.setAddress(parkNode.path("lnmadr").asText());
+            parkRequest.setAddress(parkNode.path("lnmadr").asText());
 
             if (parkNode.has("mvmFclty")) {
-                parkDto.setSportFacility(parkNode.path("mvmFclty").asText());
+                parkRequest.setSportFacility(parkNode.path("mvmFclty").asText());
             }
 
             if (parkNode.has("cnvnncFclty")) {
-                parkDto.setConvenienceFacility(parkNode.path("cnvnncFclty").asText());
+                parkRequest.setConvenienceFacility(parkNode.path("cnvnncFclty").asText());
             }
 
-            parkDtoList.add(parkDto);
+            parkRequestList.add(parkRequest);
         }
-        return parkDtoList;
+        return parkRequestList;
     }
 
     @Override
     @Transactional
-    public void saveAllParks(List<ParkDto> parkDtoList) {
-        for (ParkDto parkDto : parkDtoList) {
-            Optional<ParkEntity> existingPark = parkRepository.findByAddress(parkDto.getAddress());
+    public void saveAllParks(List<ParkRequest> parkRequestList) {
+        for (ParkRequest parkRequest : parkRequestList) {
+            Optional<ParkEntity> existingPark = parkRepository.findByAddress(parkRequest.getAddress());
 
             if (existingPark.isPresent()) {
-                updateExistingPark(existingPark.get(), parkDto);
+                updateExistingPark(existingPark.get(), parkRequest);
             } else {
-                ParkEntity newPark = ParkEntity.convertToEntity(parkDto);
+                ParkEntity newPark = ParkEntity.convertToEntity(parkRequest);
                 parkRepository.save(newPark);
             }
         }
     }
 
     @Override
-    public List<ParkDto> getParkList(Double longitude, Double latitude) {
-        List<ParkDto> result = new ArrayList<>();
+    public List<ParkDistanceResponse> getParkList(Double longitude, Double latitude) {
+        List<ParkDistanceResponse> result = new ArrayList<>();
 
         List<Object[]> parkList = parkRepository.findNearbyParks(longitude, latitude, 1000);
         for (Object[] park : parkList) {
-            ParkDto parkDto = new ParkDto();
+            ParkDistanceResponse parkDistanceResponse = new ParkDistanceResponse();
             Optional<ParkEntity> optionalPark = parkRepository.findById((Long) park[0]);
             if (optionalPark.isPresent()) {
                 ParkEntity parkEntity = optionalPark.get();
-                parkDto = ParkDto.convertToDto(parkEntity);
-                parkDto.setDistance((Double) park[1]);
+                parkDistanceResponse = ParkDistanceResponse.convertToDto(parkEntity);
+                parkDistanceResponse.setDistance((Double) park[1]);
             }
 
-            result.add(parkDto);
+            result.add(parkDistanceResponse);
         }
 
-        result.sort(Comparator.comparing(ParkDto::getDistance));
+        result.sort(Comparator.comparing(ParkDistanceResponse::getDistance));
 
         return result;
     }
 
     @Override
-    public ParkDto getParkInfo(Long parkId) {
-        Optional<ParkEntity> parkEntity = parkRepository.findById(parkId);
+    public ParkResponse getParkInfo(Long parkId) {
+        ParkEntity park = parkRepository.findById(parkId)
+                .orElseThrow(NotFoundParkException::new);
 
-        if (parkEntity.isPresent()) {
-            return ParkDto.convertToDto(parkEntity.get());
-        } else {
-            throw new RuntimeException("Park not found.");
-        }
+        return ParkResponse.convertToDto(park);
     }
 
     @Override
-    public void addPark(ParkDto parkDto) {
-        ParkEntity parkEntity = ParkEntity.convertToEntity(parkDto);
+    public ParkResponse addPark(ParkRequest parkRequest) {
+        ParkEntity parkEntity = ParkEntity.convertToEntity(parkRequest);
         parkRepository.save(parkEntity);
+
+        return ParkResponse.convertToDto(parkEntity);
     }
 
     @Override
     @Transactional
-    public void updatePark(Long parkId, ParkDto newDto) {
-        Optional<ParkEntity> optionalPark = parkRepository.findById(parkId);
+    public ParkResponse updatePark(Long parkId, ParkRequest newDto) {
+        ParkEntity park = parkRepository.findById(parkId)
+                .orElseThrow(NotFoundParkException::new);
+        updateExistingPark(park, newDto);
+        parkRepository.save(park);
 
-        if (optionalPark.isPresent()) {
-            ParkEntity park = optionalPark.get();
-            updateExistingPark(park, newDto);
-
-            parkRepository.save(park);
-        } else {
-            throw new RuntimeException("Park not found.");
-        }
+        return ParkResponse.convertToDto(park);
     }
 
     @Override
-    public void deletePark(Long parkId) {
+    public ParkResponse deletePark(Long parkId) {
+        ParkEntity park = parkRepository.findById(parkId)
+                .orElseThrow(NotFoundParkException::new);
         parkRepository.deleteById(parkId);
+
+        return ParkResponse.convertToDto(park);
     }
 
     @Override
-    public List<ParkDto> getFavoritePark(Long memberId) {
+    public List<ParkResponse> getFavoritePark(Long memberId) {
         List<FavoriteParkEntity> favoriteParks = favoriteParkRepository.findByMemberMemberId(memberId);
 
         return favoriteParks.stream()
-                .map(favoriteParkEntity -> ParkDto.convertToDto(favoriteParkEntity.getPark()))
+                .map(favoriteParkEntity -> ParkResponse.convertToDto(favoriteParkEntity.getPark()))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void addFavoritePark(Long memberId, Long parkId) {
-        Optional<MemberEntity> optionalMember = memberRepository.findById(memberId);
-        Optional<ParkEntity> optionalPark = parkRepository.findById(parkId);
+    public ParkResponse addFavoritePark(Long memberId, Long parkId) {
+        ParkEntity park = parkRepository.findById(parkId)
+                .orElseThrow(NotFoundParkException::new);
+        MemberEntity member = memberRepository.findById(memberId)
+                .orElseThrow(NotFoundMemberException::new);
 
-        if (optionalMember.isPresent() && optionalPark.isPresent()) {
-            MemberEntity member = optionalMember.get();
-            ParkEntity park = optionalPark.get();
+        FavoriteParkEntity favoritePark = new FavoriteParkEntity(member, park);
 
-            FavoriteParkEntity favoritePark = new FavoriteParkEntity(member, park);
+        favoriteParkRepository.save(favoritePark);
 
-            favoriteParkRepository.save(favoritePark);
-        } else {
-            throw new RuntimeException("Member or Park not found.");
-        }
+        return ParkResponse.convertToDto(park);
     }
 
     @Override
-    public void deleteFavoritePark(Long memberId, Long parkId) {
-        Optional<FavoriteParkEntity> optionalFavoritePark = favoriteParkRepository.findByMemberMemberIdAndParkParkId(memberId, parkId);
+    public ParkResponse deleteFavoritePark(Long memberId, Long parkId) {
+        FavoriteParkEntity favoritePark = favoriteParkRepository.findByMemberMemberIdAndParkParkId(memberId, parkId)
+                .orElseThrow(NotFoundFavoriteParkException::new);
 
-        if (optionalFavoritePark.isPresent()) {
-            favoriteParkRepository.delete(optionalFavoritePark.get());
-        } else {
-            throw new RuntimeException("Favorite Park not found.");
-        }
+        favoriteParkRepository.delete(favoritePark);
+
+        return ParkResponse.convertFavoriteToDto(favoritePark);
     }
 
-    private void updateExistingPark(ParkEntity existingPark, ParkDto parkDto) {
-        if (!parkDto.getParkName().equals(existingPark.getParkName())) {
-            existingPark.setParkName(parkDto.getParkName());
+    private void updateExistingPark(ParkEntity existingPark, ParkRequest parkRequest) {
+        if (!parkRequest.getParkName().equals(existingPark.getParkName())) {
+            existingPark.setParkName(parkRequest.getParkName());
         }
 
         if (existingPark.getLongitude() != null) {
-            if (!parkDto.getLongitude().equals(String.valueOf(existingPark.getLongitude()))) {
-                existingPark.setLongitude(Double.valueOf(parkDto.getLongitude()));
+            if (!parkRequest.getLongitude().equals(String.valueOf(existingPark.getLongitude()))) {
+                existingPark.setLongitude(Double.valueOf(parkRequest.getLongitude()));
             }
         }
 
         if (existingPark.getLatitude() != null) {
-            if (!parkDto.getLatitude().equals(String.valueOf(existingPark.getLatitude()))) {
-                existingPark.setLatitude(Double.valueOf(parkDto.getLatitude()));
+            if (!parkRequest.getLatitude().equals(String.valueOf(existingPark.getLatitude()))) {
+                existingPark.setLatitude(Double.valueOf(parkRequest.getLatitude()));
             }
         }
 
-        if (parkDto.getAddress() != null && !parkDto.getAddress().isEmpty()) {
-            if (!parkDto.getAddress().equals(existingPark.getAddress())) {
-                existingPark.setAddress(parkDto.getAddress());
+        if (parkRequest.getAddress() != null && !parkRequest.getAddress().isEmpty()) {
+            if (!parkRequest.getAddress().equals(existingPark.getAddress())) {
+                existingPark.setAddress(parkRequest.getAddress());
             }
         }
 
-        if (parkDto.getSportFacility() == null) {
+        if (parkRequest.getSportFacility() == null) {
             existingPark.setSportFacility("");
-        } else if (!parkDto.getSportFacility().equals(existingPark.getSportFacility())) {
-            existingPark.setSportFacility(parkDto.getSportFacility());
+        } else if (!parkRequest.getSportFacility().equals(existingPark.getSportFacility())) {
+            existingPark.setSportFacility(parkRequest.getSportFacility());
         }
 
 
-        if (parkDto.getConvenienceFacility() == null) {
+        if (parkRequest.getConvenienceFacility() == null) {
             existingPark.setConvenienceFacility("");
-        } else if (!parkDto.getConvenienceFacility().equals(existingPark.getConvenienceFacility())) {
-            existingPark.setConvenienceFacility(parkDto.getConvenienceFacility());
+        } else if (!parkRequest.getConvenienceFacility().equals(existingPark.getConvenienceFacility())) {
+            existingPark.setConvenienceFacility(parkRequest.getConvenienceFacility());
         }
 
         parkRepository.save(existingPark);
