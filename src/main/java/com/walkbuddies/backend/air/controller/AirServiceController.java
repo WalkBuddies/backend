@@ -5,6 +5,7 @@ import com.walkbuddies.backend.air.dto.AirServiceDto;
 import com.walkbuddies.backend.air.service.AirService;
 import com.walkbuddies.backend.common.response.SingleResponse;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,8 @@ import java.net.URISyntaxException;
 
 @Slf4j
 @RequestMapping("/air")
-@AllArgsConstructor
 @RestController
+@RequiredArgsConstructor
 public class AirServiceController {
     private final AirService airService;
 

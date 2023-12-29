@@ -35,7 +35,7 @@ public class AirServiceEntity {
     private int khaiGrade;
 
 
-    public AirServiceEntity dtoToEntity(AirServiceDto dto) {
+    public static AirServiceEntity dtoToEntity(AirServiceDto dto) {
 
         return AirServiceEntity.builder()
                 .stationCode(dto.getStationCode())

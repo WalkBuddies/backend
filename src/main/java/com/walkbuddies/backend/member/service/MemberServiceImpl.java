@@ -1,7 +1,7 @@
 package com.walkbuddies.backend.member.service;
 
 import com.walkbuddies.backend.exception.impl.*;
-import com.walkbuddies.backend.member.cache.CacheNames;
+import com.walkbuddies.backend.configuration.cache.CacheNames;
 import com.walkbuddies.backend.member.email.EmailConfig;
 import com.walkbuddies.backend.member.jwt.JwtTokenUtil;
 import com.walkbuddies.backend.member.domain.MemberEntity;

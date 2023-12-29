@@ -3,6 +3,7 @@ package com.walkbuddies.backend.weather.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.walkbuddies.backend.configuration.cache.CacheNames;
 import com.walkbuddies.backend.weather.domain.WeatherMidEntity;
 import com.walkbuddies.backend.weather.dto.WeatherMidDto;
 import com.walkbuddies.backend.weather.dto.WeatherMidLandFcstDto;
@@ -10,14 +11,13 @@ import com.walkbuddies.backend.weather.dto.WeatherMidTaDto;
 import com.walkbuddies.backend.weather.repository.WeatherMidRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -25,13 +25,13 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+
 @Service
 @RequiredArgsConstructor
 public class WeatherMidServiceImpl implements WeatherMidService {
 
     private final ObjectMapper objectMapper;
     private final WeatherMidRepository weatherMidRepository;
-    private final RedisTemplate<String, List<WeatherMidDto>> weatherMidRedisTemplate;
 
     /**
      * jsonString을 파싱하는 메서드
@@ -273,8 +273,6 @@ public class WeatherMidServiceImpl implements WeatherMidService {
         return now.format(formatter);
     }
 
-    private static final String REDIS_KEY_PREFIX = "weather:mid:";
-
     /**
      * DB에서 도시이름에 해당하는 중기예보 데이터를 가져오는 메서드
      *
@@ -283,35 +281,12 @@ public class WeatherMidServiceImpl implements WeatherMidService {
      */
     public List<WeatherMidDto> getWeatherMidData(String cityName) {
 
-        String redisKey = REDIS_KEY_PREFIX + cityName;
+        WeatherMidEntity result = weatherMidRepository.findByCityName(cityName)
+                .orElseThrow(() -> new NoSuchElementException("도시 이름이 없습니다: " + cityName));
 
-        // Redis에서 데이터 조회
-        List<WeatherMidDto> cachedData = weatherMidRedisTemplate.opsForValue().get(redisKey);
+        List<WeatherMidDto> weatherMidDtoList = List.of(WeatherMidEntity.entityToDto(result));
 
-        if (cachedData != null) {
-            // Redis에 데이터가 존재하면 DB와 비교하여 업데이트
-            WeatherMidEntity result = weatherMidRepository.findByCityName(cityName)
-                    .orElseThrow(() -> new NoSuchElementException("도시 이름이 없습니다: " + cityName));
-
-            if (!cachedData.equals(List.of(WeatherMidEntity.dtoToEntity(result)))) {
-                // Redis에 저장된 데이터가 DB와 다르면 Redis의 데이터를 업데이트
-                cachedData = List.of(WeatherMidEntity.dtoToEntity(result));
-                weatherMidRedisTemplate.opsForValue().set(redisKey, cachedData, Duration.ofHours(1));
-            }
-
-            return cachedData;
-        } else {
-            // Redis에 데이터가 없으면 DB에서 조회 후 Redis에 저장
-            WeatherMidEntity result = weatherMidRepository.findByCityName(cityName)
-                    .orElseThrow(() -> new NoSuchElementException("도시 이름이 없습니다: " + cityName));
-
-            List<WeatherMidDto> weatherMidDtoList = List.of(WeatherMidEntity.dtoToEntity(result));
-
-            // Redis에 데이터 저장 (유효시간은 1시간으로 설정)
-            weatherMidRedisTemplate.opsForValue().set(redisKey, weatherMidDtoList, Duration.ofHours(1));
-
-            return weatherMidDtoList;
-        }
+        return weatherMidDtoList;
     }
 
     /**

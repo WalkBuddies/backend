@@ -1,6 +1,6 @@
 package com.walkbuddies.backend.member.repository;
 
-import com.walkbuddies.backend.member.cache.CacheNames;
+import com.walkbuddies.backend.configuration.cache.CacheNames;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;

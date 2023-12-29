@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.bookmark.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.walkbuddies.backend.bookmark.dto.BookmarkParameter;
 import com.walkbuddies.backend.bookmark.service.BookmarkService;
 import com.walkbuddies.backend.common.response.ListResponse;
