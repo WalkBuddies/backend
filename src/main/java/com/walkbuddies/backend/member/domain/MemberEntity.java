@@ -80,6 +80,13 @@ public class MemberEntity implements Serializable {
         this.verifyExpiredAt = LocalDateTime.now().plusDays(1);
     }
 
+    public void updateMember(String nickName, String introduction, String imageUrl) {
+        this.nickname = nickName;
+        this.introduction = introduction;
+        this.imageUrl = imageUrl;
+        this.updateAt = LocalDateTime.now();
+    }
+
     public static MemberDetailDto entityToDetail(MemberEntity memberEntity) {
 
         return MemberDetailDto.builder()
@@ -104,5 +111,10 @@ public class MemberEntity implements Serializable {
                 .verifyExpiredAt(memberEntity.getVerifyExpiredAt())
                 .townVerificationDate(memberEntity.getTownVerificationDate())
                 .build();
+    }
+
+    public void setTown(TownEntity town) {
+        this.townId = town;
+        this.townVerificationDate = LocalDateTime.now();
     }
 }

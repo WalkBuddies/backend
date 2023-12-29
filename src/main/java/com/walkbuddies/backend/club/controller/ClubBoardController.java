@@ -1,14 +1,13 @@
 package com.walkbuddies.backend.club.controller;
 
-import com.walkbuddies.backend.club.domain.ClubPreface;
 import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
 import com.walkbuddies.backend.club.dto.ClubBoardSearch;
-import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.service.ClubBoardService;
 import com.walkbuddies.backend.common.response.ListResponse;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
+import com.walkbuddies.backend.member.jwt.JwtTokenUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,22 +16,25 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/club/board")
 @RequiredArgsConstructor
 public class ClubBoardController {
     private final ClubBoardService clubBoardService;
+    private final JwtTokenUtil tokenUtil;
 
     //create
     @PostMapping("/write")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<Long> fileId
+    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestHeader(value = "authorization") String token
+                                                        ,@RequestPart(value = "files", required = false) List<Long> fileId
                                                         ,@RequestPart(value = "board") ClubBoardDto clubBoardDto) {
-        System.out.println(fileId);
+        token = token.substring(7);
+        String nickname = tokenUtil.getUserInfoFromToken(token).get("nickname", String.class);
+        clubBoardDto.setNickname(nickname);
         ClubBoardDto response = clubBoardService.createPost(fileId, clubBoardDto);
+
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.CREATED.value(), "작성완료",
             response);
 
@@ -51,7 +53,7 @@ public class ClubBoardController {
 
     //list : 검색기능 포함
     @GetMapping("/list/{clubId}")
-    public ResponseEntity<PageResponse<Page<ClubBoardDto>>> boardList(@PageableDefault(page = 0, size = 20, sort = "clubBoardId", direction = Sort.Direction.DESC)
+    public ResponseEntity<PageResponse<Page<ClubBoardDto>>> boardList(@PageableDefault(size = 20, sort = "clubBoardId", direction = Sort.Direction.DESC)
                                                         Pageable pageable,
                                                         @PathVariable(value = "clubId") Long clubId,
                                                         @RequestParam(value = "keyword", required = false) String keyword,
