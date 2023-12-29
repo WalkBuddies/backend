@@ -102,19 +102,20 @@ public class MemberController {
                 memberService.addTown(memberId, memberService.getDong(longitude, latitude)));
 
         return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/update")
     public ResponseEntity<SingleResponse> updateForm(@AuthenticationPrincipal MemberDetails memberDetails) {
         if (memberDetails != null) {
-            MemberEntity member = memberDetails.getMember();
-            UpdateMemberDto memberDto = UpdateMemberDto.fromEntity(member);
-            SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(), "회원정보 조회 완료.", memberDto);
-            return ResponseEntity.ok(response);
-        } else {
-            SingleResponse response = new SingleResponse<>(HttpStatus.UNAUTHORIZED.value(), "로그인 상태가 아닙니다.", null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+                MemberEntity member = memberDetails.getMember();
+                UpdateMemberDto memberDto = UpdateMemberDto.fromEntity(member);
+                SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(), "회원정보 조회 완료.", memberDto);
+                return ResponseEntity.ok(response);
+            } else {
+                SingleResponse response = new SingleResponse<>(HttpStatus.UNAUTHORIZED.value(), "로그인 상태가 아닙니다.", null);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
         }
-    }
 
     @PutMapping("/update")
     public ResponseEntity<SingleResponse> updateMember(

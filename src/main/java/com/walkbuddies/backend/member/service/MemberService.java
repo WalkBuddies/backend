@@ -32,5 +32,4 @@ public interface MemberService {
 
     MemberTownResponse addTown(Long memberId, Long townId);
 
-    MemberEntity getMemberEntity(Long memberId);
 }
