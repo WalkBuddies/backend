@@ -9,8 +9,12 @@ import com.walkbuddies.backend.club.service.ClubBoardService;
 import com.walkbuddies.backend.common.response.ListResponse;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
+import com.walkbuddies.backend.member.dto.MemberResponse;
+import com.walkbuddies.backend.member.jwt.JwtTokenUtil;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.connector.Request;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -26,13 +30,18 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ClubBoardController {
     private final ClubBoardService clubBoardService;
+    private final JwtTokenUtil tokenUtil;
 
     //create
     @PostMapping("/write")
-    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestPart(value = "files", required = false) List<Long> fileId
+    public ResponseEntity<SingleResponse<ClubBoardDto>> createBoard(@RequestHeader(value = "authorization") String token
+                                                        ,@RequestPart(value = "files", required = false) List<Long> fileId
                                                         ,@RequestPart(value = "board") ClubBoardDto clubBoardDto) {
-        System.out.println(fileId);
+        token = token.substring(7);
+        String nickname = tokenUtil.getUserInfoFromToken(token).get("nickname", String.class);
+        System.out.println(nickname);
         ClubBoardDto response = clubBoardService.createPost(fileId, clubBoardDto);
+
         SingleResponse<ClubBoardDto> result = new SingleResponse<>(HttpStatus.CREATED.value(), "작성완료",
             response);
 

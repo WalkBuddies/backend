@@ -42,7 +42,7 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<SingleResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
         MemberResponse memberResponse = memberService.login(loginRequest);
-        TokenResponse tokenResponse = jwtTokenUtil.createTokenByLogin(memberResponse.getEmail(), "USER");
+        TokenResponse tokenResponse = jwtTokenUtil.createTokenByLogin(memberResponse);
         response.addHeader(jwtTokenUtil.AUTHORIZATION_HEADER, tokenResponse.getAccessToken());
         SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
                 "로그인 되었습니다.",
@@ -92,7 +92,7 @@ public class MemberController {
                     .body(new SingleResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null));
         }
 
-        TokenResponse tokenResponse = jwtTokenUtil.reissueToken(memberResponse.getEmail(), "USER", tokenRequest.getRefreshToken());
+        TokenResponse tokenResponse = jwtTokenUtil.reissueToken(memberResponse, tokenRequest.getRefreshToken());
         return ResponseEntity.ok(new SingleResponse<>(HttpStatus.OK.value(), "토큰 재발행", tokenResponse));
     }
 
