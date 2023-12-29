@@ -48,14 +48,13 @@ public class ClubBoardCommentEntity {
   @JoinColumn(name = "parentId")
   private ClubBoardCommentEntity parentId;
 
-  @OneToMany(mappedBy = "parentId", fetch = FetchType.EAGER, orphanRemoval = true)
+  @OneToMany(mappedBy = "parentId", fetch = FetchType.LAZY, orphanRemoval = true)
   private List<ClubBoardCommentEntity> childrenId;
 
   private String content;
   @CreationTimestamp
   private LocalDateTime createAt;
   private LocalDateTime updateAt;
-  @ColumnDefault("0")
   private Integer deleteYn;
   private LocalDateTime deleteAt;
 
@@ -64,10 +63,15 @@ public class ClubBoardCommentEntity {
   }
   public void updateContent(RequestDto dto) {
     this.content = dto.getContent();
+    this.updateAt = LocalDateTime.now();
   }
 
-  public void delete() {
-    this.deleteYn = 1;
-    this.deleteAt = LocalDateTime.now();
+  public void changeDeleteYn(int deleteYn) {
+    this.deleteYn = deleteYn;
+    if (deleteYn == 1) {
+      this.deleteAt = LocalDateTime.now();
+    } else if (deleteYn == 0) {
+      this.deleteAt = null;
+    }
   }
 }

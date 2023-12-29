@@ -3,6 +3,7 @@ package com.walkbuddies.backend.member.jwt;
 import com.walkbuddies.backend.exception.impl.ExpiredJwtException;
 import com.walkbuddies.backend.exception.impl.InvalidJwtException;
 import com.walkbuddies.backend.exception.impl.InvalidRefreshTokenException;
+import com.walkbuddies.backend.member.dto.MemberResponse;
 import com.walkbuddies.backend.member.dto.TokenResponse;
 import com.walkbuddies.backend.member.security.MemberDetailsService;
 import com.walkbuddies.backend.member.service.RedisService;
@@ -61,35 +62,36 @@ public class JwtTokenUtil {
         return null;
     }
 
-    public String createToken(String email, String role, Long tokenExpireTime) {
+    public String createToken(MemberResponse member, Long tokenExpireTime) {
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + tokenExpireTime);
 
         return BEARER_PREFIX + Jwts.builder()
-                .claim(AUTHORIZATION_KEY, role)
-                .setSubject(email)
+                .claim(AUTHORIZATION_KEY, member.getRole())
+                .setSubject(member.getEmail())
+                .claim("nickname", member.getNickname())
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public TokenResponse createTokenByLogin(String email, String role) {
-        String accessToken = createToken(email, role, ACCESS_TOKEN_TIME);
-        String refreshToken = createToken(email, role, REFRESH_TOKEN_TIME);
-        redisService.setRefreshToken(email, refreshToken, REFRESH_TOKEN_TIME);
+    public TokenResponse createTokenByLogin(MemberResponse member) {
+        String accessToken = createToken(member, ACCESS_TOKEN_TIME);
+        String refreshToken = createToken(member, REFRESH_TOKEN_TIME);
+        redisService.setRefreshToken(member.getEmail(), refreshToken, REFRESH_TOKEN_TIME);
 
         return new TokenResponse(accessToken, refreshToken);
     }
 
-    public TokenResponse reissueToken(String email, String role, String reToken) {
-        if (!redisService.getRefreshToken(email).equals(reToken)) {
+    public TokenResponse reissueToken(MemberResponse member, String reToken) {
+        if (!redisService.getRefreshToken(member.getEmail()).equals(reToken)) {
             throw new InvalidRefreshTokenException();
         }
 
-        String accessToken = createToken(email, role, ACCESS_TOKEN_TIME);
-        String refreshToken = createToken(email, role, REFRESH_TOKEN_TIME);
-        redisService.setRefreshToken(email, refreshToken, REFRESH_TOKEN_TIME);
+        String accessToken = createToken(member, ACCESS_TOKEN_TIME);
+        String refreshToken = createToken(member, REFRESH_TOKEN_TIME);
+        redisService.setRefreshToken(member.getEmail(), refreshToken, REFRESH_TOKEN_TIME);
 
         return new TokenResponse(accessToken, refreshToken);
     }

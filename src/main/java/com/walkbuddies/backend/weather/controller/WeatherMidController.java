@@ -22,7 +22,7 @@ public class WeatherMidController {
     public ResponseEntity<SingleResponse> weatherMidUpdate(@RequestParam(name = "tmFc") String tmFc) throws JsonProcessingException {
 
         SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "중기예보 정보 업데이트에 성공하였습니다.",
-                weatherMidService.updateWeatherMidData(tmFc));
+                weatherMidService.manualUpdateWeatherMidData(tmFc));
         return ResponseEntity.ok(singleResponse);
     }
 

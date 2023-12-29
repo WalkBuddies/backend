@@ -1,6 +1,7 @@
 package com.walkbuddies.backend.club.domain;
 
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
+import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import jakarta.persistence.*;
@@ -31,27 +32,38 @@ public class ClubBoardEntity {
     @JoinColumn(name = "memeberId")
     private MemberEntity memberId;
 
-    @OneToMany(mappedBy = "fileId", orphanRemoval = true)
+    @OneToMany(orphanRemoval = true)
+    @JoinColumn(name = "clubBoardId")
     private List<FileEntity> fileId;
 
     private String nickname;
     private String title;
     private String content;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prefaceId")
+    private ClubPreface preface;
     @CreationTimestamp
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
     private LocalDateTime deleteAt;
-    @ColumnDefault("0")
     private Integer noticeYn;
-    @ColumnDefault("0")
     private Integer deleteYn;
-    @ColumnDefault("0")
     private Integer fileYn;
 
-    public void update(ClubBoardDto dto) {
+    public void update(ClubBoardDto dto, ClubPreface preface) {
+
         this.content = dto.getContent();
+        this.preface = preface;
         this.title = dto.getTitle();
         this.updateAt = LocalDateTime.now();
     }
 
+    public void changeDeleteYn(int deleteYn) {
+        this.deleteYn = deleteYn;
+        if (deleteYn == 1) {
+            this.deleteAt = LocalDateTime.now();
+        } else if (deleteYn == 0) {
+            this.deleteAt = null;
+        }
+    }
 }

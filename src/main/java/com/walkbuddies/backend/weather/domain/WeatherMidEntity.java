@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "weather_mid_term")
@@ -87,8 +88,8 @@ public class WeatherMidEntity {
     @Column(name = "7w_pm")
     private String wf7Pm;
 
-    private LocalDate regDate;
-    private LocalDate modDate;
+    private LocalDateTime regDate;
+    private LocalDateTime modDate;
 
     public static WeatherMidDto dtoToEntity(WeatherMidEntity weatherMidEntity) {
         return WeatherMidDto.builder()

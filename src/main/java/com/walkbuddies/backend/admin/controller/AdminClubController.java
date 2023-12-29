@@ -32,4 +32,5 @@ public class AdminClubController {
                 adminClubService.deleteClub(clubId));
         return ResponseEntity.ok(singleResponse);
     }
+
 }

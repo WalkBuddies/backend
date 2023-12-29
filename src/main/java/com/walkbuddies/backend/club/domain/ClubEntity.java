@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "club")
@@ -37,8 +38,8 @@ public class ClubEntity {
     private Integer accessLimit;
     private Integer needGrant;
     private boolean isSuspended;
-    private LocalDate regDate;
-    private LocalDate modDate;
+    private LocalDateTime regDate;
+    private LocalDateTime modDate;
 
     public static ClubDto entityToDto(ClubEntity clubEntity) {
 

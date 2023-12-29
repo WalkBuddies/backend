@@ -1,14 +1,13 @@
 package com.walkbuddies.backend.admin.controller;
 
+import com.walkbuddies.backend.admin.dto.MemberStatus;
 import com.walkbuddies.backend.admin.service.AdminMemberService;
 import com.walkbuddies.backend.common.response.ListResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,6 +44,14 @@ public class AdminMemberController {
 
         SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "닉네임 " + nickName + "을 가진 회원 정보를 불러왔습니다.",
                 adminMemberService.getMemberNickName(nickName));
+        return ResponseEntity.ok(singleResponse);
+    }
+
+    @PostMapping("/admin/member/status")
+    public ResponseEntity<SingleResponse> memberBlock(@RequestBody MemberStatus memberStatus) {
+
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "해당 유저의 상태를 변경했습니다. ",
+                adminMemberService.memberBlock(memberStatus));
         return ResponseEntity.ok(singleResponse);
     }
 }
