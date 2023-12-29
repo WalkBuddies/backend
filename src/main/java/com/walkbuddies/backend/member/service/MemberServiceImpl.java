@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.walkbuddies.backend.club.domain.TownEntity;
 import com.walkbuddies.backend.club.repository.TownRepository;
 import com.walkbuddies.backend.exception.impl.*;
-import com.walkbuddies.backend.member.cache.CacheNames;
+import com.walkbuddies.backend.configuration.cache.CacheNames;
 import com.walkbuddies.backend.member.dto.*;
 import com.walkbuddies.backend.member.email.EmailConfig;
 import com.walkbuddies.backend.member.jwt.JwtTokenUtil;

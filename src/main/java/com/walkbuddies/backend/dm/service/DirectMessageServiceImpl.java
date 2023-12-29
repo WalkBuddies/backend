@@ -10,7 +10,6 @@ import com.walkbuddies.backend.exception.impl.NotFoundMemberException;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,6 @@ public class DirectMessageServiceImpl implements DirectMessageService {
     private final MemberRepository memberRepository;
     private final DirectMessageRepository directMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final RedisTemplate<String, List<DirectMessageDto>> messageRedisTemplate;
 
     /**
      * 1 : 1 채팅 메서드
@@ -43,6 +41,9 @@ public class DirectMessageServiceImpl implements DirectMessageService {
         MemberEntity sender = getMemberEntity(directMessageDto.getSenderId());
         MemberEntity recipient = getMemberEntity(directMessageDto.getRecipientId());
 
+        MemberEntity firstMember = (sender.getMemberId() < recipient.getMemberId()) ? sender : recipient;
+        MemberEntity secondMember = (sender.getMemberId() < recipient.getMemberId()) ? recipient : sender;
+
         // 메시지를 전송할 대상의 WebSocket 주소
         String destination = "/user/" + directMessageDto.getRecipientId() + "/topic/private";
 
@@ -50,7 +51,7 @@ public class DirectMessageServiceImpl implements DirectMessageService {
         simpMessagingTemplate.convertAndSend(destination, directMessageDto);
 
         // ChatRoom DB 저장
-        Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findBySenderIdAndRecipientId(sender, recipient);
+        Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findBySenderIdAndRecipientId(firstMember, secondMember);
         ChatRoomEntity chatRoom = optionalChatRoom.orElseGet(() -> createChatRoom(sender, recipient));
 
         // DirectMessage DB 저장
@@ -76,15 +77,7 @@ public class DirectMessageServiceImpl implements DirectMessageService {
 
         String redisKey = REDIS_KEY_PREFIX + chatRoomId;
         List<DirectMessageDto> directMessageDtos = new ArrayList<>();
-
-        // Redis에서 데이터 조회
-        List<DirectMessageDto> cachedData = messageRedisTemplate.opsForValue().get(redisKey);
-
-        if (cachedData != null) {
-            // Redis에 데이터가 존재하면 반환
-            return cachedData;
-        } else {
-            Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
+        Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
             if (optionalChatRoom.isEmpty()) {
                 throw new NotFoundChatRoomException();
             }
@@ -92,13 +85,9 @@ public class DirectMessageServiceImpl implements DirectMessageService {
             ChatRoomEntity chatRoom = optionalChatRoom.get();
             Optional<List<DirectMessageEntity>> directMessageEntities = directMessageRepository.findByChatRoomId(chatRoom);
 
-            for (DirectMessageEntity directMessageEntity : directMessageEntities.get()){
+            for (DirectMessageEntity directMessageEntity : directMessageEntities.get()) {
                 directMessageDtos.add(DirectMessageEntity.entityToDto(directMessageEntity));
             }
-
-            // Redis에 데이터 저장 (유효시간은 1시간으로 설정)
-            messageRedisTemplate.opsForValue().set(redisKey, directMessageDtos, Duration.ofHours(1));
-        }
 
         return directMessageDtos;
     }

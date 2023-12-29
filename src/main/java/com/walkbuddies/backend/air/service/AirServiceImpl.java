@@ -25,11 +25,11 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 @Service
-@Component
 @RequiredArgsConstructor
 public class AirServiceImpl implements AirService {
     @Value("${spring.keys.api-key}")
@@ -37,7 +37,6 @@ public class AirServiceImpl implements AirService {
     private final ObjectMapper objectMapper;
     final AirServiceRepository airServiceRepository;
     private final CommonService commonService;
-    private final RedisTemplate<String, AirServiceDto> airRedisTemplate;
 
     /**
      * api dataTime 항목을 dateTimeFormat으로 변환하는 메소드
@@ -84,8 +83,6 @@ public class AirServiceImpl implements AirService {
                 .path("items");
     }
 
-    private static final String REDIS_KEY_PREFIX = "air:stationName:";
-
     /**
      * (수정진행중)
      * 요청좌표의 미세먼지정보를 찾는 메소드
@@ -99,38 +96,27 @@ public class AirServiceImpl implements AirService {
      */
     public AirServiceDto getAirInfo(double X, double Y)
             throws URISyntaxException, JsonProcessingException {
-      
+
         double[] tm = commonService.GeoToTm(X, Y);
         MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tm[0], tm[1]);
 
         AirServiceDto result ;
         LocalDateTime now = LocalDateTime.now();
 
-        String redisKey = REDIS_KEY_PREFIX + msrstnDto.getStationName();
-
-        // Redis에서 데이터 조회
-        AirServiceDto cachedData = airRedisTemplate.opsForValue().get(redisKey);
-
-        if (cachedData != null) {
-            // Redis에 데이터가 존재하면 반환
-            return cachedData;
-        } else {
-            // Redis에 데이터가 없으면 DB 또는 API에서 데이터 가져오기
-            Optional<AirServiceEntity> checkDb = airServiceRepository.findByStationCode(msrstnDto.getStationCode());
-            if (checkDb.isPresent()) {
-                AirServiceEntity airServiceEntity = checkDb.get();
-                if (airServiceEntity.getDataTime().isBefore(now.minusHours(1))) {
-                    AirServiceEntity data = getAirInfoFromApi(msrstnDto);
-                    saveApiData(data);
-                    result = AirServiceEntity.entityToDto(data);
-                } else {
-                    result = AirServiceEntity.entityToDto(airServiceEntity);
-                }
-            } else {
+        Optional<AirServiceEntity> checkDb = airServiceRepository.findByStationCode(msrstnDto.getStationCode());
+        if (checkDb.isPresent()) {
+            AirServiceEntity airServiceEntity = checkDb.get();
+            if (airServiceEntity.getDataTime().isBefore(now.minusHours(1))) {
                 AirServiceEntity data = getAirInfoFromApi(msrstnDto);
                 saveApiData(data);
                 result = AirServiceEntity.entityToDto(data);
+            } else {
+                result = AirServiceEntity.entityToDto(airServiceEntity);
             }
+        } else {
+            AirServiceEntity data = getAirInfoFromApi(msrstnDto);
+            saveApiData(data);
+            result = AirServiceEntity.entityToDto(data);
         }
 
         return result;
@@ -200,12 +186,6 @@ public class AirServiceImpl implements AirService {
      * @param airServiceEntity
      */
     private void saveApiData(AirServiceEntity airServiceEntity) {
-
-        // Redis key
-        String redisKey = REDIS_KEY_PREFIX + airServiceEntity.getStationCode();
-
-        // 데이터를 Redis에 저장 (유효시간은 1시간으로 설정)
-        airRedisTemplate.opsForValue().set(redisKey, AirServiceEntity.entityToDto(airServiceEntity), Duration.ofHours(1));
 
         airServiceRepository.save(airServiceEntity);
         log.info("대기정보 저장 완료: " + airServiceEntity.getStationName());

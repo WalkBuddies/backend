@@ -12,4 +12,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
     Optional<ChatRoomEntity> findBySenderIdAndRecipientId(MemberEntity sender, MemberEntity recipient);
 
     Optional<ChatRoomEntity> findByChatRoomId(Long chatRoomId);
+
 }

@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.member.cache;
+package com.walkbuddies.backend.configuration.cache;
 
 public class CacheNames {
     public static final String USERBYUSERNAME = "CACHE_USERBYUSERNAME";

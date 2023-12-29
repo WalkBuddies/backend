@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -91,7 +90,7 @@ public class WeatherMidEntity {
     private LocalDateTime regDate;
     private LocalDateTime modDate;
 
-    public static WeatherMidDto dtoToEntity(WeatherMidEntity weatherMidEntity) {
+    public static WeatherMidDto entityToDto(WeatherMidEntity weatherMidEntity) {
         return WeatherMidDto.builder()
                 .regId(weatherMidEntity.getRegId())
                 .cityName(weatherMidEntity.getCityName())

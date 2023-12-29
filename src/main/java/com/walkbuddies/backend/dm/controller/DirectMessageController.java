@@ -19,7 +19,7 @@ public class DirectMessageController {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final DirectMessageService directMessageService;
 
-    @MessageMapping("chat/sendMessage")
+    @MessageMapping("/chat/sendMessage")
     public void sendMessage(@Payload DirectMessageDto directMessageDto) {
         // 웹 소켓을 통해 메시지를 수신하고 다시 수신자에게 해당 메시지를 전송
         simpMessagingTemplate.convertAndSendToUser(
