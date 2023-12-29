@@ -50,5 +50,13 @@ public interface BookmarkService {
      */
     List<WeatherMidDto> getWeatheMidData(Long bookmarkId);
 
+    /**
+     * 즐겨 찾기 지역 미세먼지 정보를 가져오는 메서드
+     * @param bookmarkId
+     * @return
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+
     AirServiceDto getAirData(Long bookmarkId) throws IOException, URISyntaxException;
 }

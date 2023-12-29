@@ -44,10 +44,10 @@ public class MemberServiceImpl implements MemberService {
     private final RedisService redisService;
     private final BCryptPasswordEncoder encoder;
 
-    @Value("${naver-api-key-id}")
+    @Value("${spring.keys.naver-client-id}")
     private String naverApiKeyId;
 
-    @Value("${naver-api-key-secret}")
+    @Value("${spring.keys.naver-client-secret}")
     private String naverApiKeySecret;
 
     @Override
