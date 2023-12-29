@@ -16,15 +16,12 @@ import lombok.ToString;
 @AllArgsConstructor
 public class FileDto {
   private Long fileId;
-  private Integer feedCategory;
   private Long clubId;
   private Long feedId;
   private String originalName;
   private String savedName;
   private Long size;
   private LocalDateTime createAt;
-  private Integer deleteYn;
-  private LocalDateTime deleteAt;
 
 
 }

@@ -365,7 +365,7 @@ public class ClubServiceImpl implements ClubService {
 
         MemberEntity memberEntity = getMemberEntity(clubUpdateParameter.getOwnerId());
         MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
-        TownEntity townEntity = townRepository.findByTownId(clubUpdateParameter.getTownId());
+        TownEntity townEntity = townRepository.findByTownId(clubUpdateParameter.getTownId()).get();
 
 
         if (clubEntity.getOwnerId().getMemberId() != clubUpdateParameter.getOwnerId()) {

@@ -3,14 +3,14 @@ package com.walkbuddies.backend.exception.impl;
 import com.walkbuddies.backend.exception.AbstractException;
 import org.springframework.http.HttpStatus;
 
-public class NotFoundTownException extends AbstractException {
+public class DuplicateNameException extends AbstractException {
     @Override
     public int getStatusCode() {
-        return HttpStatus.NOT_FOUND.value();
+        return HttpStatus.BAD_REQUEST.value();
     }
 
     @Override
     public String getMessage() {
-        return "해당하는 동네를 찾을 수 없습니다.";
+        return "동일한 이름으로는 수정할 수 없습니다.";
     }
 }

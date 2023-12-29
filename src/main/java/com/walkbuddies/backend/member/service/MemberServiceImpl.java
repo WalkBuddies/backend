@@ -334,4 +334,14 @@ public class MemberServiceImpl implements MemberService {
         }
         return builder.toString();
     }
+
+    @Override
+    @Transactional
+    public void update(MemberEntity existingMember, UpdateMemberDto updateMemberDto) {
+         existingMember.updateMember(updateMemberDto.getNickname(),
+                updateMemberDto.getIntroduction(),
+                updateMemberDto.getImageUrl());
+
+        memberRepository.save(existingMember);
+    }
 }

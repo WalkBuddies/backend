@@ -48,14 +48,13 @@ public class ClubBoardCommentEntity {
   @JoinColumn(name = "parentId")
   private ClubBoardCommentEntity parentId;
 
-  @OneToMany(mappedBy = "parentId", fetch = FetchType.EAGER, orphanRemoval = true)
+  @OneToMany(mappedBy = "parentId", fetch = FetchType.LAZY, orphanRemoval = true)
   private List<ClubBoardCommentEntity> childrenId;
 
   private String content;
   @CreationTimestamp
   private LocalDateTime createAt;
   private LocalDateTime updateAt;
-  @ColumnDefault("0")
   private Integer deleteYn;
   private LocalDateTime deleteAt;
 

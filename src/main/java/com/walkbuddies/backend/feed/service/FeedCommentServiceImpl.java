@@ -1,6 +1,5 @@
 package com.walkbuddies.backend.feed.service;
 
-import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.exception.impl.NoResultException;
 import com.walkbuddies.backend.feed.domain.FeedCommentEntity;
 import com.walkbuddies.backend.feed.domain.FeedEntity;
@@ -9,12 +8,14 @@ import com.walkbuddies.backend.feed.dto.FeedCommentDto;
 import com.walkbuddies.backend.feed.repository.FeedCommentRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FeedCommentServiceImpl implements FeedCommentService {
   private final FeedCommentConvertEntityDto convert;
   private final FeedCommentRepository feedCommentRepository;
@@ -29,13 +30,14 @@ public class FeedCommentServiceImpl implements FeedCommentService {
   @Override
   public FeedCommentDto createComment(Long feedId, FeedCommentDto feedCommentDto) {
     feedCommentDto.setFeedId(feedId);
+    feedCommentDto.setDeleteYn(0);
     FeedCommentEntity entity = convert.toEntity(feedCommentDto);
     if (feedCommentDto.getParentId() != null) {
       entity.updateParent(getFeedCommentEntity(feedCommentDto.getFeedId()));
     }
 
     feedCommentRepository.save(entity);
-
+    log.info("피드 댓글 등록 완료: " + entity.getFeedCommentId());
     return convert.toDto(entity);
 
   }
@@ -44,12 +46,14 @@ public class FeedCommentServiceImpl implements FeedCommentService {
    * 댓글목록 불러오기
    * @param pageable 페이지정보
    * @param feedId 원글번호
+   * @param deleteYn 삭제여부
    * @return
    */
   @Override
-  public Page<FeedCommentDto> getCommentList(Pageable pageable, Long feedId) {
+  public Page<FeedCommentDto> getCommentList(Pageable pageable, Long feedId, Integer deleteYn) {
     FeedEntity entity = feedService.getFeedEntity(feedId);
-    Page<FeedCommentEntity> result = feedCommentRepository.findAllByFeedIdAndDeleteYn(pageable, entity, 0);
+    System.out.println(entity.toString());
+    Page<FeedCommentEntity> result = feedCommentRepository.findAllByFeedIdAndDeleteYn(pageable, entity, deleteYn);
 
     return convert.toPageDto(result);
   }
@@ -64,7 +68,7 @@ public class FeedCommentServiceImpl implements FeedCommentService {
     FeedCommentEntity entity = getFeedCommentEntity(dto.getFeedCommentId());
     entity.updateContent(dto);
     feedCommentRepository.save(entity);
-
+    log.info("피드 댓글 수정 완료: " + entity.getFeedCommentId());
     return convert.toDto(entity);
   }
 
@@ -77,18 +81,10 @@ public class FeedCommentServiceImpl implements FeedCommentService {
     FeedCommentEntity entity = getFeedCommentEntity(commentId);
     entity.changeDeleteYn(1);
     feedCommentRepository.save(entity);
+    log.info("댓글 삭제 완료: " + entity.getFeedCommentId());
   }
 
-  /**
-   * 댓글복구
-   * @param commentId
-   */
-  @Override
-  public void restoreComment(Long commentId) {
-    FeedCommentEntity entity = getFeedCommentEntity(commentId);
-    entity.changeDeleteYn(0);
-    feedCommentRepository.save(entity);
-  }
+
 
   /**
    * 댓글entity 로드
@@ -99,6 +95,7 @@ public class FeedCommentServiceImpl implements FeedCommentService {
   public FeedCommentEntity getFeedCommentEntity(Long feedId) {
     Optional<FeedCommentEntity> op = feedCommentRepository.findByFeedCommentId(feedId);
     if (op.isEmpty()) {
+      log.warn("피드 댓글이 존재하지 않음:" + feedId);
       throw new NoResultException();
     }
     return op.get();

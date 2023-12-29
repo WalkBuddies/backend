@@ -57,7 +57,7 @@ public class AirServiceImpl implements AirService {
      *
      * @param apiUrl
      * @return 통신결과 jsonString 리턴
-     * @throws
+     *
      */
     public String getApiInfo(String apiUrl) throws URISyntaxException {
 
@@ -84,7 +84,7 @@ public class AirServiceImpl implements AirService {
                 .path("items");
     }
 
-    private static final String REDIS_KEY_PREFIX = "air:stationCode:";
+    private static final String REDIS_KEY_PREFIX = "air:stationName:";
 
     /**
      * (수정진행중)
@@ -98,14 +98,15 @@ public class AirServiceImpl implements AirService {
      * @throws IOException
      */
     public AirServiceDto getAirInfo(double X, double Y)
-        throws URISyntaxException, JsonProcessingException {
+            throws URISyntaxException, JsonProcessingException {
+      
         double[] tm = commonService.GeoToTm(X, Y);
         MsrstnDto msrstnDto = getNearbyMsrstnInfoFromApi(tm[0], tm[1]);
 
         AirServiceDto result ;
         LocalDateTime now = LocalDateTime.now();
 
-        String redisKey = REDIS_KEY_PREFIX + msrstnDto.getStationCode();
+        String redisKey = REDIS_KEY_PREFIX + msrstnDto.getStationName();
 
         // Redis에서 데이터 조회
         AirServiceDto cachedData = airRedisTemplate.opsForValue().get(redisKey);
@@ -141,7 +142,7 @@ public class AirServiceImpl implements AirService {
      * @param tmX 입력받은 tmx 좌표
      * @param tmY 입력받은 tmy 좌표
      * @return 최근접측정소 정보(msrstnDto) 리턴
-     * @throws IOException
+     * @throws
      */
     public MsrstnDto getNearbyMsrstnInfoFromApi(double tmX, double tmY)
             throws JsonProcessingException, URISyntaxException {
@@ -153,7 +154,7 @@ public class AirServiceImpl implements AirService {
                 + "&serviceKey=" + API_KEY;
         String result = getApiInfo(apiUrl);
         JsonNode items = jsonParser(result);
-
+        log.info("근접측정소 api 조회 완료");
         return objectMapper.treeToValue(items.get(0), MsrstnDto.class);
     }
 
@@ -162,7 +163,7 @@ public class AirServiceImpl implements AirService {
      *
      * @param msrstnDto 측정소정보 dto
      * @return
-     * @throws IOException
+     * @throws
      */
     public AirServiceEntity getAirInfoFromApi(MsrstnDto msrstnDto)
             throws JsonProcessingException {
@@ -181,7 +182,7 @@ public class AirServiceImpl implements AirService {
         for (int i = 0; i < items.size(); i++) {
             JsonNode item = items.get(i);
             if (!item.get("coFlag").isNull() || !item.get("pm10Flag").isNull()) {
-                log.info("통신장애");
+                log.warn("통신장애");
                 continue;
             }
             ((ObjectNode) item).put("dataTime", changeTimeFormat(String.valueOf(item.get("dataTime"))));
@@ -207,7 +208,7 @@ public class AirServiceImpl implements AirService {
         airRedisTemplate.opsForValue().set(redisKey, AirServiceEntity.entityToDto(airServiceEntity), Duration.ofHours(1));
 
         airServiceRepository.save(airServiceEntity);
+        log.info("대기정보 저장 완료: " + airServiceEntity.getStationName());
     }
-
 
 }

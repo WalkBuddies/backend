@@ -21,6 +21,7 @@ public class FeedConvertEntityDto {
         .content(dto.getContent())
         .createAt(dto.getCreateAt())
         .updateAt(dto.getUpdateAt())
+        .fileYn(dto.getFileYn())
         .deleteAt(dto.getDeleteAt())
         .deleteYn(dto.getDeleteYn())
         .build();

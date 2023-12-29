@@ -1,12 +1,13 @@
 package com.walkbuddies.backend.feed.service;
 
-import com.walkbuddies.backend.common.domain.FileEntity;
 import com.walkbuddies.backend.common.dto.FileDto;
 import com.walkbuddies.backend.common.service.FileService;
 import com.walkbuddies.backend.exception.impl.NoPostException;
+import com.walkbuddies.backend.feed.domain.FeedCommentEntity;
 import com.walkbuddies.backend.feed.domain.FeedEntity;
 import com.walkbuddies.backend.feed.dto.FeedConvertEntityDto;
 import com.walkbuddies.backend.feed.dto.FeedDto;
+import com.walkbuddies.backend.feed.repository.FeedCommentRepository;
 import com.walkbuddies.backend.feed.repository.FeedRepository;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.service.MemberService;
@@ -14,19 +15,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FeedServiceImpl implements FeedService {
   private final FileService fileService;
   private final FeedRepository feedRepository;
   private final FeedConvertEntityDto feedConvertEntityDto;
   private final MemberService memberService;
+  private final FeedCommentRepository feedCommentRepository;
+
 
   /**
    * 피드 쓰기
@@ -48,20 +52,20 @@ public class FeedServiceImpl implements FeedService {
     dto.setDeleteYn(0);
     dto.setCreateAt(LocalDateTime.now());
 
-    FeedEntity result = feedRepository.save(feedConvertEntityDto.dtoToEntity(dto));
-
-    return feedConvertEntityDto.entityToDto(result);
+    FeedEntity entity = feedRepository.save(feedConvertEntityDto.dtoToEntity(dto));
+    log.info("피드 등록 완료: " + entity.getFeedId());
+    return feedConvertEntityDto.entityToDto(entity);
   }
 
   /**
    * 피드 상세보기
    * 삭제여부 체크 후 반환
-   * @param feedIdx 피드번호
+   * @param feedId 피드번호
    * @return feedDto
    */
   @Override
-  public FeedDto getFeed(Long feedIdx) {
-    FeedEntity entity = getFeedEntity(feedIdx);
+  public FeedDto getFeed(Long feedId) {
+    FeedEntity entity = getFeedEntity(feedId);
     if (entity.getDeleteYn() == 1) {
       throw new NoPostException();
     }
@@ -73,14 +77,16 @@ public class FeedServiceImpl implements FeedService {
    * 피드목록
    * @param memberId long 멤버 id
    * @param pageable 페이징 객체
+   * @param deleteYn 삭제여부 (0, 1)
    * @return
    */
   @Override
-  public Page<FeedDto> feedList(Pageable pageable, Long memberId) {
+  public Page<FeedDto> feedList(Pageable pageable, Long memberId, Integer deleteYn) {
     MemberEntity memberEntity = memberService.getMemberEntity(memberId);
-
-    return feedConvertEntityDto.toPageFeedDto(
-        feedRepository.findAllByMemberIdAndDeleteYn(pageable, memberEntity, 0));
+    Page<FeedEntity> result = feedRepository.findAllByMemberIdAndDeleteYn(pageable, memberEntity,
+        deleteYn);
+    Page<FeedDto> dtos = result.map(feedConvertEntityDto::entityToDto);
+    return dtos;
   }
 
   /**
@@ -103,43 +109,46 @@ public class FeedServiceImpl implements FeedService {
 
     entity.update(dto);
     feedRepository.save(entity);
+    log.info("피드 수정 완료: " + entity.getFeedId());
+
     return feedConvertEntityDto.entityToDto(entity);
   }
 
   /**
    * 피드 삭제
-   * @param feedIdx 피드번호
+   * @param feedId 피드번호
    */
   @Override
-  public void deleteFeed(Long feedIdx) {
-    FeedEntity entity = getFeedEntity(feedIdx);
+  public void deleteFeed(Long feedId) {
+    FeedEntity entity = getFeedEntity(feedId);
     entity.changeDeleteYn(1);
     feedRepository.save(entity);
+    log.info("피드 삭제 완료" + entity.getFeedId());
+    Optional<List<FeedCommentEntity>> op = feedCommentRepository.findAllByFeedId(entity);
+    if (op.isEmpty()) {
+      return;
+    }
+    List<FeedCommentEntity> entities = op.get();
+    for(FeedCommentEntity et : entities) {
+      et.changeDeleteYn(1);
+      feedCommentRepository.save(et);
+    }
   }
 
   /**
    * 피드 엔티티 로드
-   * @param feedIdx 피드 번호
-   * @return
+   * @param feedId 피드 번호
+   * @return FeedEntity
    */
   @Override
-  public FeedEntity getFeedEntity(Long feedIdx) {
-    Optional<FeedEntity> op = feedRepository.findByFeedId(feedIdx);
+  public FeedEntity getFeedEntity(Long feedId) {
+    Optional<FeedEntity> op = feedRepository.findByFeedId(feedId);
     if (op.isEmpty()) {
+      log.warn("피드가 존재하지 않음: " + feedId);
       throw new NoPostException();
     }
 
     return op.get();
   }
 
-  /**
-   * 피드 복구
-   * @param feedIdx
-   */
-  @Override
-  public void restoreFeed(Long feedIdx) {
-    FeedEntity entity = getFeedEntity(feedIdx);
-    entity.changeDeleteYn(0);
-    feedRepository.save(entity);
-  }
 }

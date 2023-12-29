@@ -1,6 +1,5 @@
 package com.walkbuddies.backend.club.controller;
 
-import com.walkbuddies.backend.club.domain.ClubPreface;
 import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.ClubJoinInform;
 import com.walkbuddies.backend.club.dto.ClubParameter;
@@ -124,5 +123,4 @@ public class ClubController {
         return ResponseEntity.ok(response);
 
     }
-
 }
