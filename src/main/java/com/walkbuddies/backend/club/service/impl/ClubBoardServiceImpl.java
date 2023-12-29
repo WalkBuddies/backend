@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-
 public class ClubBoardServiceImpl implements ClubBoardService {
     private final ClubBoardRepository clubBoardRepository;
     private final ClubPrefaceRepository clubPrefaceRepository;
@@ -67,6 +66,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
 
 
         ClubBoardEntity result = clubBoardRepository.save(clubBoardConvertDtoEntity.dtoToEntity(clubBoardDto));
+        log.info("동호회게시판 글 등록: " + result.getClubBoardId());
         return clubBoardConvertDtoEntity.entityToDto(result);
 
     }
@@ -83,7 +83,9 @@ public class ClubBoardServiceImpl implements ClubBoardService {
         ClubBoardEntity entity = getBoardEntity(boardId);
 
         if (entity.getDeleteYn() == 1) {
+            log.warn("게시글 오류: noPostException");
             throw new NoPostException();
+
         }
         return clubBoardConvertDtoEntity.entityToDto(entity);
     }
@@ -151,6 +153,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
 
         Optional<ClubPreface> op = clubPrefaceRepository.findByPrefaceId(clubBoardDto.getPrefaceId());
         if (op.isEmpty()) {
+            log.warn("말머리가 존재하지 않음");
             throw new NoResultException();
         }
         ClubPreface preface = op.get();
@@ -171,7 +174,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
         ClubBoardEntity entity = getBoardEntity(boardId);
         entity.changeDeleteYn(1);
         clubBoardRepository.save(entity);
-
+        log.info("동호회 게시판 글 삭제 완료:" + boardId);
         Optional<List<ClubBoardCommentEntity>> op = boardCommentRepository.findAllByClubBoardId(entity);
         if (op.isEmpty()) {
             return;
@@ -194,6 +197,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
         Optional<ClubBoardEntity> op = clubBoardRepository.findByClubBoardId(boardId);
 
         if (op.isEmpty()) {
+            log.warn("동호회게시판 글이 존재하지 않음:" + boardId);
             throw new NoPostException();
         }
 
@@ -202,13 +206,14 @@ public class ClubBoardServiceImpl implements ClubBoardService {
 
     /**
      *
-     * @param clubId 클럽id
+     * @param clubId 동호회id
      * @return clubPrefaceDto list
      */
     @Override
     public List<ClubPrefaceDto> getClubPreface(Long clubId) {
         Optional<ClubEntity> opClub = clubRepository.findByClubId(clubId);
         if (opClub.isEmpty()) {
+            log.warn("클럽이 존재하지 않음: " + clubId);
             throw new NotFoundClubException();
         }
         ClubEntity entity = opClub.get();
@@ -228,6 +233,7 @@ public class ClubBoardServiceImpl implements ClubBoardService {
     public ClubEntity getClubEntity(Long clubId) {
         Optional<ClubEntity> op = clubRepository.findByClubId(clubId);
         if (op.isEmpty()) {
+            log.warn("클럽이 존재하지 않음: " + clubId);
             throw new NotFoundClubException();
         }
 

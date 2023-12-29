@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,6 +18,7 @@ import java.net.URISyntaxException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CommonServiceImpl implements CommonService {
     private final ObjectMapper objectMapper;
     @Value("${spring.keys.kakao-api-key}")
@@ -39,6 +41,7 @@ public class CommonServiceImpl implements CommonService {
         result[0] = Double.parseDouble(String.valueOf(item.get(0).get("x")));
         result[1] = Double.parseDouble(String.valueOf(item.get(0).get("y")));
 
+        log.info("kakao 좌표변환 완료");
 
         return result;
     }

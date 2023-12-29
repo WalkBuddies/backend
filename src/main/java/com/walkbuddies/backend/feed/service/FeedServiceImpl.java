@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FeedServiceImpl implements FeedService {
   private final FileService fileService;
   private final FeedRepository feedRepository;
@@ -50,9 +52,9 @@ public class FeedServiceImpl implements FeedService {
     dto.setDeleteYn(0);
     dto.setCreateAt(LocalDateTime.now());
 
-    FeedEntity result = feedRepository.save(feedConvertEntityDto.dtoToEntity(dto));
-
-    return feedConvertEntityDto.entityToDto(result);
+    FeedEntity entity = feedRepository.save(feedConvertEntityDto.dtoToEntity(dto));
+    log.info("피드 등록 완료: " + entity.getFeedId());
+    return feedConvertEntityDto.entityToDto(entity);
   }
 
   /**
@@ -107,6 +109,8 @@ public class FeedServiceImpl implements FeedService {
 
     entity.update(dto);
     feedRepository.save(entity);
+    log.info("피드 수정 완료: " + entity.getFeedId());
+
     return feedConvertEntityDto.entityToDto(entity);
   }
 
@@ -119,6 +123,7 @@ public class FeedServiceImpl implements FeedService {
     FeedEntity entity = getFeedEntity(feedId);
     entity.changeDeleteYn(1);
     feedRepository.save(entity);
+    log.info("피드 삭제 완료" + entity.getFeedId());
     Optional<List<FeedCommentEntity>> op = feedCommentRepository.findAllByFeedId(entity);
     if (op.isEmpty()) {
       return;
@@ -128,7 +133,6 @@ public class FeedServiceImpl implements FeedService {
       et.changeDeleteYn(1);
       feedCommentRepository.save(et);
     }
-
   }
 
   /**
@@ -140,6 +144,7 @@ public class FeedServiceImpl implements FeedService {
   public FeedEntity getFeedEntity(Long feedId) {
     Optional<FeedEntity> op = feedRepository.findByFeedId(feedId);
     if (op.isEmpty()) {
+      log.warn("피드가 존재하지 않음: " + feedId);
       throw new NoPostException();
     }
 
