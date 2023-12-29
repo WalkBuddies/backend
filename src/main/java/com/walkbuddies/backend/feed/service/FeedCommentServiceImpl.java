@@ -1,6 +1,5 @@
 package com.walkbuddies.backend.feed.service;
 
-import com.walkbuddies.backend.club.dto.clubboardcomment.RequestDto;
 import com.walkbuddies.backend.exception.impl.NoResultException;
 import com.walkbuddies.backend.feed.domain.FeedCommentEntity;
 import com.walkbuddies.backend.feed.domain.FeedEntity;
@@ -9,12 +8,14 @@ import com.walkbuddies.backend.feed.dto.FeedCommentDto;
 import com.walkbuddies.backend.feed.repository.FeedCommentRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FeedCommentServiceImpl implements FeedCommentService {
   private final FeedCommentConvertEntityDto convert;
   private final FeedCommentRepository feedCommentRepository;
@@ -36,7 +37,7 @@ public class FeedCommentServiceImpl implements FeedCommentService {
     }
 
     feedCommentRepository.save(entity);
-
+    log.info("피드 댓글 등록 완료: " + entity.getFeedCommentId());
     return convert.toDto(entity);
 
   }
@@ -67,7 +68,7 @@ public class FeedCommentServiceImpl implements FeedCommentService {
     FeedCommentEntity entity = getFeedCommentEntity(dto.getFeedCommentId());
     entity.updateContent(dto);
     feedCommentRepository.save(entity);
-
+    log.info("피드 댓글 수정 완료: " + entity.getFeedCommentId());
     return convert.toDto(entity);
   }
 
@@ -80,6 +81,7 @@ public class FeedCommentServiceImpl implements FeedCommentService {
     FeedCommentEntity entity = getFeedCommentEntity(commentId);
     entity.changeDeleteYn(1);
     feedCommentRepository.save(entity);
+    log.info("댓글 삭제 완료: " + entity.getFeedCommentId());
   }
 
 
@@ -93,6 +95,7 @@ public class FeedCommentServiceImpl implements FeedCommentService {
   public FeedCommentEntity getFeedCommentEntity(Long feedId) {
     Optional<FeedCommentEntity> op = feedCommentRepository.findByFeedCommentId(feedId);
     if (op.isEmpty()) {
+      log.warn("피드 댓글이 존재하지 않음:" + feedId);
       throw new NoResultException();
     }
     return op.get();

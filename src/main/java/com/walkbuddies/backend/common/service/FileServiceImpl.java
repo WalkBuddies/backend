@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FileServiceImpl implements FileService{
   private final String UPLOADPATH = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files";
   private final FileRepository fileRepository;
@@ -124,8 +126,9 @@ public class FileServiceImpl implements FileService{
 
     try {
       multipartFile.transferTo(uploadFile);
-
+      log.info("파일저장 완료" + uploadPath);
     } catch (IOException e) {
+      log.warn("파일저장오류" + e);
       throw new RuntimeException(e);
     }
 
@@ -138,11 +141,13 @@ public class FileServiceImpl implements FileService{
   }
 
   @Override
+  @Transactional
   public void deleteFiles(List<FileEntity> entities) {
     for (FileEntity entity : entities) {
       String filepath = Paths.get(UPLOADPATH, entity.getCreateAt().format(
           DateTimeFormatter.ofPattern("yyMMdd")), entity.getSaveName()).toString();
       deleteFile(filepath);
+      log.info("파일 삭제 완료:" + filepath);
     }
   }
 
