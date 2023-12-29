@@ -43,21 +43,21 @@ public class MemberDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return !member.isBlocked();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return !member.isBlocked();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return member.isBlocked();
     }
 }

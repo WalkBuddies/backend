@@ -82,20 +82,26 @@ public class MemberController {
     public ResponseEntity<SingleResponse> reissueToken(
             @AuthenticationPrincipal MemberDetails memberDetails,
             @RequestBody ReissueTokenRequest tokenRequest) {
-        if (memberDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new SingleResponse<>(HttpStatus.UNAUTHORIZED.value(), "Unauthorized", null));
-        }
 
         MemberResponse memberResponse = MemberResponse.fromEntity(memberDetails.getMember());
-        if (memberResponse == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new SingleResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null));
-        }
 
         TokenResponse tokenResponse = jwtTokenUtil.reissueToken(memberResponse, tokenRequest.getRefreshToken());
         return ResponseEntity.ok(new SingleResponse<>(HttpStatus.OK.value(), "토큰 재발행", tokenResponse));
     }
+
+
+    @PostMapping("/town")
+    public ResponseEntity<SingleResponse> addTown(
+            @AuthenticationPrincipal MemberDetails memberDetails,
+            @RequestParam("longitude") Double longitude,
+            @RequestParam("latitude") Double latitude) {
+        Long memberId = memberDetails.getMember().getMemberId();
+
+        SingleResponse response = new SingleResponse<>(HttpStatus.OK.value(),
+                "동네 인증되었습니다.",
+                memberService.addTown(memberId, memberService.getDong(longitude, latitude)));
+
+        return ResponseEntity.ok(response);
 
     @GetMapping("/update")
     public ResponseEntity<SingleResponse> updateForm(@AuthenticationPrincipal MemberDetails memberDetails) {

@@ -112,4 +112,9 @@ public class MemberEntity implements Serializable {
                 .townVerificationDate(memberEntity.getTownVerificationDate())
                 .build();
     }
+
+    public void setTown(TownEntity town) {
+        this.townId = town;
+        this.townVerificationDate = LocalDateTime.now();
+    }
 }
