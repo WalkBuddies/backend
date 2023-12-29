@@ -5,6 +5,7 @@ import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.club.service.ClubBoardCommentService;
 import com.walkbuddies.backend.common.response.PageResponse;
 import com.walkbuddies.backend.common.response.SingleResponse;
+import com.walkbuddies.backend.member.jwt.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/club/board")
 public class ClubBoardCommentController {
   private final ClubBoardCommentService clubBoardCommentService;
+  private final JwtTokenUtil tokenUtil;
 
 
   /**
@@ -33,8 +36,11 @@ public class ClubBoardCommentController {
    * @return
    */
   @PostMapping("/{boardId}/comment")
-  public ResponseEntity<SingleResponse<ResponseDto>> createComment(@PathVariable Long boardId, @RequestBody RequestDto requestDto) {
-
+  public ResponseEntity<SingleResponse<ResponseDto>> createComment(@RequestHeader(value = "authorization") String token
+      ,@PathVariable Long boardId, @RequestBody RequestDto requestDto) {
+    token = token.substring(7);
+    String nickname = tokenUtil.getUserInfoFromToken(token).get("nickname", String.class);
+    requestDto.setNickname(nickname);
     ResponseDto result = clubBoardCommentService.createComment(boardId, requestDto);
 
     SingleResponse<ResponseDto> response = new SingleResponse<>(HttpStatus.OK.value(), "작성완료",
@@ -47,7 +53,7 @@ public class ClubBoardCommentController {
   //list
 
   @GetMapping("/{boardId}/comment-list")
-  public ResponseEntity<PageResponse<Page<ResponseDto>>> commentList(@PageableDefault(page = 0, size = 10, sort = "clubBoardCommentId", direction = Direction.DESC)
+  public ResponseEntity<PageResponse<Page<ResponseDto>>> commentList(@PageableDefault(sort = "clubBoardCommentId", direction = Direction.DESC)
        Pageable pageable
       ,@PathVariable Long boardId) {
 
