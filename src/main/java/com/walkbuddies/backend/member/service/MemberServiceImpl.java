@@ -2,13 +2,10 @@ package com.walkbuddies.backend.member.service;
 
 import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.cache.CacheNames;
+import com.walkbuddies.backend.member.dto.*;
 import com.walkbuddies.backend.member.email.EmailConfig;
 import com.walkbuddies.backend.member.jwt.JwtTokenUtil;
 import com.walkbuddies.backend.member.domain.MemberEntity;
-import com.walkbuddies.backend.member.dto.LoginRequest;
-import com.walkbuddies.backend.member.dto.MemberResponse;
-import com.walkbuddies.backend.member.dto.ResetPasswordRequest;
-import com.walkbuddies.backend.member.dto.SignUpRequest;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -270,5 +267,15 @@ public class MemberServiceImpl implements MemberService {
             builder.append(random.nextInt(10));
         }
         return builder.toString();
+    }
+
+    @Override
+    @Transactional
+    public void update(MemberEntity existingMember, UpdateMemberDto updateMemberDto) {
+         existingMember.updateMember(updateMemberDto.getNickname(),
+                updateMemberDto.getIntroduction(),
+                updateMemberDto.getImageUrl());
+
+        memberRepository.save(existingMember);
     }
 }
