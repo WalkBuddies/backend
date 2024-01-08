@@ -15,6 +15,7 @@ import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import com.walkbuddies.backend.weather.dto.WeatherMidDto;
+import com.walkbuddies.backend.weather.dto.WeatherMidResponse;
 import com.walkbuddies.backend.weather.service.WeatherMidService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -148,7 +149,7 @@ public class BookmarkServiceImpl implements BookmarkService{
      * @return
      */
     @Override
-    public List<WeatherMidDto> getWeatheMidData(Long bookmarkId) {
+    public List<WeatherMidResponse> getWeatheMidData(Long bookmarkId) {
 
         BookmarkEntity bookmarkEntity = getBookmarkEntity(bookmarkId);
         TownEntity townEntity = getTownEntity(bookmarkEntity.getTownId().getTownId());
@@ -163,7 +164,7 @@ public class BookmarkServiceImpl implements BookmarkService{
             }
         }
 
-        return weatherMidService.getWeatherMidData(cityName);
+        return weatherMidService.getData(cityName);
     }
 
     /**

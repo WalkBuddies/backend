@@ -5,6 +5,7 @@ import com.walkbuddies.backend.air.dto.AirServiceDto;
 import com.walkbuddies.backend.bookmark.dto.BookmarkDto;
 import com.walkbuddies.backend.bookmark.dto.BookmarkParameter;
 import com.walkbuddies.backend.weather.dto.WeatherMidDto;
+import com.walkbuddies.backend.weather.dto.WeatherMidResponse;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -48,7 +49,7 @@ public interface BookmarkService {
      * @param bookmarkId
      * @return
      */
-    List<WeatherMidDto> getWeatheMidData(Long bookmarkId);
+    List<WeatherMidResponse> getWeatheMidData(Long bookmarkId);
 
     /**
      * 즐겨 찾기 지역 미세먼지 정보를 가져오는 메서드
