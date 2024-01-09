@@ -2,6 +2,7 @@ package com.walkbuddies.backend.weather.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.walkbuddies.backend.weather.dto.WeatherMidDto;
+import com.walkbuddies.backend.weather.dto.WeatherMidResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public interface WeatherMidService {
      * @return
      * @throws JsonProcessingException
      */
-    void autoUpdateWeatherMidData() throws JsonProcessingException;
+    void autoUpdate() throws JsonProcessingException;
 
 
     /**
@@ -45,7 +46,7 @@ public interface WeatherMidService {
      * @param cityName
      * @return
      */
-    List<WeatherMidDto> getWeatherMidData(String cityName);
+    List<WeatherMidResponse> getData(String cityName);
 
     /**
      * 수동으로 지역코드를 기반으로 DB에 이미 저장되어있는 지역이라면 업데이트하고 없는 지역이라면 새로 추가하는 메서드
@@ -53,5 +54,5 @@ public interface WeatherMidService {
      * @return
      * @throws JsonProcessingException
      */
-    String manualUpdateWeatherMidData(String tmFc) throws JsonProcessingException;
+    void update(String tmFc) throws JsonProcessingException;
 }

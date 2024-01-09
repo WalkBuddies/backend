@@ -3,16 +3,14 @@ package com.walkbuddies.backend.weather.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.walkbuddies.backend.configuration.cache.CacheNames;
 import com.walkbuddies.backend.weather.domain.WeatherMidEntity;
 import com.walkbuddies.backend.weather.dto.WeatherMidDto;
 import com.walkbuddies.backend.weather.dto.WeatherMidLandFcstDto;
+import com.walkbuddies.backend.weather.dto.WeatherMidResponse;
 import com.walkbuddies.backend.weather.dto.WeatherMidTaDto;
 import com.walkbuddies.backend.weather.repository.WeatherMidRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -141,7 +139,7 @@ public class WeatherMidServiceImpl implements WeatherMidService {
     @Transactional
     @Scheduled(cron = "0 0 6,18 * * ?")
     @Override
-    public void autoUpdateWeatherMidData() throws JsonProcessingException {
+    public void autoUpdate() throws JsonProcessingException {
         String tmFc = generateTmFc();
         processWeatherMidData(tmFc);
     }
@@ -154,9 +152,8 @@ public class WeatherMidServiceImpl implements WeatherMidService {
      */
     @Transactional
     @Override
-    public String manualUpdateWeatherMidData(String tmFc) throws JsonProcessingException {
+    public void update(String tmFc) throws JsonProcessingException {
         processWeatherMidData(tmFc);
-        return "중기예보 정보를 업데이트 완료 했습니다.";
     }
 
     private void processWeatherMidData(String tmFc) throws JsonProcessingException {
@@ -279,14 +276,14 @@ public class WeatherMidServiceImpl implements WeatherMidService {
      * @param cityName
      * @return
      */
-    public List<WeatherMidDto> getWeatherMidData(String cityName) {
+    public List<WeatherMidResponse> getData(String cityName) {
 
         WeatherMidEntity result = weatherMidRepository.findByCityName(cityName)
                 .orElseThrow(() -> new NoSuchElementException("도시 이름이 없습니다: " + cityName));
 
-        List<WeatherMidDto> weatherMidDtoList = List.of(WeatherMidEntity.entityToDto(result));
+        List<WeatherMidResponse> weatherMidResponses = List.of(WeatherMidResponse.of(result));
 
-        return weatherMidDtoList;
+        return weatherMidResponses;
     }
 
     /**
