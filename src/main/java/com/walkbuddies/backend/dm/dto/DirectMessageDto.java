@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.dm.dto;
 
+import com.walkbuddies.backend.dm.domain.DirectMessageEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,4 +19,16 @@ public class DirectMessageDto {
     private String content;
     private String contentType;
     private LocalDateTime sendTime;
+
+    public static DirectMessageDto of(DirectMessageEntity directMessageEntity) {
+        return DirectMessageDto.builder()
+                .messageId(directMessageEntity.getMessageId())
+                .chatRoomId(directMessageEntity.getChatRoomId().getChatRoomId())
+                .senderId(directMessageEntity.getSenderId().getMemberId())
+                .recipientId(directMessageEntity.getRecipientId().getMemberId())
+                .content(directMessageEntity.getContent())
+                .contentType(directMessageEntity.getContentType())
+                .sendTime(directMessageEntity.getSendTime())
+                .build();
+    }
 }

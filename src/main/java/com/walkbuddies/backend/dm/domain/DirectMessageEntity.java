@@ -24,29 +24,17 @@ public class DirectMessageEntity {
 
     @ManyToOne
     @JoinColumn(name = "chat_room_id")
-    private ChatRoomEntity chatRoomId;
+    private ChatRoomEntity chatRoom;
 
     @ManyToOne
     @JoinColumn(name = "sender_id")
-    private MemberEntity senderId;
+    private MemberEntity sender;
 
     @ManyToOne
     @JoinColumn(name = "recipient_id")
-    private MemberEntity recipientId;
+    private MemberEntity recipient;
 
     private String content;
     private String contentType;
     private LocalDateTime sendTime;
-
-    public static DirectMessageDto entityToDto(DirectMessageEntity directMessageEntity) {
-        return DirectMessageDto.builder()
-                .messageId(directMessageEntity.getMessageId())
-                .chatRoomId(directMessageEntity.getChatRoomId().getChatRoomId())
-                .senderId(directMessageEntity.getSenderId().getMemberId())
-                .recipientId(directMessageEntity.getRecipientId().getMemberId())
-                .content(directMessageEntity.getContent())
-                .contentType(directMessageEntity.getContentType())
-                .sendTime(directMessageEntity.getSendTime())
-                .build();
-    }
 }
