@@ -5,11 +5,8 @@ import com.walkbuddies.backend.club.domain.ClubPreface;
 import com.walkbuddies.backend.club.domain.ClubWaitingEntity;
 import com.walkbuddies.backend.club.domain.MyClubEntity;
 import com.walkbuddies.backend.club.domain.TownEntity;
-import com.walkbuddies.backend.club.dto.ClubDto;
-import com.walkbuddies.backend.club.dto.ClubJoinInform;
-import com.walkbuddies.backend.club.dto.ClubParameter;
+import com.walkbuddies.backend.club.dto.form.*;
 import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
-import com.walkbuddies.backend.club.dto.ClubUpdateParameter;
 import com.walkbuddies.backend.club.dto.PrefaceConvertDtoEntity;
 import com.walkbuddies.backend.club.repository.ClubPrefaceRepository;
 import com.walkbuddies.backend.club.repository.ClubRepository;
@@ -20,6 +17,8 @@ import com.walkbuddies.backend.club.service.ClubService;
 import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
+import com.walkbuddies.backend.type.ClubAccessLimit;
+import com.walkbuddies.backend.type.ClubNeedGrant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,31 +46,31 @@ public class ClubServiceImpl implements ClubService {
     /**
      * 소모임을 생성하는 메서드.
      *
-     * @param clubDto
+     * @param clubCreateParameter
      * @return
      */
     @Transactional
     @Override
-    public ClubDto createClub(ClubDto clubDto) {
+    public ClubResponse create(ClubCreateParameter clubCreateParameter) {
 
-        Optional<ClubEntity> existingClub = clubRepository.findByClubName(clubDto.getClubName());
+        Optional<ClubEntity> existingClub = clubRepository.findByClubName(clubCreateParameter.getClubName());
         if (existingClub.isPresent()) {
             throw new ExistsClubException();
         }
 
-        MemberEntity member = getMemberEntity(clubDto.getOwnerId());
-        if (!clubDto.getTownId().equals(member.getTownId().getTownId())) {
+        MemberEntity member = getMemberEntity(clubCreateParameter.getOwnerId());
+        if (clubCreateParameter.getTownId() != member.getTownId().getTownId()) {
             throw new NotMyTownException();
         }
 
         ClubEntity clubEntity = ClubEntity.builder()
-                .clubName(clubDto.getClubName())
-                .townId(member.getTownId())
-                .ownerId(member)
+                .clubName(clubCreateParameter.getClubName())
+                .town(member.getTownId())
+                .owner(member)
                 .members(1)
-                .membersLimit(clubDto.getMembersLimit())
-                .accessLimit(clubDto.getAccessLimit())
-                .needGrant(clubDto.getNeedGrant())
+                .membersLimit(clubCreateParameter.getMembersLimit())
+                .accessLimit(clubCreateParameter.getAccessLimit())
+                .needGrant(clubCreateParameter.getNeedGrant())
                 .regDate(LocalDateTime.now())
                 .build();
 
@@ -86,7 +85,7 @@ public class ClubServiceImpl implements ClubService {
 
         myClubRepository.save(myClubEntity);
 
-        return ClubEntity.entityToDto(clubEntity);
+        return ClubResponse.of(clubEntity);
     }
 
     /**
@@ -96,20 +95,20 @@ public class ClubServiceImpl implements ClubService {
      */
     @Transactional
     @Override
-    public ClubDto deleteClub(ClubParameter clubParameter) {
+    public ClubResponse delete(ClubParameter clubParameter) {
 
         ClubEntity clubEntity = getClubEntity(clubParameter.getClubId());
-        MemberEntity memberEntity = getMemberEntity(clubParameter.getOwnerId());
-        List<MyClubEntity> myClubEntities = myClubRepository.findByClubId(clubEntity);
-        List<ClubWaitingEntity> clubWaitingEntities = clubWaitingRepository.findByClubId(clubEntity);
-        Optional<ClubEntity> byClubIdAndMemberId = clubRepository.findByClubIdAndOwnerId(clubParameter.getClubId(), memberEntity);
-
         if (clubEntity.isSuspended()) {
             throw new ClubSuspendedException();
         }
-        if (clubEntity.getOwnerId().getMemberId() != clubParameter.getOwnerId()) {
+        if (clubEntity.getOwner().getMemberId() != clubParameter.getOwnerId()) {
             throw new NotClubAdminException();
         }
+
+        MemberEntity memberEntity = getMemberEntity(clubParameter.getOwnerId());
+        List<MyClubEntity> myClubEntities = myClubRepository.findByClubId(clubEntity);
+        List<ClubWaitingEntity> clubWaitingEntities = clubWaitingRepository.findByClubId(clubEntity);
+        Optional<ClubEntity> byClubIdAndOwner = clubRepository.findByClubIdAndOwner(clubParameter.getClubId(), memberEntity);
 
         if (!clubWaitingEntities.isEmpty()) {
             for (ClubWaitingEntity clubWaitingEntity : clubWaitingEntities) {
@@ -121,9 +120,9 @@ public class ClubServiceImpl implements ClubService {
             myClubRepository.delete(myClubEntity);
         }
 
-        clubRepository.delete(byClubIdAndMemberId.get());
+        clubRepository.delete(byClubIdAndOwner.get());
 
-        return ClubEntity.entityToDto(byClubIdAndMemberId.get());
+        return ClubResponse.of(clubEntity);
     }
 
     /**
@@ -134,7 +133,7 @@ public class ClubServiceImpl implements ClubService {
      * @return
      */
     @Override
-    public List<String> searchClub(ClubParameter clubParameter) {
+    public List<String> search(ClubParameter clubParameter) {
 
         List<ClubEntity> clubEntities = clubRepository.findByClubNameContaining(clubParameter.getClubName());
         if (clubEntities.isEmpty()) {
@@ -142,7 +141,8 @@ public class ClubServiceImpl implements ClubService {
         }
 
         return clubEntities.stream()
-                .filter(clubEntity -> clubEntity.getAccessLimit() != 2 && clubEntity.getTownId().getTownId().equals(clubParameter.getTownId()))
+                .filter(clubEntity -> clubEntity.getAccessLimit() != ClubAccessLimit.SEARCH_NOT_ALLOW.getValue()
+                        && clubEntity.getTown().getTownId().equals(clubParameter.getTownId()))
                 .map(ClubEntity::getClubName)
                 .collect(Collectors.toList());
     }
@@ -151,36 +151,37 @@ public class ClubServiceImpl implements ClubService {
      * 소모임 가입 요청 기능 메서드
      * 단 가입 조건이 없는 소모임일 경우 바로 가입 가능
      *
-     * @param clubJoinInform
+     * @param clubJoinParameter
      * @return
      */
     @Transactional
     @Override
-    public String joinClubRequest(ClubJoinInform clubJoinInform) {
+    public String joinRequest(ClubJoinParameter clubJoinParameter) {
 
-        ClubEntity clubEntity = getClubEntity(clubJoinInform.getClubId());
-        MemberEntity memberEntity = getMemberEntity(clubJoinInform.getMemberId());
-        Optional<MyClubEntity> optionalMyClub = myClubRepository.findByClubIdAndMemberId(clubEntity, memberEntity);
-
+        ClubEntity clubEntity = getClubEntity(clubJoinParameter.getClubId());
         if (clubEntity.isSuspended()) {
             throw new ClubSuspendedException();
         }
         if (clubEntity.getMembersLimit() < clubEntity.getMembers() + 1) {
             throw new MemberLimitException();
         }
-        if (!clubEntity.getTownId().getTownId().equals(clubJoinInform.getTownId())) {
+        if (!clubEntity.getTown().getTownId().equals(clubJoinParameter.getTownId())) {
             throw new NotMyTownException();
         }
+
+        MemberEntity memberEntity = getMemberEntity(clubJoinParameter.getMemberId());
+
+        Optional<MyClubEntity> optionalMyClub = myClubRepository.findByClubIdAndMemberId(clubEntity, memberEntity);
         if (optionalMyClub.isPresent()) {
             throw new AlreadyMemberException();
         }
 
-        if (clubEntity.getNeedGrant() == 1) {
+        if (clubEntity.getNeedGrant() == ClubNeedGrant.GRANT_NEED.getValue()) {
             ClubWaitingEntity clubWaitingEntity = ClubWaitingEntity.builder()
                     .clubId(clubEntity)
                     .memberId(memberEntity)
                     .nickName(memberEntity)
-                    .message(clubJoinInform.getMessage())
+                    .message(clubJoinParameter.getMessage())
                     .build();
             clubWaitingRepository.save(clubWaitingEntity);
 
@@ -206,8 +207,8 @@ public class ClubServiceImpl implements ClubService {
         ClubEntity updatedClubEntity = ClubEntity.builder()
                 .clubId(clubEntity.getClubId())
                 .clubName(clubEntity.getClubName())
-                .townId(clubEntity.getTownId())
-                .ownerId(clubEntity.getOwnerId())
+                .town(clubEntity.getTown())
+                .owner(clubEntity.getOwner())
                 .members(clubEntity.getMembers() + 1)
                 .membersLimit(clubEntity.getMembersLimit())
                 .accessLimit(clubEntity.getAccessLimit())
@@ -224,24 +225,24 @@ public class ClubServiceImpl implements ClubService {
      * 소모임 Id를 기반으로 소모임의 가입 신청자를 볼 수 있는 메서드.
      * 신청자의 memberId와 가입시 작성했던 message를 함께 볼 수 있음.
      *
-     * @param clubId
+     * @param clubParameter
      * @return
      */
     @Override
-    public List<String> getClubWaitingData(ClubParameter clubParameter) {
-        ClubEntity clubEntity = getClubEntity(clubParameter.getClubId());
-        List<ClubWaitingEntity> clubWaitingEntities = clubWaitingRepository.findByClubId(clubEntity);
+    public List<String> getWaitingData(ClubParameter clubParameter) {
 
+        ClubEntity clubEntity = getClubEntity(clubParameter.getClubId());
         if (clubEntity.isSuspended()) {
             throw new ClubSuspendedException();
         }
 
+        List<ClubWaitingEntity> clubWaitingEntities = clubWaitingRepository.findByClubId(clubEntity);
         if (clubWaitingEntities.isEmpty()) {
             return Collections.singletonList("가입 신청자가 없습니다.");
         }
 
         return clubWaitingEntities.stream()
-                .map(clubWaitingEntity -> String.format("nickName: %s, message: %s",
+                .map(clubWaitingEntity -> String.format("닉네임: %s, 메시지: %s",
                         clubWaitingEntity.getNickName().getNickname(),
                         clubWaitingEntity.getMessage()))
                 .collect(Collectors.toList());
@@ -251,30 +252,29 @@ public class ClubServiceImpl implements ClubService {
      * 소모임 신청자 가입 승인, 거절 메서드.
      * 승인에 대한 Boolean 타입과 정보를 받아서 승인할지 거절할지 정함.
      *
-     * @param clubJoinInform
+     * @param clubJoinParameter
      * @return
      */
     @Transactional
     @Override
-    public String joinClubResponse(ClubJoinInform clubJoinInform) {
+    public String joinResponse(ClubJoinParameter clubJoinParameter) {
 
-        ClubEntity clubEntity = getClubEntity(clubJoinInform.getClubId());
-        MemberEntity memberEntity = getMemberEntity(clubJoinInform.getMemberId());
-        MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
-        ClubWaitingEntity clubWaitingEntity = getClubWaitingEntity(clubEntity, memberEntity);
-
+        ClubEntity clubEntity = getClubEntity(clubJoinParameter.getClubId());
         if (clubEntity.isSuspended()) {
             throw new ClubSuspendedException();
         }
+        if (clubEntity.getMembersLimit() < clubEntity.getMembers() + 1) {
+            throw new MemberLimitException();
+        }
 
-        if (!clubJoinInform.getAllowJoin()) {
+        MemberEntity memberEntity = getMemberEntity(clubJoinParameter.getMemberId());
+        MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
+        ClubWaitingEntity clubWaitingEntity = getClubWaitingEntity(clubEntity, memberEntity);
+
+        if (!clubJoinParameter.isAllowJoin()) {
             myClubRepository.delete(myClubEntity);
             clubWaitingRepository.delete(clubWaitingEntity);
             return "닉네임: " + memberEntity.getNickname() + " 유저 소모임 가입 승인 거절.";
-        }
-
-        if (clubEntity.getMembersLimit() < clubEntity.getMembers() + 1) {
-            throw new MemberLimitException();
         }
 
         MyClubEntity updatedMyClubEntity = MyClubEntity.builder()
@@ -289,8 +289,8 @@ public class ClubServiceImpl implements ClubService {
         ClubEntity updatedClubEntity = ClubEntity.builder()
                 .clubId(clubEntity.getClubId())
                 .clubName(clubEntity.getClubName())
-                .townId(clubEntity.getTownId())
-                .ownerId(clubEntity.getOwnerId())
+                .town(clubEntity.getTown())
+                .owner(clubEntity.getOwner())
                 .members(clubEntity.getMembers() + 1)
                 .membersLimit(clubEntity.getMembersLimit())
                 .accessLimit(clubEntity.getAccessLimit())
@@ -307,32 +307,33 @@ public class ClubServiceImpl implements ClubService {
 
     /**
      * 소모임 탈퇴 메서드.
-     * @param clubId
-     * @param memberId
+     *
+     * @param clubParameter
      * @return
      */
     @Transactional
     @Override
-    public String leaveClub(ClubParameter clubParameter) {
+    public String leave(ClubParameter clubParameter) {
 
         ClubEntity clubEntity = getClubEntity(clubParameter.getClubId());
-        MemberEntity memberEntity = getMemberEntity(clubParameter.getMemberId());
-        MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
-
         if (clubEntity.isSuspended()) {
             throw new ClubSuspendedException();
         }
-        if (clubEntity.getOwnerId().getMemberId() == clubParameter.getMemberId()) {
+
+        if (clubEntity.getOwner().getMemberId() == clubParameter.getMemberId()) {
             throw new ChangeClubOwnerException();
         }
+
+        MemberEntity memberEntity = getMemberEntity(clubParameter.getMemberId());
+        MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
 
         myClubRepository.delete(myClubEntity);
 
         ClubEntity updatedClubEntity = ClubEntity.builder()
                 .clubId(clubEntity.getClubId())
                 .clubName(clubEntity.getClubName())
-                .townId(clubEntity.getTownId())
-                .ownerId(clubEntity.getOwnerId())
+                .town(clubEntity.getTown())
+                .owner(clubEntity.getOwner())
                 .members(clubEntity.getMembers() - 1)
                 .membersLimit(clubEntity.getMembersLimit())
                 .accessLimit(clubEntity.getAccessLimit())
@@ -347,16 +348,16 @@ public class ClubServiceImpl implements ClubService {
 
     /**
      * 소모임 정보를 수정하는 메서드
-     * @param ownerId
-     * @param clubDto
+     *
+     * @param clubUpdateParameter
      * @return
      */
     @Transactional
     @Override
-    public ClubDto updateClubData(ClubUpdateParameter clubUpdateParameter) {
+    public ClubResponse update(ClubUpdateParameter clubUpdateParameter) {
 
         ClubEntity clubEntity = getClubEntity(clubUpdateParameter.getClubId());
-        if (clubUpdateParameter.getMemberId() != clubEntity.getOwnerId().getMemberId()) {
+        if (clubUpdateParameter.getMemberId() != clubEntity.getOwner().getMemberId()) {
             throw new NotClubAdminException();
         }
         if (clubEntity.isSuspended()) {
@@ -367,9 +368,8 @@ public class ClubServiceImpl implements ClubService {
         MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
         TownEntity townEntity = townRepository.findByTownId(clubUpdateParameter.getTownId()).get();
 
-
-        if (clubEntity.getOwnerId().getMemberId() != clubUpdateParameter.getOwnerId()) {
-            MemberEntity member = getMemberEntity(clubEntity.getOwnerId().getMemberId());
+        if (clubEntity.getOwner().getMemberId() != clubUpdateParameter.getOwnerId()) {
+            MemberEntity member = getMemberEntity(clubEntity.getOwner().getMemberId());
             MyClubEntity myClub = getMyClubEntity(clubEntity, member);
 
             MyClubEntity updatedMyClubEntity = MyClubEntity.builder()
@@ -385,8 +385,8 @@ public class ClubServiceImpl implements ClubService {
         ClubEntity updatedClubEntity = ClubEntity.builder()
                 .clubId(clubUpdateParameter.getClubId())
                 .clubName(clubUpdateParameter.getClubName())
-                .townId(townEntity)
-                .ownerId(memberEntity)
+                .town(townEntity)
+                .owner(memberEntity)
                 .members(clubEntity.getMembers())
                 .membersLimit(clubUpdateParameter.getMembersLimit())
                 .accessLimit(clubUpdateParameter.getAccessLimit())
@@ -405,7 +405,7 @@ public class ClubServiceImpl implements ClubService {
                 .build();
         myClubRepository.save(updatedMyClubEntity);
 
-        return ClubEntity.entityToDto(updatedClubEntity);
+        return ClubResponse.of(updatedClubEntity);
     }
 
     /**
@@ -415,7 +415,7 @@ public class ClubServiceImpl implements ClubService {
      * @return
      */
     @Override
-    public List<ClubDto> getMyClub(ClubParameter clubParameter) {
+    public List<ClubResponse> getMyClub(ClubParameter clubParameter) {
 
         MemberEntity memberEntity = getMemberEntity(clubParameter.getMemberId());
         List<MyClubEntity> myClubEntities = myClubRepository.findByMemberId(memberEntity);
@@ -423,13 +423,13 @@ public class ClubServiceImpl implements ClubService {
             throw new NotFoundMyClubException();
         }
 
-        List<ClubDto> clubDtos = new ArrayList<>();
+        List<ClubResponse> clubResponses = new ArrayList<>();
         for (int i = 0; i < myClubEntities.size(); i++) {
             ClubEntity clubEntity = getClubEntity(myClubEntities.get(i).getClubId().getClubId());
-            clubDtos.add(ClubEntity.entityToDto(clubEntity));
+            clubResponses.add(ClubResponse.of(clubEntity));
         }
 
-        return clubDtos;
+        return clubResponses;
     }
 
     /**
@@ -478,22 +478,22 @@ public class ClubServiceImpl implements ClubService {
 
     private ClubEntity getClubEntity(Long clubId) {
         return clubRepository.findByClubId(clubId)
-                .orElseThrow(() -> new NotFoundClubException());
+                .orElseThrow(NotFoundClubException::new);
     }
 
     private MemberEntity getMemberEntity(Long memberId) {
         return memberRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new NotFoundMemberException());
+                .orElseThrow(NotFoundMemberException::new);
     }
 
     private MyClubEntity getMyClubEntity(ClubEntity clubEntity, MemberEntity memberEntity) {
         return myClubRepository.findByClubIdAndMemberId(clubEntity, memberEntity)
-                .orElseThrow(() -> new NotFoundMyClubException());
+                .orElseThrow(NotFoundMyClubException::new);
     }
 
     private ClubWaitingEntity getClubWaitingEntity(ClubEntity clubEntity, MemberEntity memberEntity) {
         return clubWaitingRepository.findByClubIdAndMemberId(clubEntity, memberEntity)
-                .orElseThrow(() -> new ClubJoinException());
+                .orElseThrow(ClubJoinException::new);
     }
 
 }

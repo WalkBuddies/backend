@@ -27,11 +27,11 @@ public class ClubEntity {
 
     @ManyToOne
     @JoinColumn(name = "town_id")
-    private TownEntity townId;
+    private TownEntity town;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private MemberEntity ownerId;
+    private MemberEntity owner;
 
     private Integer members;
     private Integer membersLimit;
@@ -40,22 +40,5 @@ public class ClubEntity {
     private boolean isSuspended;
     private LocalDateTime regDate;
     private LocalDateTime modDate;
-
-    public static ClubDto entityToDto(ClubEntity clubEntity) {
-
-        return ClubDto.builder()
-                .clubId(clubEntity.getClubId())
-                .clubName(clubEntity.getClubName())
-                .townId(clubEntity.getTownId().getTownId())
-                .ownerId(clubEntity.getOwnerId().getMemberId())
-                .members(clubEntity.getMembers())
-                .membersLimit(clubEntity.getMembersLimit())
-                .accessLimit(clubEntity.getAccessLimit())
-                .needGrant(clubEntity.getNeedGrant())
-                .isSuspended(clubEntity.isSuspended())
-                .regDate(clubEntity.getRegDate())
-                .modDate(clubEntity.getModDate())
-                .build();
-    }
 
 }
