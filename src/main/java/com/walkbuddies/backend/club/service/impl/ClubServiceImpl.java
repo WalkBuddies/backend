@@ -18,6 +18,7 @@ import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import com.walkbuddies.backend.type.ClubAccessLimit;
+import com.walkbuddies.backend.type.ClubAuthority;
 import com.walkbuddies.backend.type.ClubNeedGrant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -79,7 +80,7 @@ public class ClubServiceImpl implements ClubService {
         MyClubEntity myClubEntity = MyClubEntity.builder()
                 .memberId(member)
                 .clubId(clubEntity)
-                .authority(1)
+                .authority(ClubAuthority.ADMIN.getValue())
                 .regDate(LocalDate.now())
                 .build();
 
@@ -188,7 +189,7 @@ public class ClubServiceImpl implements ClubService {
             MyClubEntity myClubEntity = MyClubEntity.builder()
                     .memberId(memberEntity)
                     .clubId(clubEntity)
-                    .authority(3)
+                    .authority(ClubAuthority.WAITING.getValue())
                     .regDate(LocalDate.now())
                     .build();
             myClubRepository.save(myClubEntity);
@@ -199,7 +200,7 @@ public class ClubServiceImpl implements ClubService {
         MyClubEntity updatedMyClubEntity = MyClubEntity.builder()
                 .memberId(memberEntity)
                 .clubId(clubEntity)
-                .authority(2)
+                .authority(ClubAuthority.MEMBER.getValue())
                 .regDate(LocalDate.now())
                 .build();
         myClubRepository.save(updatedMyClubEntity);
@@ -281,7 +282,7 @@ public class ClubServiceImpl implements ClubService {
                 .myClubId(myClubEntity.getMyClubId())
                 .memberId(myClubEntity.getMemberId())
                 .clubId(myClubEntity.getClubId())
-                .authority(2)
+                .authority(ClubAuthority.MEMBER.getValue())
                 .regDate(LocalDate.now())
                 .build();
         myClubRepository.save(updatedMyClubEntity);
@@ -376,7 +377,7 @@ public class ClubServiceImpl implements ClubService {
                     .myClubId(myClub.getMyClubId())
                     .memberId(member)
                     .clubId(clubEntity)
-                    .authority(2)
+                    .authority(ClubAuthority.MEMBER.getValue())
                     .regDate(myClub.getRegDate())
                     .build();
             myClubRepository.save(updatedMyClubEntity);
@@ -400,7 +401,7 @@ public class ClubServiceImpl implements ClubService {
                 .myClubId(myClubEntity.getMyClubId())
                 .memberId(memberEntity)
                 .clubId(clubEntity)
-                .authority(1)
+                .authority(ClubAuthority.ADMIN.getValue())
                 .regDate(myClubEntity.getRegDate())
                 .build();
         myClubRepository.save(updatedMyClubEntity);
