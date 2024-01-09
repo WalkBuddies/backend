@@ -86,19 +86,19 @@ public class ClubServiceImpl implements ClubService {
 
         myClubRepository.save(myClubEntity);
 
-        ClubResponse clubResponse = ClubResponse.builder()
-                .clubName(clubEntity.getClubName())
-                .ownerName(clubEntity.getOwner().getName())
-                .townName(clubEntity.getTown().getTownName())
-                .members(clubEntity.getMembers())
-                .membersLimit(clubEntity.getMembersLimit())
-                .accessLimit(clubEntity.getAccessLimit())
-                .needGrant(clubEntity.getNeedGrant())
-                .isSuspended(clubEntity.isSuspended())
-                .regDate(clubEntity.getRegDate())
-                .build();
+//        ClubResponse clubResponse = ClubResponse.builder()
+//                .clubName(clubEntity.getClubName())
+//                .ownerName(clubEntity.getOwner().getName())
+//                .townName(clubEntity.getTown().getTownName())
+//                .members(clubEntity.getMembers())
+//                .membersLimit(clubEntity.getMembersLimit())
+//                .accessLimit(clubEntity.getAccessLimit())
+//                .needGrant(clubEntity.getNeedGrant())
+//                .isSuspended(clubEntity.isSuspended())
+//                .regDate(clubEntity.getRegDate())
+//                .build();
 
-        return clubResponse;
+        return ClubResponse.of(clubEntity);
     }
 
     /**
@@ -135,19 +135,19 @@ public class ClubServiceImpl implements ClubService {
 
         clubRepository.delete(byClubIdAndOwner.get());
 
-        ClubResponse clubResponse = ClubResponse.builder()
-                .clubName(clubEntity.getClubName())
-                .ownerName(clubEntity.getOwner().getName())
-                .townName(clubEntity.getTown().getTownName())
-                .members(clubEntity.getMembers())
-                .membersLimit(clubEntity.getMembersLimit())
-                .accessLimit(clubEntity.getAccessLimit())
-                .needGrant(clubEntity.getNeedGrant())
-                .isSuspended(clubEntity.isSuspended())
-                .regDate(clubEntity.getRegDate())
-                .build();
+//        ClubResponse clubResponse = ClubResponse.builder()
+//                .clubName(clubEntity.getClubName())
+//                .ownerName(clubEntity.getOwner().getName())
+//                .townName(clubEntity.getTown().getTownName())
+//                .members(clubEntity.getMembers())
+//                .membersLimit(clubEntity.getMembersLimit())
+//                .accessLimit(clubEntity.getAccessLimit())
+//                .needGrant(clubEntity.getNeedGrant())
+//                .isSuspended(clubEntity.isSuspended())
+//                .regDate(clubEntity.getRegDate())
+//                .build();
 
-        return clubResponse;
+        return ClubResponse.of(clubEntity);
     }
 
     /**
@@ -379,7 +379,7 @@ public class ClubServiceImpl implements ClubService {
      */
     @Transactional
     @Override
-    public ClubDto update(ClubUpdateParameter clubUpdateParameter) {
+    public ClubResponse update(ClubUpdateParameter clubUpdateParameter) {
 
         ClubEntity clubEntity = getClubEntity(clubUpdateParameter.getClubId());
         if (clubUpdateParameter.getMemberId() != clubEntity.getOwner().getMemberId()) {
@@ -430,7 +430,7 @@ public class ClubServiceImpl implements ClubService {
                 .build();
         myClubRepository.save(updatedMyClubEntity);
 
-        return ClubDto.of(updatedClubEntity);
+        return ClubResponse.of(updatedClubEntity);
     }
 
     /**
@@ -440,7 +440,7 @@ public class ClubServiceImpl implements ClubService {
      * @return
      */
     @Override
-    public List<ClubDto> getMyClub(ClubParameter clubParameter) {
+    public List<ClubResponse> getMyClub(ClubParameter clubParameter) {
 
         MemberEntity memberEntity = getMemberEntity(clubParameter.getMemberId());
         List<MyClubEntity> myClubEntities = myClubRepository.findByMemberId(memberEntity);
@@ -448,13 +448,13 @@ public class ClubServiceImpl implements ClubService {
             throw new NotFoundMyClubException();
         }
 
-        List<ClubDto> clubDtos = new ArrayList<>();
+        List<ClubResponse> clubResponses = new ArrayList<>();
         for (int i = 0; i < myClubEntities.size(); i++) {
             ClubEntity clubEntity = getClubEntity(myClubEntities.get(i).getClubId().getClubId());
-            clubDtos.add(ClubDto.of(clubEntity));
+            clubResponses.add(ClubResponse.of(clubEntity));
         }
 
-        return clubDtos;
+        return clubResponses;
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.walkbuddies.backend.club.dto.form;
 
+import com.walkbuddies.backend.club.domain.ClubEntity;
+import com.walkbuddies.backend.club.dto.ClubDto;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -20,5 +22,20 @@ public class ClubResponse {
     private int needGrant;
     private boolean isSuspended;
     private LocalDateTime regDate;
+
+    public static ClubResponse of(ClubEntity clubEntity) {
+
+        return ClubResponse.builder()
+                .clubName(clubEntity.getClubName())
+                .townName(clubEntity.getTown().getTownName())
+                .ownerName(clubEntity.getOwner().getNickname())
+                .members(clubEntity.getMembers())
+                .membersLimit(clubEntity.getMembersLimit())
+                .accessLimit(clubEntity.getAccessLimit())
+                .needGrant(clubEntity.getNeedGrant())
+                .isSuspended(clubEntity.isSuspended())
+                .regDate(clubEntity.getRegDate())
+                .build();
+    }
 
 }

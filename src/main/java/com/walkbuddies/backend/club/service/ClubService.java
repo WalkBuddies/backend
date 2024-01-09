@@ -75,14 +75,14 @@ public interface ClubService {
      * @param clubUpdateParameter
      * @return
      */
-    ClubDto update(ClubUpdateParameter clubUpdateParameter);
+    ClubResponse update(ClubUpdateParameter clubUpdateParameter);
 
     /**
      * 내 소모임 목록 보기 메서드
      * @param clubParameter
      * @return
      */
-    List<ClubDto> getMyClub(ClubParameter clubParameter);
+    List<ClubResponse> getMyClub(ClubParameter clubParameter);
 
     /**
      * 말머리 만들기
