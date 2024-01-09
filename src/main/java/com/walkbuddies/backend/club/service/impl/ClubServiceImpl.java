@@ -5,7 +5,6 @@ import com.walkbuddies.backend.club.domain.ClubPreface;
 import com.walkbuddies.backend.club.domain.ClubWaitingEntity;
 import com.walkbuddies.backend.club.domain.MyClubEntity;
 import com.walkbuddies.backend.club.domain.TownEntity;
-import com.walkbuddies.backend.club.dto.ClubDto;
 import com.walkbuddies.backend.club.dto.form.*;
 import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import com.walkbuddies.backend.club.dto.PrefaceConvertDtoEntity;
@@ -86,18 +85,6 @@ public class ClubServiceImpl implements ClubService {
 
         myClubRepository.save(myClubEntity);
 
-//        ClubResponse clubResponse = ClubResponse.builder()
-//                .clubName(clubEntity.getClubName())
-//                .ownerName(clubEntity.getOwner().getName())
-//                .townName(clubEntity.getTown().getTownName())
-//                .members(clubEntity.getMembers())
-//                .membersLimit(clubEntity.getMembersLimit())
-//                .accessLimit(clubEntity.getAccessLimit())
-//                .needGrant(clubEntity.getNeedGrant())
-//                .isSuspended(clubEntity.isSuspended())
-//                .regDate(clubEntity.getRegDate())
-//                .build();
-
         return ClubResponse.of(clubEntity);
     }
 
@@ -134,18 +121,6 @@ public class ClubServiceImpl implements ClubService {
         }
 
         clubRepository.delete(byClubIdAndOwner.get());
-
-//        ClubResponse clubResponse = ClubResponse.builder()
-//                .clubName(clubEntity.getClubName())
-//                .ownerName(clubEntity.getOwner().getName())
-//                .townName(clubEntity.getTown().getTownName())
-//                .members(clubEntity.getMembers())
-//                .membersLimit(clubEntity.getMembersLimit())
-//                .accessLimit(clubEntity.getAccessLimit())
-//                .needGrant(clubEntity.getNeedGrant())
-//                .isSuspended(clubEntity.isSuspended())
-//                .regDate(clubEntity.getRegDate())
-//                .build();
 
         return ClubResponse.of(clubEntity);
     }
