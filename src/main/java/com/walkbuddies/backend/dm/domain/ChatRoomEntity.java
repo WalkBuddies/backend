@@ -21,10 +21,10 @@ public class ChatRoomEntity {
 
     @ManyToOne
     @JoinColumn(name = "sender_id")
-    private MemberEntity senderId;
+    private MemberEntity sender;
 
     @ManyToOne
     @JoinColumn(name = "recipient_id")
-    private MemberEntity recipientId;
+    private MemberEntity recipient;
 
 }

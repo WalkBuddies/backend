@@ -51,14 +51,14 @@ public class DirectMessageServiceImpl implements DirectMessageService {
         simpMessagingTemplate.convertAndSend(destination, directMessageDto);
 
         // ChatRoom DB 저장
-        Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findBySenderIdAndRecipientId(firstMember, secondMember);
+        Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findBySenderAndRecipient(firstMember, secondMember);
         ChatRoomEntity chatRoom = optionalChatRoom.orElseGet(() -> createChatRoom(sender, recipient));
 
         // DirectMessage DB 저장
         DirectMessageEntity directMessageEntity = DirectMessageEntity.builder()
-                .chatRoomId(chatRoom)
-                .senderId(sender)
-                .recipientId(recipient)
+                .chatRoom(chatRoom)
+                .sender(sender)
+                .recipient(recipient)
                 .content(directMessageDto.getContent())
                 .contentType(directMessageDto.getContentType())
                 .sendTime(LocalDateTime.now())
@@ -75,18 +75,16 @@ public class DirectMessageServiceImpl implements DirectMessageService {
     @Override
     public List<DirectMessageDto> getMessage(Long chatRoomId) {
 
-        String redisKey = REDIS_KEY_PREFIX + chatRoomId;
         List<DirectMessageDto> directMessageDtos = new ArrayList<>();
         Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
             if (optionalChatRoom.isEmpty()) {
                 throw new NotFoundChatRoomException();
             }
-
             ChatRoomEntity chatRoom = optionalChatRoom.get();
-            Optional<List<DirectMessageEntity>> directMessageEntities = directMessageRepository.findByChatRoomId(chatRoom);
 
-            for (DirectMessageEntity directMessageEntity : directMessageEntities.get()) {
-                directMessageDtos.add(DirectMessageEntity.entityToDto(directMessageEntity));
+            List<DirectMessageEntity> directMessageEntities = directMessageRepository.findByChatRoom(chatRoom);
+            for (DirectMessageEntity directMessageEntity : directMessageEntities) {
+                directMessageDtos.add(DirectMessageDto.of(directMessageEntity));
             }
 
         return directMessageDtos;
@@ -95,13 +93,13 @@ public class DirectMessageServiceImpl implements DirectMessageService {
 
     private MemberEntity getMemberEntity(Long memberId) {
         return memberRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new NotFoundMemberException());
+                .orElseThrow(NotFoundMemberException::new);
     }
 
     private ChatRoomEntity createChatRoom(MemberEntity sender, MemberEntity recipient) {
         ChatRoomEntity chatRoomEntity = ChatRoomEntity.builder()
-                .senderId(sender)
-                .recipientId(recipient)
+                .sender(sender)
+                .recipient(recipient)
                 .build();
         return chatRoomRepository.save(chatRoomEntity);
     }

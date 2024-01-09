@@ -10,5 +10,5 @@ import java.util.Optional;
 
 @Repository
 public interface DirectMessageRepository extends JpaRepository<DirectMessageEntity, Long> {
-    Optional<List<DirectMessageEntity>> findByChatRoomId(ChatRoomEntity chatRoom);
+    List<DirectMessageEntity> findByChatRoom(ChatRoomEntity chatRoom);
 }

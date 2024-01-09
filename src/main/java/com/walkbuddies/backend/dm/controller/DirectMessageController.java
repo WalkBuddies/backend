@@ -10,6 +10,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,11 +33,11 @@ public class DirectMessageController {
     }
 
     @GetMapping("/chat/getMessage")
-    public ResponseEntity<ListResponse> getMessage(Long chatRoomId) {
+    public ListResponse getMessage(@RequestParam(name = "chatRoomId") Long chatRoomId) {
 
         ListResponse listResponse = new ListResponse(HttpStatus.OK.value(), "채팅 내용을 불러왔습니다.",
                 directMessageService.getMessage(chatRoomId));
-        return ResponseEntity.ok(listResponse);
+        return listResponse;
     }
 
 }
