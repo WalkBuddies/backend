@@ -27,7 +27,6 @@ public class ClubController {
         SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
                 clubCreateParameter.getClubName() + " 소모임을 생성 완료했습니다.",
                 clubService.create(clubCreateParameter));
-
         return singleResponse;
     }
 
@@ -35,18 +34,16 @@ public class ClubController {
     public SingleResponse deleteClub(@RequestBody ClubParameter clubParameter) {
 
         SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "소모임 폐쇄를 완료했습니다.",
-                clubService.delete(clubParameter));
-
+                clubService.delete(clubParameter.getClubId(), clubParameter.getOwnerId()));
         return singleResponse;
     }
 
     @GetMapping("/club/search")
     public ListResponse searchClub(@RequestBody ClubParameter clubParameter) {
 
-        List<String> foundClubs = clubService.search(clubParameter);
+        List<String> foundClubs = clubService.search(clubParameter.getClubName(), clubParameter.getTownId());
         ListResponse listResponse = new ListResponse(HttpStatus.OK.value(),
                 clubParameter.getClubName() + "이(가) 포함된 소모임이 검색되었습니다.", foundClubs);
-
         return listResponse;
     }
 
@@ -62,10 +59,9 @@ public class ClubController {
     @GetMapping("/club/join/waiting")
     public ListResponse getClubWaitingData(@RequestBody ClubParameter clubParameter) {
 
-        List<String> foundMembers = clubService.getWaitingData(clubParameter);
+        List<String> foundMembers = clubService.getWaitingData(clubParameter.getClubId());
         ListResponse listResponse = new ListResponse(HttpStatus.OK.value(),
                 "가입 신청한 회원 목록입니다.", foundMembers);
-
         return listResponse;
     }
 
@@ -83,7 +79,7 @@ public class ClubController {
 
         SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
                 "소모임 탈퇴가 완료 되었습니다.",
-                clubService.leave(clubParameter));
+                clubService.leave(clubParameter.getClubId(), clubParameter.getMemberId()));
         return singleResponse;
     }
 
@@ -100,7 +96,7 @@ public class ClubController {
     public ListResponse getMyClub(@RequestBody ClubParameter clubParameter) {
 
         ListResponse listResponse = new ListResponse(HttpStatus.OK.value(),
-               "가입한 소모임 목록을 불러왔습니다.", clubService.getMyClub(clubParameter));
+               "가입한 소모임 목록을 불러왔습니다.", clubService.getMyClub(clubParameter.getMemberId()));
        return listResponse;
     }
 

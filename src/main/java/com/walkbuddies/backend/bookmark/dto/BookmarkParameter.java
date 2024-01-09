@@ -10,6 +10,7 @@ import lombok.*;
 public class BookmarkParameter {
 
     private String townName;
-    private Long memberId;
+    private long memberId;
     private String bookmarkName;
+    private long bookmarkId;
 }

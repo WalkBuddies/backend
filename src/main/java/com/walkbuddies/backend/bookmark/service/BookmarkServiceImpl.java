@@ -6,15 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.walkbuddies.backend.air.dto.AirServiceDto;
 import com.walkbuddies.backend.air.service.AirService;
 import com.walkbuddies.backend.bookmark.domain.BookmarkEntity;
-import com.walkbuddies.backend.bookmark.dto.BookmarkDto;
 import com.walkbuddies.backend.bookmark.dto.BookmarkParameter;
+import com.walkbuddies.backend.bookmark.dto.BookmarkResponse;
 import com.walkbuddies.backend.bookmark.repository.BookmarkRepository;
 import com.walkbuddies.backend.club.domain.TownEntity;
 import com.walkbuddies.backend.club.repository.TownRepository;
 import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
-import com.walkbuddies.backend.weather.dto.WeatherMidDto;
 import com.walkbuddies.backend.weather.dto.WeatherMidResponse;
 import com.walkbuddies.backend.weather.service.WeatherMidService;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +52,7 @@ public class BookmarkServiceImpl implements BookmarkService{
      */
     @Transactional
     @Override
-    public BookmarkDto bookmarkRedister(BookmarkParameter bookmarkParameter) {
+    public BookmarkResponse bookmarkResister(BookmarkParameter bookmarkParameter) {
 
         TownEntity townEntity = townRepository.findByTownName(bookmarkParameter.getTownName()).orElse(null);
         if (townEntity == null) {
@@ -62,20 +61,20 @@ public class BookmarkServiceImpl implements BookmarkService{
 
         MemberEntity memberEntity = getMemberEntity(bookmarkParameter.getMemberId());
 
-        Optional<BookmarkEntity> optionalBookmarkEntity = bookmarkRepository.findByTownIdAndMemberId(townEntity, memberEntity);
+        Optional<BookmarkEntity> optionalBookmarkEntity = bookmarkRepository.findByTownAndMember(townEntity, memberEntity);
         if (optionalBookmarkEntity.isPresent()) {
             throw new ExisitsBookmarkException();
         }
 
         BookmarkEntity bookmarkEntity = BookmarkEntity.builder()
-                .townId(townEntity)
-                .memberId(memberEntity)
+                .town(townEntity)
+                .member(memberEntity)
                 .bookmarkName(bookmarkParameter.getBookmarkName())
                 .regDate(LocalDateTime.now())
                 .build();
        bookmarkRepository.save(bookmarkEntity);
 
-        return BookmarkEntity.entityToDto(bookmarkEntity);
+        return BookmarkResponse.of(bookmarkEntity);
     }
 
     /**
@@ -84,21 +83,21 @@ public class BookmarkServiceImpl implements BookmarkService{
      * @return
      */
     @Override
-    public List<BookmarkDto> getMyBookmark(Long memberId) {
+    public List<BookmarkResponse> getMyBookmark(Long memberId) {
 
         MemberEntity memberEntity = getMemberEntity(memberId);
 
-        Optional<List<BookmarkEntity>> optionalBookmarkEntities = bookmarkRepository.findByMemberId(memberEntity);
+        List<BookmarkEntity> optionalBookmarkEntities = bookmarkRepository.findByMember(memberEntity);
         if (optionalBookmarkEntities.isEmpty()) {
             throw new NotFoundBookmarkException();
         }
 
-        List<BookmarkDto> bookmarkDtos = new ArrayList<>();
-        for (BookmarkEntity bookmarkEntity : optionalBookmarkEntities.get()) {
-            bookmarkDtos.add(BookmarkEntity.entityToDto(bookmarkEntity));
+        List<BookmarkResponse> bookmarkResponses = new ArrayList<>();
+        for (BookmarkEntity bookmarkEntity : optionalBookmarkEntities) {
+            bookmarkResponses.add(BookmarkResponse.of(bookmarkEntity));
         }
 
-        return bookmarkDtos;
+        return bookmarkResponses;
     }
 
     /**
@@ -108,12 +107,12 @@ public class BookmarkServiceImpl implements BookmarkService{
      */
     @Transactional
     @Override
-    public BookmarkDto bookmarkDelete(Long bookmarkId) {
+    public BookmarkResponse bookmarkDelete(Long bookmarkId) {
 
         BookmarkEntity bookmarkEntity = getBookmarkEntity(bookmarkId);
         bookmarkRepository.delete(bookmarkEntity);
 
-        return BookmarkEntity.entityToDto(bookmarkEntity);
+        return BookmarkResponse.of(bookmarkEntity);
     }
 
     /**
@@ -124,7 +123,7 @@ public class BookmarkServiceImpl implements BookmarkService{
      */
     @Transactional
     @Override
-    public BookmarkDto bookmarkUpdate(Long bookmarkId, String bookmarkName) {
+    public BookmarkResponse bookmarkUpdate(Long bookmarkId, String bookmarkName) {
 
         BookmarkEntity bookmarkEntity = getBookmarkEntity(bookmarkId);
         if (bookmarkEntity.getBookmarkName().equals(bookmarkName)) {
@@ -133,14 +132,14 @@ public class BookmarkServiceImpl implements BookmarkService{
 
         BookmarkEntity updatedBookmarkEntity = BookmarkEntity.builder()
                 .bookmarkId(bookmarkEntity.getBookmarkId())
-                .townId(bookmarkEntity.getTownId())
-                .memberId(bookmarkEntity.getMemberId())
+                .town(bookmarkEntity.getTown())
+                .member(bookmarkEntity.getMember())
                 .bookmarkName(bookmarkName)
                 .regDate(bookmarkEntity.getRegDate())
                 .build();
         bookmarkRepository.save(updatedBookmarkEntity);
 
-        return BookmarkEntity.entityToDto(updatedBookmarkEntity);
+        return BookmarkResponse.of(updatedBookmarkEntity);
     }
 
     /**
@@ -152,7 +151,7 @@ public class BookmarkServiceImpl implements BookmarkService{
     public List<WeatherMidResponse> getWeatheMidData(Long bookmarkId) {
 
         BookmarkEntity bookmarkEntity = getBookmarkEntity(bookmarkId);
-        TownEntity townEntity = getTownEntity(bookmarkEntity.getTownId().getTownId());
+        TownEntity townEntity = getTownEntity(bookmarkEntity.getTown().getTownId());
 
         String cityName = townEntity.getTownName();
         if ((cityName.contains("광역시") || cityName.contains("특별시") || cityName.contains("특별자치시"))) {
@@ -178,7 +177,7 @@ public class BookmarkServiceImpl implements BookmarkService{
     public AirServiceDto getAirData(Long bookmarkId) throws IOException, URISyntaxException {
 
         BookmarkEntity bookmarkEntity = getBookmarkEntity(bookmarkId);
-        TownEntity townEntity = getTownEntity(bookmarkEntity.getTownId().getTownId());
+        TownEntity townEntity = getTownEntity(bookmarkEntity.getTown().getTownId());
 
         String result = getCoordinate(townEntity.getTownName());
         double x = Double.parseDouble(result.split("\\s")[0]);
@@ -239,16 +238,16 @@ public class BookmarkServiceImpl implements BookmarkService{
 
     private MemberEntity getMemberEntity(Long memberId) {
         return memberRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new NotFoundMemberException());
+                .orElseThrow(NotFoundMemberException::new);
     }
 
     private BookmarkEntity getBookmarkEntity(Long bookmarkId) {
         return bookmarkRepository.findByBookmarkId(bookmarkId)
-                .orElseThrow(() -> new NotFoundBookmarkException());
+                .orElseThrow(NotFoundBookmarkException::new);
     }
 
     private TownEntity getTownEntity(Long townId) {
         return townRepository.findByTownId(townId)
-                .orElseThrow(() -> new NotFoundTownException());
+                .orElseThrow(NotFoundTownException::new);
     }
 }

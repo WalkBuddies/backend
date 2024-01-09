@@ -15,7 +15,7 @@ public class ClubResponse {
 
     private String clubName;
     private String townName;
-    private String ownerName;
+    private String ownerNickName;
     private int members;
     private int membersLimit;
     private int accessLimit;
@@ -28,7 +28,7 @@ public class ClubResponse {
         return ClubResponse.builder()
                 .clubName(clubEntity.getClubName())
                 .townName(clubEntity.getTown().getTownName())
-                .ownerName(clubEntity.getOwner().getNickname())
+                .ownerNickName(clubEntity.getOwner().getNickname())
                 .members(clubEntity.getMembers())
                 .membersLimit(clubEntity.getMembersLimit())
                 .accessLimit(clubEntity.getAccessLimit())
