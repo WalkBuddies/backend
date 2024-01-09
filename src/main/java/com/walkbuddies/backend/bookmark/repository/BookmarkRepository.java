@@ -11,9 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface BookmarkRepository extends JpaRepository<BookmarkEntity, Long> {
-    Optional<BookmarkEntity> findByTownIdAndMemberId(TownEntity townEntity, MemberEntity memberEntity);
+    Optional<BookmarkEntity> findByTownAndMember(TownEntity townEntity, MemberEntity memberEntity);
 
-    Optional<List<BookmarkEntity>> findByMemberId(MemberEntity memberEntity);
+    List<BookmarkEntity> findByMember(MemberEntity memberEntity);
 
     Optional<BookmarkEntity> findByBookmarkId(Long bookmarkId);
 }
