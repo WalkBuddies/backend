@@ -1,12 +1,9 @@
 package com.walkbuddies.backend.club.dto;
 
 import com.walkbuddies.backend.club.domain.ClubEntity;
-import com.walkbuddies.backend.club.repository.ClubRepository;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -14,15 +11,32 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ClubDto {
-    private Long clubId;
+    private long clubId;
     private String clubName;
-    private Long townId;
-    private Long ownerId;
-    private Integer members;
-    private Integer membersLimit;
-    private Integer accessLimit;
-    private Integer needGrant;
-    private Boolean isSuspended;
+    private long townId;
+    private long ownerId;
+    private int members;
+    private int membersLimit;
+    private int accessLimit;
+    private int needGrant;
+    private boolean isSuspended;
     private LocalDateTime regDate;
     private LocalDateTime modDate;
+
+    public static ClubDto of(ClubEntity clubEntity) {
+
+        return ClubDto.builder()
+                .clubId(clubEntity.getClubId())
+                .clubName(clubEntity.getClubName())
+                .townId(clubEntity.getTown().getTownId())
+                .ownerId(clubEntity.getOwner().getMemberId())
+                .members(clubEntity.getMembers())
+                .membersLimit(clubEntity.getMembersLimit())
+                .accessLimit(clubEntity.getAccessLimit())
+                .needGrant(clubEntity.getNeedGrant())
+                .isSuspended(clubEntity.isSuspended())
+                .regDate(clubEntity.getRegDate())
+                .modDate(clubEntity.getModDate())
+                .build();
+    }
 }

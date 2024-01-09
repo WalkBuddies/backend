@@ -10,20 +10,16 @@ import com.walkbuddies.backend.club.repository.ClubRepository;
 import com.walkbuddies.backend.club.repository.ClubWaitingRepository;
 import com.walkbuddies.backend.club.repository.MyClubRepository;
 import com.walkbuddies.backend.club.repository.TownRepository;
-import com.walkbuddies.backend.exception.impl.ClubJoinException;
 import com.walkbuddies.backend.exception.impl.NotFoundClubException;
 import com.walkbuddies.backend.exception.impl.NotFoundMemberException;
-import com.walkbuddies.backend.exception.impl.NotFoundMyClubException;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +42,7 @@ public class AdminClubServiceImpl implements AdminClubService {
     public ClubDto setClubStatus(Long clubId, boolean suspended) {
 
         ClubEntity clubEntity = getClubEntity(clubId);
-        ClubDto clubDto = ClubEntity.entityToDto(clubEntity);
+        ClubDto clubDto = ClubDto.of(clubEntity);
 
         MemberEntity memberEntity = getMemberEntity(clubDto.getOwnerId());
         TownEntity townEntity = townRepository.findByTownId(clubDto.getTownId()).get();
@@ -54,8 +50,8 @@ public class AdminClubServiceImpl implements AdminClubService {
         ClubEntity updatedClubEntity = ClubEntity.builder()
                 .clubId(clubDto.getClubId())
                 .clubName(clubDto.getClubName())
-                .townId(townEntity)
-                .ownerId(memberEntity)
+                .town(townEntity)
+                .owner(memberEntity)
                 .members(clubEntity.getMembers())
                 .membersLimit(clubDto.getMembersLimit())
                 .accessLimit(clubDto.getAccessLimit())
@@ -65,7 +61,7 @@ public class AdminClubServiceImpl implements AdminClubService {
                 .build();
         clubRepository.save(updatedClubEntity);
 
-        return ClubEntity.entityToDto(updatedClubEntity);
+        return ClubDto.of(updatedClubEntity);
     }
 
     /**
@@ -92,17 +88,17 @@ public class AdminClubServiceImpl implements AdminClubService {
 
         clubRepository.delete(clubEntity);
 
-        return ClubEntity.entityToDto(clubEntity);
+        return ClubDto.of(clubEntity);
     }
 
     private ClubEntity getClubEntity(Long clubId) {
         return clubRepository.findByClubId(clubId)
-                .orElseThrow(() -> new NotFoundClubException());
+                .orElseThrow(NotFoundClubException::new);
     }
 
     private MemberEntity getMemberEntity(Long memberId) {
         return memberRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new NotFoundMemberException());
+                .orElseThrow(NotFoundMemberException::new);
     }
 
 }

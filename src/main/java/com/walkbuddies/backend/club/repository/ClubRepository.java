@@ -16,5 +16,5 @@ public interface ClubRepository extends JpaRepository<ClubEntity, Long> {
 
     Optional<ClubEntity> findByClubId(Long clubId);
 
-    Optional<ClubEntity> findByClubIdAndOwnerId(Long clubId, MemberEntity memberEntity);
+    Optional<ClubEntity> findByClubIdAndOwner(Long clubId, MemberEntity memberEntity);
 }

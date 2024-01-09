@@ -1,12 +1,9 @@
 package com.walkbuddies.backend.club.service;
 
 import com.walkbuddies.backend.club.dto.ClubDto;
-import com.walkbuddies.backend.club.dto.ClubJoinInform;
-import com.walkbuddies.backend.club.dto.ClubParameter;
+import com.walkbuddies.backend.club.dto.form.*;
 import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
-import com.walkbuddies.backend.club.dto.ClubUpdateParameter;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -15,10 +12,10 @@ public interface ClubService {
     /**
      * 소모임을 생성하는 메서드
      *
-     * @param clubDto
+     * @param clubCreateParameter
      * @return
      */
-    ClubDto createClub(ClubDto clubDto);
+    ClubResponse create(ClubCreateParameter clubCreateParameter);
 
     /**
      * 소모임 폐쇄 메서드
@@ -26,7 +23,7 @@ public interface ClubService {
      * @param clubParameter
      * @return
      */
-    ClubDto deleteClub(ClubParameter clubParameter);
+    ClubResponse delete(ClubParameter clubParameter);
 
     /**
      * 소모임 검색 기능 메서드.
@@ -35,16 +32,16 @@ public interface ClubService {
      * @param clubParameter
      * @return
      */
-    List<String> searchClub(ClubParameter clubParameter);
+    List<String> search(ClubParameter clubParameter);
 
     /**
      * 소모임 가입 요청 기능 메서드
      * 단 가입 조건이 없는 소모임일 경우 바로 가입 가능
      *
-     * @param clubJoinInform
+     * @param clubJoinParameter
      * @return
      */
-    String joinClubRequest(ClubJoinInform clubJoinInform);
+    String joinRequest(ClubJoinParameter clubJoinParameter);
 
     /**
      * 소모임 Id를 기반으로 소모임의 가입 신청자를 볼 수 있는 메서드.
@@ -53,16 +50,16 @@ public interface ClubService {
      * @param clubParameter
      * @return
      */
-    List<String> getClubWaitingData(ClubParameter clubParameter);
+    List<String> getWaitingData(ClubParameter clubParameter);
 
     /**
      * 소모임 신청자 가입 승인, 거절 메서드.
      * 승인에 대한 Boolean 타입과 정보를 받아서 승인할지 거절할지 정함.
      *
-     * @param clubJoinInform
+     * @param clubJoinParameter
      * @return
      */
-    String joinClubResponse(ClubJoinInform clubJoinInform);
+    String joinResponse(ClubJoinParameter clubJoinParameter);
 
     /**
      * 소모임 탈퇴 메서드.
@@ -70,7 +67,7 @@ public interface ClubService {
      * @param clubParameter
      * @return
      */
-    String leaveClub(ClubParameter clubParameter);
+    String leave(ClubParameter clubParameter);
 
     /**
      * 소모임 정보를 수정하는 메서드
@@ -78,7 +75,7 @@ public interface ClubService {
      * @param clubUpdateParameter
      * @return
      */
-    ClubDto updateClubData(ClubUpdateParameter clubUpdateParameter);
+    ClubDto update(ClubUpdateParameter clubUpdateParameter);
 
     /**
      * 내 소모임 목록 보기 메서드
