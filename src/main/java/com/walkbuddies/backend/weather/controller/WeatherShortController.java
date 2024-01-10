@@ -5,6 +5,7 @@ import com.walkbuddies.backend.common.response.SingleResponse;
 import com.walkbuddies.backend.weather.service.WeatherShortService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +21,18 @@ public class WeatherShortController {
     public SingleResponse weatherShortUpdate(@RequestParam Double x, @RequestParam Double y) throws JsonProcessingException {
 
         weatherShortService.update(x, y);
-        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(), "단기예보 정보 업데이트에 성공하였습니다.", null);
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
+                "단기예보 정보 업데이트에 성공하였습니다.", null);
         return singleResponse;
     }
+
+    @GetMapping("/weather/short/data")
+    public SingleResponse getWeatherShortData(@RequestParam Double x, @RequestParam Double y) throws JsonProcessingException {
+
+        SingleResponse singleResponse = new SingleResponse(HttpStatus.OK.value(),
+                "단기예보 정보를 조회하는데 성공하였습니다.", weatherShortService.getInfo(x, y));
+        return singleResponse;
+    }
+
 
 }

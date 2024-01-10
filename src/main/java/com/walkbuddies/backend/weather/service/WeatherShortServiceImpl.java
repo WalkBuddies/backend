@@ -7,6 +7,7 @@ import com.walkbuddies.backend.club.domain.TownEntity;
 import com.walkbuddies.backend.club.repository.TownRepository;
 import com.walkbuddies.backend.exception.impl.NotFoundTownException;
 import com.walkbuddies.backend.weather.domain.WeatherShortEntity;
+import com.walkbuddies.backend.weather.dto.form.WeatherShortResponse;
 import com.walkbuddies.backend.weather.repository.WeatherShortRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,7 @@ public class WeatherShortServiceImpl implements WeatherShortService{
      * @throws JsonProcessingException
      */
     @Override
-    public Object getWeatherShortData(Double x, Double y) throws JsonProcessingException {
+    public Object getData(Double x, Double y) throws JsonProcessingException {
 
         LocalDate time = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -86,6 +87,71 @@ public class WeatherShortServiceImpl implements WeatherShortService{
         return itemsArray;
     }
 
+    @Value("${spring.keys.naver-client-id}")
+    private String clientId;
+    @Value("${spring.keys.naver-client-secret}")
+    private String clientSecret;
+
+    /**
+     * 위경도를 받아 해당 지역의 주소를 받아오는 메서드
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    public String getAddress(Double x, Double y) {
+
+        RestTemplate restTemplate = new RestTemplate();
+        String apiUrl = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?" +
+                "request=coordsToaddr" +
+                "&coords=" + y + "," + x +
+                "&sourcecrs=epsg:4326" +
+                "&output=json" +
+                "&orders=legalcode";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-NCP-APIGW-API-KEY-ID", clientId);
+        headers.set("X-NCP-APIGW-API-KEY", clientSecret);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class);
+        String result = mapParser(response.getBody());
+
+        return result;
+    }
+
+    /**
+     * 네이버 지도 api parser
+     *
+     * @param jsonString
+     * @return
+     */
+    private String mapParser(String jsonString) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(jsonString);
+
+            if (jsonNode.path("status").path("code").asInt() == 0) {
+                JsonNode resultsNode = jsonNode.path("results").get(0).path("region");
+
+                String area1 = resultsNode.path("area1").path("name").asText();
+                String area2 = resultsNode.path("area2").path("name").asText();
+                String area3 = resultsNode.path("area3").path("name").asText();
+
+                StringBuilder result = new StringBuilder();
+                result.append(area1).append(" ").append(area2).append(" ").append(area3);
+
+                return result.toString();
+            } else {
+                String errorMessage = jsonNode.path("status").path("message").asText();
+                log.error("Error: " + errorMessage);
+            }
+        } catch (JsonProcessingException e) {
+            log.error("Error parsing JSON response", e);
+        }
+
+        throw new RuntimeException("Error processing JSON response");
+    }
+
     /**
      * 위경도를 입력하면 그 위경도에 해당하는 지역의 단기예보를 저장하는 메서드
      *
@@ -104,7 +170,7 @@ public class WeatherShortServiceImpl implements WeatherShortService{
         }
         TownEntity town = townEntity.get();
 
-        JsonNode itemsArray = (JsonNode) getWeatherShortData(x, y);
+        JsonNode itemsArray = (JsonNode) getData(x, y);
 
         // fcstDate와 fcstTime을 기반으로 WeatherShortEntityBuilder를 저장하는 Map
         Map<String, WeatherShortEntity.WeatherShortEntityBuilder> weatherBuilderMap = new HashMap<>();
@@ -192,70 +258,38 @@ public class WeatherShortServiceImpl implements WeatherShortService{
         return "업데이트 완료";
     }
 
-    @Value("${spring.keys.naver-client-id}")
-    private String clientId;
+    @Override
+    public WeatherShortResponse getInfo(Double x, Double y) throws JsonProcessingException {
 
-    @Value("${spring.keys.naver-client-secret}")
-    private String clientSecret;
+        String address = getAddress(x, y);
+        Optional<TownEntity> townEntity = townRepository.findByTownName(address);
+        if (townEntity.isEmpty()) {
+            throw new NotFoundTownException();
+        }
+        TownEntity town = townEntity.get();
 
-    /**
-     * 위경도를 받아 해당 지역의 주소를 받아오는 메서드
-     *
-     * @param x
-     * @param y
-     * @return
-     */
-    public String getAddress(Double x, Double y) {
+        LocalDate date = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String fcstDate = date.format(dateTimeFormatter);
 
-        RestTemplate restTemplate = new RestTemplate();
-        String apiUrl = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?" +
-                "request=coordsToaddr" +
-                "&coords=" + y + "," + x +
-                "&sourcecrs=epsg:4326" +
-                "&output=json" +
-                "&orders=legalcode";
+        LocalDateTime time = LocalDateTime.now();
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH00");
+        String fcstTime = time.format(timeFormatter);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-NCP-APIGW-API-KEY-ID", clientId);
-        headers.set("X-NCP-APIGW-API-KEY", clientSecret);
+        Optional<WeatherShortEntity> byTownAndFcstDateAndFcstTime =
+                weatherShortRepository.findByTownAndFcstDateAndFcstTime(town, fcstDate, fcstTime);
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class);
-        String result = mapParser(response.getBody());
-
-        return result;
-    }
-
-    /**
-     * 네이버 지도 api parser
-     *
-     * @param jsonString
-     * @return
-     */
-    private String mapParser(String jsonString) {
-        try {
-            JsonNode jsonNode = objectMapper.readTree(jsonString);
-
-            if (jsonNode.path("status").path("code").asInt() == 0) {
-                JsonNode resultsNode = jsonNode.path("results").get(0).path("region");
-
-                String area1 = resultsNode.path("area1").path("name").asText();
-                String area2 = resultsNode.path("area2").path("name").asText();
-                String area3 = resultsNode.path("area3").path("name").asText();
-
-                StringBuilder result = new StringBuilder();
-                result.append(area1).append(" ").append(area2).append(" ").append(area3);
-
-                return result.toString();
-            } else {
-                String errorMessage = jsonNode.path("status").path("message").asText();
-                log.error("Error: " + errorMessage);
-            }
-        } catch (JsonProcessingException e) {
-            log.error("Error parsing JSON response", e);
+        // byTownAndFcstDateAndFcstTime이 비어있다면 DB에 없다는 의미로 update 후 지역, 측정일자, 측정시간에 맞는 정보를 제공
+        if (byTownAndFcstDateAndFcstTime.isEmpty()) {
+            update(x, y);
+            Optional<WeatherShortEntity> updatedEntity =
+                    weatherShortRepository.findByTownAndFcstDateAndFcstTime(town, fcstDate, fcstTime);
+            WeatherShortEntity weatherShortEntity = updatedEntity.get();
+            return WeatherShortResponse.of(weatherShortEntity);
         }
 
-        throw new RuntimeException("Error processing JSON response");
+        WeatherShortEntity weatherShortEntity = byTownAndFcstDateAndFcstTime.get();
+        return WeatherShortResponse.of(weatherShortEntity);
     }
 
 }

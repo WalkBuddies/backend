@@ -1,6 +1,7 @@
 package com.walkbuddies.backend.weather.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.walkbuddies.backend.weather.dto.form.WeatherShortResponse;
 import org.springframework.stereotype.Service;
 
 import java.net.URISyntaxException;
@@ -16,7 +17,7 @@ public interface WeatherShortService {
      * @return
      * @throws JsonProcessingException
      */
-    Object getWeatherShortData(Double x, Double y) throws URISyntaxException, JsonProcessingException;
+    Object getData(Double x, Double y) throws URISyntaxException, JsonProcessingException;
 
     /**
      * 위경도를 입력하면 그 위경도에 해당하는 지역의 단기예보를 저장하는 메서드
@@ -27,4 +28,6 @@ public interface WeatherShortService {
      * @throws JsonProcessingException
      */
     String update(Double x, Double y) throws JsonProcessingException;
+
+    WeatherShortResponse getInfo(Double x, Double y) throws JsonProcessingException;
 }
