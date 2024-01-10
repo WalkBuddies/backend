@@ -1,4 +1,4 @@
-package com.walkbuddies.backend.weather.dto;
+package com.walkbuddies.backend.weather.dto.form;
 
 import com.walkbuddies.backend.weather.domain.WeatherMidEntity;
 import lombok.*;

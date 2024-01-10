@@ -26,6 +26,7 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public double[] GeoToTm(double x, double y) throws URISyntaxException, JsonProcessingException {
+
         String url = "https://dapi.kakao.com/v2/local/geo/transcoord.json" + "?output_coord=TM" + "&x=" + x + "&y=" + y;
         double[] result = new double[2];
         URI uri = new URI(url);

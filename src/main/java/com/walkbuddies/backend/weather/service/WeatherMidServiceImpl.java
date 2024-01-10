@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.walkbuddies.backend.weather.domain.WeatherMidEntity;
 import com.walkbuddies.backend.weather.dto.WeatherMidDto;
 import com.walkbuddies.backend.weather.dto.WeatherMidLandFcstDto;
-import com.walkbuddies.backend.weather.dto.WeatherMidResponse;
+import com.walkbuddies.backend.weather.dto.form.WeatherMidResponse;
 import com.walkbuddies.backend.weather.dto.WeatherMidTaDto;
 import com.walkbuddies.backend.weather.repository.WeatherMidRepository;
 import lombok.RequiredArgsConstructor;

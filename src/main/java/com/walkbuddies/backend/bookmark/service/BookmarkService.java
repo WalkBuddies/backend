@@ -1,12 +1,9 @@
 package com.walkbuddies.backend.bookmark.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.walkbuddies.backend.air.dto.AirServiceDto;
-import com.walkbuddies.backend.bookmark.dto.BookmarkDto;
 import com.walkbuddies.backend.bookmark.dto.BookmarkParameter;
 import com.walkbuddies.backend.bookmark.dto.BookmarkResponse;
-import com.walkbuddies.backend.weather.dto.WeatherMidDto;
-import com.walkbuddies.backend.weather.dto.WeatherMidResponse;
+import com.walkbuddies.backend.weather.dto.form.WeatherMidResponse;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
