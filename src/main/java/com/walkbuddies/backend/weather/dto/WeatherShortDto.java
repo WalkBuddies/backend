@@ -15,7 +15,7 @@ public class WeatherShortDto {
     private Integer nx;
     private Integer ny;
     private Double pop;
-    private Integer pyt;
+    private Integer pty;
     private String pcp;
     private String sno;
     private Integer sky;

@@ -13,7 +13,7 @@ public class WeatherShortResponse {
 
     private String townName;
     private Double pop;
-    private Integer pyt;
+    private Integer pty;
     private String pcp;
     private String sno;
     private Integer sky;
@@ -31,7 +31,7 @@ public class WeatherShortResponse {
         return WeatherShortResponse.builder()
                 .townName(weatherShortEntity.getTown().getTownName())
                 .pop(weatherShortEntity.getPop())
-                .pyt(weatherShortEntity.getPyt())
+                .pty(weatherShortEntity.getPty())
                 .pcp(weatherShortEntity.getPcp())
                 .sno(weatherShortEntity.getSno())
                 .sky(weatherShortEntity.getSky())

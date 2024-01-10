@@ -160,8 +160,8 @@ public class WeatherShortServiceImpl implements WeatherShortService{
                 case "SKY":
                     weatherBuilder.sky(item.path("fcstValue").asInt());
                     break;
-                case "PYT":
-                    weatherBuilder.pyt(item.path("fcstValue").asInt());
+                case "PTY":
+                    weatherBuilder.pty(item.path("fcstValue").asInt());
                     break;
                 case "POP":
                     weatherBuilder.pop(item.path("fcstValue").asDouble());
@@ -183,6 +183,8 @@ public class WeatherShortServiceImpl implements WeatherShortService{
 
         List<WeatherShortEntity> weatherShortEntities = weatherBuilderMap.values().stream()
                 .map(WeatherShortEntity.WeatherShortEntityBuilder::build)
+                .sorted(Comparator.comparing(WeatherShortEntity::getFcstDate)
+                        .thenComparing(WeatherShortEntity::getFcstTime))
                 .collect(Collectors.toList());
 
         weatherShortRepository.saveAll(weatherShortEntities);
