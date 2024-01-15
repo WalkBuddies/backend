@@ -3,12 +3,10 @@ package com.walkbuddies.backend.club.service;
 import com.walkbuddies.backend.club.domain.ClubBoardEntity;
 import com.walkbuddies.backend.club.dto.ClubPrefaceDto;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
-import com.walkbuddies.backend.club.dto.ClubBoardSearch;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public interface ClubBoardService {
@@ -31,17 +29,24 @@ public interface ClubBoardService {
   ClubBoardDto getPost(Long boardIdx);
 
   /**
-   * @param pageable (page 필요)
+   * 게시글 목록
+   * @param pageable 페이지정보
+   * @param clubId 클럽id
+   * @param deleteYn 삭제여부
    * @return
    */
   Page<ClubBoardDto> postList(Pageable pageable, Long clubId, Integer deleteYn);
 
   /**
-   * @param pageable (현재페이지 page)
-   * @param search   (검색키워드 keyword, 검색컬럼 type)
+   * 게시글 검색 결과
+   * @param pageable 페이지정보
+   * @param clubId 클럽id
+   * @param keyword 검색어
+   * @param type 검색유형
+   * @param deleteYn 삭제여부
    * @return
    */
-  Page<ClubBoardDto> postSearchList(Pageable pageable, Long clubId, ClubBoardSearch search,
+  Page<ClubBoardDto> postList(Pageable pageable, Long clubId, String keyword, String type,
       Integer deleteYn);
 
   /**

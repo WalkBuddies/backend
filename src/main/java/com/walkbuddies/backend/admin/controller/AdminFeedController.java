@@ -1,8 +1,8 @@
 package com.walkbuddies.backend.admin.controller;
 
 import com.walkbuddies.backend.admin.service.AdminFeedService;
-import com.walkbuddies.backend.club.dto.ClubBoardSearch;
 import com.walkbuddies.backend.club.dto.clubboard.ClubBoardDto;
+import com.walkbuddies.backend.club.dto.clubboard.ClubBoardListDto;
 import com.walkbuddies.backend.club.dto.clubboardcomment.ResponseDto;
 import com.walkbuddies.backend.club.service.ClubBoardCommentService;
 import com.walkbuddies.backend.club.service.ClubBoardService;
@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,18 +51,9 @@ public class AdminFeedController {
   public ResponseEntity<PageResponse<Page<ClubBoardDto>>> deletedList(@PageableDefault(page = 0, size = 20, sort = "clubBoardId", direction = Sort.Direction.DESC)
   Pageable pageable,
       @PathVariable(value = "clubId") Long clubId,
-      @RequestParam(value = "keyword", required = false) String keyword,
-      @RequestParam(value = "type", required = false) String type) {
-    Page<ClubBoardDto> data;
-    if (keyword == null) {
-      data = clubBoardService.postList(pageable, clubId, 1);
-    } else {
-      ClubBoardSearch search = ClubBoardSearch.builder()
-          .keyword(keyword)
-          .type(type)
-          .build();
-      data = clubBoardService.postSearchList(pageable, clubId, search, 1);
-    }
+      @RequestBody ClubBoardListDto listDto) {
+
+    Page<ClubBoardDto> data = clubBoardService.postList(pageable, clubId, listDto.getKeyword(), listDto.getType(), 1);
 
     PageResponse<Page<ClubBoardDto>> result = new PageResponse<>(HttpStatus.OK.value(), "검색 완료",
         data);
