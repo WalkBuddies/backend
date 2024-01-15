@@ -90,26 +90,27 @@ public class ClubServiceImpl implements ClubService {
     }
 
     /**
-     * 소모임 폐쇄 메서드
-     * @param clubParameter
+     * 소모임을 폐쇄하는 메서드
+     * @param clubId
+     * @param ownerId
      * @return
      */
     @Transactional
     @Override
-    public ClubResponse delete(ClubParameter clubParameter) {
+    public ClubResponse delete(Long clubId, Long ownerId) {
 
-        ClubEntity clubEntity = getClubEntity(clubParameter.getClubId());
+        ClubEntity clubEntity = getClubEntity(clubId);
         if (clubEntity.isSuspended()) {
             throw new ClubSuspendedException();
         }
-        if (clubEntity.getOwner().getMemberId() != clubParameter.getOwnerId()) {
+        if (clubEntity.getOwner().getMemberId() != ownerId) {
             throw new NotClubAdminException();
         }
 
-        MemberEntity memberEntity = getMemberEntity(clubParameter.getOwnerId());
+        MemberEntity memberEntity = getMemberEntity(ownerId);
         List<MyClubEntity> myClubEntities = myClubRepository.findByClubId(clubEntity);
         List<ClubWaitingEntity> clubWaitingEntities = clubWaitingRepository.findByClubId(clubEntity);
-        Optional<ClubEntity> byClubIdAndOwner = clubRepository.findByClubIdAndOwner(clubParameter.getClubId(), memberEntity);
+        Optional<ClubEntity> byClubIdAndOwner = clubRepository.findByClubIdAndOwner(clubId, memberEntity);
 
         if (!clubWaitingEntities.isEmpty()) {
             for (ClubWaitingEntity clubWaitingEntity : clubWaitingEntities) {
@@ -130,20 +131,21 @@ public class ClubServiceImpl implements ClubService {
      * 소모임 검색 기능 메서드.
      * 검색어가 포함되고 검색이 되도록 한 소모임에 한에서 모두 검색이 됨.
      *
-     * @param clubParameter
+     * @param clubName
+     * @param townId
      * @return
      */
     @Override
-    public List<String> search(ClubParameter clubParameter) {
+    public List<String> search(String clubName, Long townId) {
 
-        List<ClubEntity> clubEntities = clubRepository.findByClubNameContaining(clubParameter.getClubName());
+        List<ClubEntity> clubEntities = clubRepository.findByClubNameContaining(clubName);
         if (clubEntities.isEmpty()) {
             throw new NotFoundClubException();
         }
 
         return clubEntities.stream()
                 .filter(clubEntity -> clubEntity.getAccessLimit() != ClubAccessLimit.SEARCH_NOT_ALLOW.getValue()
-                        && clubEntity.getTown().getTownId().equals(clubParameter.getTownId()))
+                        && clubEntity.getTown().getTownId().equals(townId))
                 .map(ClubEntity::getClubName)
                 .collect(Collectors.toList());
     }
@@ -226,13 +228,13 @@ public class ClubServiceImpl implements ClubService {
      * 소모임 Id를 기반으로 소모임의 가입 신청자를 볼 수 있는 메서드.
      * 신청자의 memberId와 가입시 작성했던 message를 함께 볼 수 있음.
      *
-     * @param clubParameter
+     * @param clubId
      * @return
      */
     @Override
-    public List<String> getWaitingData(ClubParameter clubParameter) {
+    public List<String> getWaitingData(Long clubId) {
 
-        ClubEntity clubEntity = getClubEntity(clubParameter.getClubId());
+        ClubEntity clubEntity = getClubEntity(clubId);
         if (clubEntity.isSuspended()) {
             throw new ClubSuspendedException();
         }
@@ -314,18 +316,18 @@ public class ClubServiceImpl implements ClubService {
      */
     @Transactional
     @Override
-    public String leave(ClubParameter clubParameter) {
+    public String leave(Long clubId, Long memberId) {
 
-        ClubEntity clubEntity = getClubEntity(clubParameter.getClubId());
+        ClubEntity clubEntity = getClubEntity(clubId);
         if (clubEntity.isSuspended()) {
             throw new ClubSuspendedException();
         }
 
-        if (clubEntity.getOwner().getMemberId() == clubParameter.getMemberId()) {
+        if (clubEntity.getOwner().getMemberId() == memberId) {
             throw new ChangeClubOwnerException();
         }
 
-        MemberEntity memberEntity = getMemberEntity(clubParameter.getMemberId());
+        MemberEntity memberEntity = getMemberEntity(memberId);
         MyClubEntity myClubEntity = getMyClubEntity(clubEntity, memberEntity);
 
         myClubRepository.delete(myClubEntity);
@@ -412,13 +414,13 @@ public class ClubServiceImpl implements ClubService {
     /**
      * 내 소모임 목록 보기 메서드
      *
-     * @param clubParameter
+     * @param memberId
      * @return
      */
     @Override
-    public List<ClubResponse> getMyClub(ClubParameter clubParameter) {
+    public List<ClubResponse> getMyClub(Long memberId) {
 
-        MemberEntity memberEntity = getMemberEntity(clubParameter.getMemberId());
+        MemberEntity memberEntity = getMemberEntity(memberId);
         List<MyClubEntity> myClubEntities = myClubRepository.findByMemberId(memberEntity);
         if (myClubEntities.isEmpty()) {
             throw new NotFoundMyClubException();

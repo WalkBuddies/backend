@@ -25,23 +25,13 @@ public class BookmarkEntity {
 
     @ManyToOne
     @JoinColumn(name = "town_id")
-    private TownEntity townId;
+    private TownEntity town;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private MemberEntity memberId;
+    private MemberEntity member;
 
     private String bookmarkName;
     private LocalDateTime regDate;
 
-    public static BookmarkDto entityToDto(BookmarkEntity bookmarkEntity) {
-
-        return BookmarkDto.builder()
-                .bookmarkId(bookmarkEntity.getBookmarkId())
-                .townId(bookmarkEntity.getTownId().getTownId())
-                .memberId(bookmarkEntity.getMemberId().getMemberId())
-                .bookmarkName(bookmarkEntity.getBookmarkName())
-                .regDate(bookmarkEntity.getRegDate())
-                .build();
-    }
 }

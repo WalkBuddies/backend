@@ -1,5 +1,6 @@
 package com.walkbuddies.backend.bookmark.dto;
 
+import com.walkbuddies.backend.bookmark.domain.BookmarkEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -11,9 +12,9 @@ import java.time.LocalDateTime;
 @Builder
 public class BookmarkDto {
 
-    private Long bookmarkId;
-    private Long townId;
-    private Long memberId;
+    private long bookmarkId;
+    private long townId;
+    private long memberId;
     private String bookmarkName;
     private LocalDateTime regDate;
 }
