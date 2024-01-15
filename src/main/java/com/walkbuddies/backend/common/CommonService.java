@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 
 @Service
 public interface CommonService {
+
     /**
      * 경위도 tm좌표 변환
      *

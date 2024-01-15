@@ -14,7 +14,7 @@ import com.walkbuddies.backend.club.repository.TownRepository;
 import com.walkbuddies.backend.exception.impl.*;
 import com.walkbuddies.backend.member.domain.MemberEntity;
 import com.walkbuddies.backend.member.repository.MemberRepository;
-import com.walkbuddies.backend.weather.dto.WeatherMidResponse;
+import com.walkbuddies.backend.weather.dto.form.WeatherMidResponse;
 import com.walkbuddies.backend.weather.service.WeatherMidService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -23,9 +23,9 @@ public class DirectMessageDto {
     public static DirectMessageDto of(DirectMessageEntity directMessageEntity) {
         return DirectMessageDto.builder()
                 .messageId(directMessageEntity.getMessageId())
-                .chatRoomId(directMessageEntity.getChatRoomId().getChatRoomId())
-                .senderId(directMessageEntity.getSenderId().getMemberId())
-                .recipientId(directMessageEntity.getRecipientId().getMemberId())
+                .chatRoomId(directMessageEntity.getChatRoom().getChatRoomId())
+                .senderId(directMessageEntity.getSender().getMemberId())
+                .recipientId(directMessageEntity.getRecipient().getMemberId())
                 .content(directMessageEntity.getContent())
                 .contentType(directMessageEntity.getContentType())
                 .sendTime(directMessageEntity.getSendTime())
