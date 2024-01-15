@@ -33,4 +33,5 @@ public class WeatherMidController {
                 weatherMidService.getData(cityName));
         return listResponse;
     }
+
 }

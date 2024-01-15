@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface WeatherShortRepository extends JpaRepository<WeatherShortEntity, Long> {
 
     Optional<WeatherShortEntity> findByTownAndFcstDateAndFcstTime(TownEntity townEntity, String fcstDate, String fcstTime);
+
 }
